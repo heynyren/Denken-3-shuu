@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import mark from "./assets/mark.svg";
 import About, { VietnamFlag } from "./components/About";
-import { BADGES } from "./lib/badges";
+import BadgeCelebration from "./components/BadgeCelebration";
 import { computeOverview } from "./lib/stats";
 import { useStore } from "./state/useStore";
 import Dashboard from "./views/Dashboard";
@@ -39,13 +39,6 @@ export default function App() {
     () => (store.data ? computeOverview(store.data) : null),
     [store.data],
   );
-
-  // Huy hiệu mới chỉ chúc mừng vài giây rồi tự ẩn.
-  useEffect(() => {
-    if (store.justEarned.length === 0) return;
-    const timer = setTimeout(() => store.clearJustEarned(), 6000);
-    return () => clearTimeout(timer);
-  }, [store.justEarned, store]);
 
   if (store.loading || !store.data || !view) {
     return (
@@ -173,22 +166,9 @@ export default function App() {
 
       {showAbout && <About onClose={() => setShowAbout(false)} />}
 
+      {/* Chạm mốc lúc đang học thì popup này nhảy lên; người dùng tự tắt. */}
       {store.justEarned.length > 0 && (
-        <div className="toast-stack">
-          {store.justEarned.map((id) => {
-            const badge = BADGES.find((entry) => entry.id === id);
-            if (!badge) return null;
-            return (
-              <div className="toast" key={id}>
-                <span className="big">{badge.icon}</span>
-                <div>
-                  <div className="toast-title">Mở khoá: {badge.name}</div>
-                  <div className="toast-sub">{badge.description}</div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+        <BadgeCelebration earned={store.justEarned} onClose={store.clearJustEarned} />
       )}
     </div>
   );

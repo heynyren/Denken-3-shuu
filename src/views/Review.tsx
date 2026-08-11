@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import ItemDetail from "../components/ItemDetail";
+import Timer, { useCountdown } from "../components/Timer";
 import { Bar, Empty, Stars, StatusPill } from "../components/ui";
 import { subjectName, topicsBySubject } from "../lib/catalog";
 import { levelLabel, overdueDays, todayISO } from "../lib/srs";
@@ -60,6 +61,14 @@ export default function Review({ store, view }: { store: Store; view: Overview }
   const item = queue[cursor];
   const progress = item ? data.progress[item.id] : undefined;
   const late = item ? overdueDays(progress, todayISO()) : 0;
+  const clock = useCountdown(item);
+
+  /** Mở bài trên denken-ou.com và bắt đầu tính giờ cùng lúc. */
+  const openAndTime = () => {
+    if (!item) return;
+    void window.denken.openExternal(item.url);
+    clock.start();
+  };
 
   const toggleStar = (value: number) => {
     setStars((current) => {
@@ -87,7 +96,7 @@ export default function Review({ store, view }: { store: Store; view: Overview }
       else if (event.key === "2") grade("wrong");
       else if (event.code === "Space") {
         event.preventDefault();
-        void window.denken.openExternal(item.url);
+        openAndTime();
       }
     };
     window.addEventListener("keydown", onKey);
@@ -260,7 +269,11 @@ export default function Review({ store, view }: { store: Store; view: Overview }
               </button>
             </div>
 
-            <div className="btn-row" style={{ marginTop: 10 }}>
+            <div style={{ marginTop: 16 }}>
+              <Timer item={item} clock={clock} />
+            </div>
+
+            <div className="btn-row" style={{ marginTop: 12 }}>
               <button
                 className="btn ghost sm"
                 onClick={() => setCursor((index) => Math.max(0, index - 1))}
@@ -288,13 +301,19 @@ export default function Review({ store, view }: { store: Store; view: Overview }
           </div>
 
           <div className="card">
-            <ItemDetail item={item} progress={progress} store={store} compact />
+            <ItemDetail
+              item={item}
+              progress={progress}
+              store={store}
+              compact
+              onOpenExercise={openAndTime}
+            />
           </div>
 
           <div className="callout">
             <strong>Phím tắt:</strong> <span className="mono">1</span> làm đúng ·{" "}
             <span className="mono">2</span> làm sai ·{" "}
-            <span className="mono">Space</span> mở bài trên trình duyệt.
+            <span className="mono">Space</span> mở bài và bắt đầu tính giờ.
           </div>
         </>
       )}

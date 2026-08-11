@@ -2,11 +2,11 @@ import { useMemo } from "react";
 
 import { BADGES } from "../lib/badges";
 import { dailySeries, upcomingLoad, weeklySeries } from "../lib/stats";
+import { todayISO } from "../lib/srs";
 import type { Overview } from "../lib/stats";
 import type { SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
 import {
-  Bar,
   BarChart,
   Heatmap,
   Ring,
@@ -53,13 +53,10 @@ export default function Dashboard({
   const weeks = useMemo(() => weeklySeries(data, 12), [data]);
   const upcoming = useMemo(() => upcomingLoad(data, 14), [data]);
 
+  // Huy hiệu chưa đạt không hiện ở đâu cả — bất ngờ thì mới vui.
+  const today = todayISO();
   const earned = BADGES.filter((badge) => data.badges[badge.id]);
-  const locked = BADGES.filter((badge) => !data.badges[badge.id]);
-  // Ba huy hiệu sắp đạt nhất, để có mục tiêu ngắn hạn nhìn thấy được.
-  const nearest = locked
-    .map((badge) => ({ badge, ratio: badge.progress(view, data) }))
-    .sort((a, b) => b.ratio - a.ratio)
-    .slice(0, 3);
+  const earnedToday = earned.filter((badge) => data.badges[badge.id] === today);
 
   const maxUpcoming = Math.max(1, ...upcoming.map((day) => day.count));
 
@@ -342,62 +339,48 @@ export default function Dashboard({
         </div>
       </div>
 
-      {/* Huy hiệu */}
+      {/* Huy hiệu — chỉ hiện những cái đã đạt được */}
       <div className="card">
         <div className="card-head">
           <div className="card-title">
-            Huy hiệu
+            Huy hiệu đã đạt
             <div className="card-sub">
-              Đã mở {earned.length}/{BADGES.length}
+              {earned.length === 0
+                ? "Chưa có huy hiệu nào — cứ học đều, tự khắc mở khoá"
+                : `${earned.length} huy hiệu${
+                    earnedToday.length > 0 ? ` · ${earnedToday.length} mở hôm nay` : ""
+                  }`}
             </div>
           </div>
         </div>
 
-        {nearest.length > 0 && (
-          <div style={{ marginBottom: 16 }}>
-            <div className="small muted" style={{ marginBottom: 8 }}>
-              Sắp mở khoá
-            </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {nearest.map(({ badge, ratio }) => (
-                <div key={badge.id}>
-                  <div className="row between small" style={{ marginBottom: 4 }}>
-                    <span>
-                      {badge.icon} {badge.name}
-                    </span>
-                    <span className="dim">{Math.round(ratio * 100)}%</span>
-                  </div>
-                  <Bar ratio={ratio} thin />
+        {earned.length === 0 ? (
+          <div className="empty small">
+            Huy hiệu được giữ kín cho tới lúc bạn chạm mốc. Đang học mà đạt được
+            thì app sẽ báo ngay.
+          </div>
+        ) : (
+          <div className="badge-grid">
+            {earned.map((badge) => {
+              const day = data.badges[badge.id]!;
+              const isToday = day === today;
+              return (
+                <div
+                  className={`badge${isToday ? " fresh" : ""}`}
+                  key={badge.id}
+                  title={badge.description}
+                >
+                  {isToday && <span className="badge-new">MỚI</span>}
+                  <div className="badge-icon">{badge.icon}</div>
+                  <div className="badge-name">{badge.name}</div>
+                  <div className="badge-date">{isToday ? "hôm nay" : day}</div>
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         )}
-
-        <div className="badge-grid">
-          {BADGES.map((badge) => {
-            const on = data.badges[badge.id];
-            return (
-              <div
-                className={`badge${on ? "" : " locked"}`}
-                key={badge.id}
-                title={badge.description}
-              >
-                <div className="badge-icon">{badge.icon}</div>
-                <div className="badge-name">{badge.name}</div>
-                {on ? (
-                  <div className="badge-date">{on}</div>
-                ) : (
-                  <div
-                    className="badge-progress"
-                    style={{ width: `${badge.progress(view, data) * 100}%` }}
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
       </div>
+
     </div>
   );
 }

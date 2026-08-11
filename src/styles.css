@@ -1348,3 +1348,186 @@ select {
     flex: 1 0 100%;
   }
 }
+
+/* ==========================================================================
+   Đồng hồ làm bài
+   ========================================================================== */
+
+.timer-idle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+}
+
+.timer-card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+}
+/* Hết giờ thì cả thẻ nhấp nháy đỏ, khó mà bỏ qua */
+.timer-card.expired {
+  background: var(--red-soft);
+  animation: alarm-pulse 1s ease-in-out infinite;
+}
+@keyframes alarm-pulse {
+  50% {
+    background: rgba(240, 40, 73, 0.3);
+  }
+}
+
+.timer-value {
+  font-size: 25px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+/* ==========================================================================
+   Popup chúc mừng huy hiệu
+   ========================================================================== */
+
+.celebrate-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.72);
+  display: grid;
+  place-items: center;
+  z-index: 300;
+  padding: 24px;
+  overflow: hidden;
+  animation: fade 0.2s ease;
+}
+
+.celebrate-card {
+  position: relative;
+  z-index: 2;
+  background: var(--surface);
+  border-radius: 22px;
+  box-shadow: var(--shadow-lg);
+  padding: 28px 30px 24px;
+  text-align: center;
+  max-width: 520px;
+  width: 100%;
+  animation: celebrate-in 0.42s cubic-bezier(0.18, 1.3, 0.4, 1);
+}
+@keyframes celebrate-in {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.82);
+  }
+}
+
+.celebrate-kicker {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 18px;
+}
+
+.celebrate-badges {
+  display: flex;
+  justify-content: center;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.celebrate-badge {
+  max-width: 190px;
+  animation: badge-pop 0.5s cubic-bezier(0.18, 1.4, 0.4, 1) backwards;
+}
+@keyframes badge-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3) rotate(-14deg);
+  }
+}
+
+/* Huy hiệu nảy lên liên tục cho tới khi người dùng tắt popup */
+.celebrate-icon {
+  font-size: 64px;
+  line-height: 1.1;
+  animation: badge-jump 1.15s ease-in-out infinite;
+  filter: drop-shadow(0 8px 18px rgba(247, 185, 40, 0.4));
+}
+@keyframes badge-jump {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  30% {
+    transform: translateY(-14px) scale(1.08);
+  }
+  55% {
+    transform: translateY(0) scale(0.97);
+  }
+  70% {
+    transform: translateY(-5px) scale(1.02);
+  }
+}
+
+.celebrate-name {
+  font-size: 18px;
+  font-weight: 800;
+  margin-top: 8px;
+}
+.celebrate-desc {
+  font-size: 13px;
+  color: var(--text-2);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* Mảnh giấy rơi, thuần CSS */
+.confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+.confetti i {
+  position: absolute;
+  top: -18px;
+  width: 9px;
+  height: 15px;
+  border-radius: 2px;
+  opacity: 0.9;
+  animation: confetti-fall 2.6s linear infinite;
+}
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-20px) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(102vh) rotate(620deg);
+    opacity: 0.15;
+  }
+}
+
+/* Huy hiệu vừa mở hôm nay được đánh dấu ở màn Hôm nay */
+.badge.fresh {
+  background: var(--amber-soft);
+  box-shadow: inset 0 0 0 1px rgba(247, 185, 40, 0.45);
+}
+.badge-new {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: var(--amber);
+  color: #1a1300;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  border-radius: 999px;
+  padding: 2px 6px;
+}

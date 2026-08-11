@@ -1,0 +1,187 @@
+/**
+ * Đồng hồ làm bài.
+ *
+ * Bấm Space (hoặc nút mở bài) là đồng hồ chạy, đếm ngược đúng số phút quy cho
+ * loại câu đó. Hết giờ thì chuông reo cho tới khi bạn bấm tắt.
+ *
+ * Đếm giờ dựa trên mốc thời gian thật (`Date.now()`) chứ không cộng dồn mỗi
+ * nhịp setInterval: trình duyệt hãm nhịp khi cửa sổ chạy nền, cộng dồn sẽ khiến
+ * đồng hồ chạy chậm dần đúng lúc bạn đang mở tab denken-ou để làm bài.
+ */
+
+import { useCallback, useEffect, useRef, useState } from "react";
+
+import { createAlarm } from "../lib/alarm";
+import { formatClock, partLabel, secondsFor } from "../lib/timing";
+import type { CatalogItem } from "../lib/types";
+import { Ring } from "./ui";
+
+export interface TimerHandle {
+  start(): void;
+  stop(): void;
+}
+
+export function useCountdown(item: CatalogItem | undefined) {
+  const total = item ? secondsFor(item) : 0;
+  const [endsAt, setEndsAt] = useState<number | null>(null);
+  const [pausedLeft, setPausedLeft] = useState<number | null>(null);
+  const [left, setLeft] = useState(total);
+  const [expired, setExpired] = useState(false);
+  const alarm = useRef(createAlarm());
+
+  const running = endsAt !== null;
+
+  const stop = useCallback(() => {
+    alarm.current.stop();
+    setEndsAt(null);
+    setPausedLeft(null);
+    setExpired(false);
+  }, []);
+
+  const start = useCallback(() => {
+    if (!item) return;
+    alarm.current.stop();
+    setExpired(false);
+    setPausedLeft(null);
+    setEndsAt(Date.now() + secondsFor(item) * 1000);
+  }, [item]);
+
+  const pause = useCallback(() => {
+    if (endsAt === null) return;
+    setPausedLeft(Math.max(0, Math.round((endsAt - Date.now()) / 1000)));
+    setEndsAt(null);
+  }, [endsAt]);
+
+  const resume = useCallback(() => {
+    if (pausedLeft === null) return;
+    setEndsAt(Date.now() + pausedLeft * 1000);
+    setPausedLeft(null);
+  }, [pausedLeft]);
+
+  const dismiss = useCallback(() => {
+    alarm.current.stop();
+    setExpired(false);
+  }, []);
+
+  // Đổi sang bài khác thì bỏ đồng hồ cũ, kể cả khi chuông đang reo.
+  useEffect(() => {
+    stop();
+    setLeft(item ? secondsFor(item) : 0);
+  }, [item, stop]);
+
+  useEffect(() => {
+    if (endsAt === null) {
+      if (pausedLeft !== null) setLeft(pausedLeft);
+      return;
+    }
+    const tick = () => {
+      const remain = Math.max(0, Math.round((endsAt - Date.now()) / 1000));
+      setLeft(remain);
+      if (remain === 0) {
+        setEndsAt(null);
+        setExpired(true);
+        alarm.current.start();
+      }
+    };
+    tick();
+    const id = setInterval(tick, 250);
+    return () => clearInterval(id);
+  }, [endsAt, pausedLeft]);
+
+  // Đóng cửa sổ hay rời màn hình mà chuông còn reo thì phải tắt tiếng.
+  const alarmRef = alarm.current;
+  useEffect(() => () => alarmRef.stop(), [alarmRef]);
+
+  return {
+    total,
+    left,
+    running,
+    paused: pausedLeft !== null,
+    expired,
+    start,
+    stop,
+    pause,
+    resume,
+    dismiss,
+  };
+}
+
+export type Countdown = ReturnType<typeof useCountdown>;
+
+export default function Timer({
+  item,
+  clock,
+}: {
+  item: CatalogItem;
+  clock: Countdown;
+}) {
+  const ratio = clock.total > 0 ? clock.left / clock.total : 0;
+  // Còn dưới một phút thì chuyển đỏ để nhìn là biết phải chốt đáp án.
+  const color = clock.expired
+    ? "var(--red)"
+    : clock.left <= 60
+      ? "var(--amber)"
+      : "var(--blue)";
+
+  if (!clock.running && !clock.paused && !clock.expired) {
+    return (
+      <div className="timer-idle">
+        <span className="small dim">⏱ {partLabel(item)}</span>
+        <button className="btn sm" onClick={clock.start}>
+          Bắt đầu tính giờ
+        </button>
+        <span className="field-hint">
+          Bấm <span className="mono">Space</span> để mở bài là đồng hồ tự chạy.
+        </span>
+      </div>
+    );
+  }
+
+  return (
+    <div className={`timer-card${clock.expired ? " expired" : ""}`}>
+      <Ring ratio={ratio} size={96} width={9} color={color}>
+        <div>
+          <div className="timer-value" style={{ color }}>
+            {clock.expired ? "0:00" : formatClock(clock.left)}
+          </div>
+        </div>
+      </Ring>
+
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontWeight: 700 }}>
+          {clock.expired
+            ? "⏰ Hết giờ rồi!"
+            : clock.paused
+              ? "Đang tạm dừng"
+              : "Đang tính giờ"}
+        </div>
+        <div className="small muted" style={{ marginTop: 2 }}>
+          {partLabel(item)}
+          {clock.expired && " — chốt đáp án và chấm kết quả nhé"}
+        </div>
+
+        <div className="btn-row" style={{ marginTop: 10 }}>
+          {clock.expired ? (
+            <button className="btn danger" onClick={clock.dismiss}>
+              🔕 Tắt chuông
+            </button>
+          ) : clock.paused ? (
+            <button className="btn sm primary" onClick={clock.resume}>
+              ▶ Tiếp tục
+            </button>
+          ) : (
+            <button className="btn sm" onClick={clock.pause}>
+              ⏸ Tạm dừng
+            </button>
+          )}
+          <button className="btn sm ghost" onClick={clock.start}>
+            ↺ Bắt đầu lại
+          </button>
+          <button className="btn sm ghost" onClick={clock.stop}>
+            ✕ Bỏ đồng hồ
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

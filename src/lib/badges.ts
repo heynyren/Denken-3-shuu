@@ -50,6 +50,18 @@ function comebacks(data: AppData): number {
   return count;
 }
 
+/** Số bài đang nằm trong chu kỳ ôn (đã có ngày ôn lại). */
+function scheduledCount(data: AppData): number {
+  let count = 0;
+  for (const entry of Object.values(data.progress)) {
+    if (entry.nextReview) count += 1;
+  }
+  return count;
+}
+
+/** Dưới mức này thì chưa coi là đang chạy một lịch ôn thực sự. */
+const SCHEDULED_FLOOR = 20;
+
 /** Tổng số lần ôn đã ghi nhận từ trước tới nay. */
 function totalReviews(data: AppData): number {
   let count = 0;
@@ -102,8 +114,20 @@ export const BADGES: Badge[] = [
 
   milestone("comeback-100", "💪", "Sửa sai", "100 bài từ Sai chuyển thành Đúng", 100,
     (_view, data) => comebacks(data)),
-  milestone("clear-due", "🌤️", "Bàn học sạch", "Ôn hết bài đến hạn, không còn bài quá hạn", 1,
-    (view) => (view.dueToday === 0 ? 1 : 0)),
+  {
+    id: "clear-due",
+    icon: "🌤️",
+    name: "Bàn học sạch",
+    description: "Ôn hết bài đến hạn, không còn bài nào quá hạn",
+    // "Hết bài đến hạn" chỉ là thành tích khi bạn thực sự đang chạy một lịch ôn
+    // có quy mô. Người mới cài, hoặc người vừa chấm đúng một bài, cũng thoả điều
+    // kiện đó về mặt chữ nghĩa — nên phải có ít nhất SCHEDULED_FLOOR bài nằm
+    // trong chu kỳ thì mới tính.
+    earned: (view, data) =>
+      view.dueToday === 0 && scheduledCount(data) >= SCHEDULED_FLOOR,
+    progress: (view, data) =>
+      view.dueToday === 0 ? ratio(scheduledCount(data), SCHEDULED_FLOOR) : 0,
+  },
 
   {
     id: "all-subjects",

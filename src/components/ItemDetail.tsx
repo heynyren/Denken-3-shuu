@@ -325,11 +325,14 @@ export default function ItemDetail({
   progress,
   store,
   compact,
+  onOpenExercise,
 }: {
   item: CatalogItem;
   progress: ItemProgress | undefined;
   store: Store;
   compact?: boolean;
+  /** Màn Ôn tập truyền vào để mở bài đồng thời khởi động đồng hồ. */
+  onOpenExercise?: () => void;
 }) {
   const [focusNote, setFocusNote] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -357,7 +360,10 @@ export default function ItemDetail({
       )}
 
       <div className="btn-row">
-        <button className="btn primary" onClick={() => openLink(item.url)}>
+        <button
+          className="btn primary"
+          onClick={() => (onOpenExercise ? onOpenExercise() : openLink(item.url))}
+        >
           ↗ Mở bài trên denken-ou.com
         </button>
       </div>
