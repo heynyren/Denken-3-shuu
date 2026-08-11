@@ -1,0 +1,43 @@
+appId: com.heynyren.denken3shuu
+productName: Denken 3-shuu
+copyright: Copyright © 2026 heynyren
+
+directories:
+  output: release
+  buildResources: build
+
+# Chỉ đóng gói phần đã build, không nhét cả mã nguồn và node_modules vào.
+files:
+  - dist/**/*
+  - package.json
+
+# Nén asar để khởi động nhanh hơn.
+asar: true
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico
+  artifactName: Denken-3-shuu-Setup-${version}.${ext}
+
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Denken 3-shuu
+  # Gỡ cài đặt KHÔNG xoá thư mục dữ liệu người dùng: tiến độ học phải sống sót
+  # qua mọi lần cài lại. Muốn xoá hẳn thì tự xoá thư mục trong AppData\Roaming.
+  deleteAppDataOnUninstall: false
+
+linux:
+  target: [AppImage]
+  icon: build/icon.png
+  category: Education
+
+mac:
+  target: [dmg]
+  icon: build/icon.png
+  category: public.app-category.education
