@@ -4,12 +4,12 @@ import ItemDetail from "../components/ItemDetail";
 import { Bar, Empty, Stars, StatusPill } from "../components/ui";
 import { subjectName } from "../lib/catalog";
 import { levelLabel, overdueDays, todayISO } from "../lib/srs";
-import { dueQueue, freshQueue } from "../lib/stats";
+import { dueQueue, freshQueue, wrongQueue } from "../lib/stats";
 import type { Overview } from "../lib/stats";
 import type { SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
 
-type Mode = "due" | "fresh";
+type Mode = "due" | "wrong" | "fresh";
 
 const SUBJECT_FILTERS: Array<{ key: SubjectKey | "all"; label: string }> = [
   { key: "all", label: "Tất cả" },
@@ -21,7 +21,9 @@ const SUBJECT_FILTERS: Array<{ key: SubjectKey | "all"; label: string }> = [
 
 export default function Review({ store, view }: { store: Store; view: Overview }) {
   const data = store.data!;
-  const [mode, setMode] = useState<Mode>("due");
+  // Chưa có bài nào đến hạn (người mới, hoặc đã ôn hết) thì mở thẳng sang bài
+  // chưa làm, để không rơi vào một danh sách trống rồi phải tự mò.
+  const [mode, setMode] = useState<Mode>(view.dueToday > 0 ? "due" : "fresh");
   const [subject, setSubject] = useState<SubjectKey | "all">("all");
   // Lọc theo độ khó: tập sao nào đang bật. Rỗng = không lọc.
   const [stars, setStars] = useState<Set<number>>(new Set());
@@ -29,7 +31,12 @@ export default function Review({ store, view }: { store: Store; view: Overview }
   const [done, setDone] = useState(0);
 
   const queue = useMemo(() => {
-    const base = mode === "due" ? dueQueue(data) : freshQueue(data);
+    const base =
+      mode === "due"
+        ? dueQueue(data)
+        : mode === "wrong"
+          ? wrongQueue(data)
+          : freshQueue(data);
     return base.filter(
       (item) =>
         (subject === "all" || item.subject === subject) &&
@@ -97,6 +104,12 @@ export default function Review({ store, view }: { store: Store; view: Overview }
               🎯 Đến hạn hôm nay ({view.dueToday})
             </button>
             <button
+              className={`chip${mode === "wrong" ? " on" : ""}`}
+              onClick={() => setMode("wrong")}
+            >
+              ❌ Đang làm sai ({view.counts.wrong})
+            </button>
+            <button
               className={`chip${mode === "fresh" ? " on" : ""}`}
               onClick={() => setMode("fresh")}
             >
@@ -155,7 +168,15 @@ export default function Review({ store, view }: { store: Store; view: Overview }
 
       {!item ? (
         <div className="card">
-          {mode === "due" ? (
+          {mode === "wrong" ? (
+            <Empty icon="🎉" title="Không còn bài nào đang sai">
+              <p className="muted">
+                {stars.size > 0 || subject !== "all"
+                  ? "Không có bài sai nào khớp bộ lọc."
+                  : "Mọi bài từng sai đều đã được sửa thành đúng. Quá tốt!"}
+              </p>
+            </Empty>
+          ) : mode === "due" ? (
             <Empty icon="🌤️" title="Không còn bài nào đến hạn">
               <p className="muted">
                 {stars.size > 0 || subject !== "all"

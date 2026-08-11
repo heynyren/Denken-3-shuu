@@ -1,10 +1,20 @@
 import { useState } from "react";
 
 import { Bar, Empty, openLink } from "../components/ui";
+import glossaryFile from "../data/glossary.json";
 import type { Store } from "../state/useStore";
+import type { VocabEntry } from "../lib/types";
+
+/**
+ * Sổ từ chuyên ngành đi kèm app — tài liệu tham khảo chung, ai cài cũng có.
+ * Người dùng nhập file Excel riêng thì bản của họ thay thế bản này.
+ */
+const GLOSSARY = (glossaryFile as { terms: VocabEntry[] }).terms;
 
 export default function Quizlet({ store }: { store: Store }) {
   const data = store.data!;
+  const vocabSource = data.vocab.length > 0 ? data.vocab : GLOSSARY;
+  const usingBundled = data.vocab.length === 0;
   const [adding, setAdding] = useState(false);
   const [draft, setDraft] = useState({ subject: "", name: "", url: "", total: 0 });
   const [search, setSearch] = useState("");
@@ -13,7 +23,7 @@ export default function Quizlet({ store }: { store: Store }) {
   const remainingWords = data.decks.reduce((sum, deck) => sum + deck.remaining, 0);
   const learned = totalWords - remainingWords;
 
-  const vocab = data.vocab.filter((entry) => {
+  const vocab = vocabSource.filter((entry) => {
     const needle = search.trim().toLowerCase();
     if (!needle) return true;
     return `${entry.term} ${entry.reading} ${entry.meaning} ${entry.hint}`
@@ -131,7 +141,10 @@ export default function Quizlet({ store }: { store: Store }) {
 
         {data.decks.length === 0 ? (
           <Empty icon="🗂️" title="Chưa có bộ thẻ nào">
-            <p className="muted">Bấm “Thêm bộ” để bắt đầu theo dõi từ vựng.</p>
+            <p className="muted">
+              Bộ thẻ Quizlet là của riêng từng người. Bấm “Thêm bộ” để gắn link
+              bộ thẻ của bạn vào đây, rồi cập nhật số từ còn quên sau mỗi lần học.
+            </p>
           </Empty>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
@@ -201,7 +214,10 @@ export default function Quizlet({ store }: { store: Store }) {
         <div className="card-head">
           <div className="card-title">
             Sổ từ vựng chuyên ngành
-            <div className="card-sub">{data.vocab.length} từ lấy từ file Excel</div>
+            <div className="card-sub">
+              {vocabSource.length} từ
+              {usingBundled ? " — sổ đi kèm app" : " — lấy từ file Excel của bạn"}
+            </div>
           </div>
           <div className="search-wrap" style={{ maxWidth: 260 }}>
             <span className="search-icon">🔍</span>

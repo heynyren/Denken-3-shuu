@@ -214,9 +214,25 @@ export function dueQueue(data: AppData, today = todayISO()): CatalogItem[] {
     });
 }
 
-/** Bài chưa từng làm, dùng khi đã ôn hết hàng đợi mà chưa đạt KPI. */
+/**
+ * Bài chưa từng làm.
+ *
+ * Xét theo TRẠNG THÁI chứ không theo "có ngày làm bài hay chưa": trong file
+ * Excel chỉ những bài mới ôn gần đây mới được điền ngày, nên lấy theo ngày sẽ
+ * kéo cả nghìn bài đã làm đúng từ lâu vào đây.
+ */
 export function freshQueue(data: AppData): CatalogItem[] {
-  return items.filter((item) => !data.progress[item.id]?.doneDate);
+  return items.filter((item) => (data.progress[item.id]?.status ?? "todo") === "todo");
+}
+
+/**
+ * Bài đang sai — nhóm đáng quay lại nhất.
+ * Bài khó xếp lên trước vì đó thường là chỗ hổng kiến thức thật sự.
+ */
+export function wrongQueue(data: AppData): CatalogItem[] {
+  return items
+    .filter((item) => data.progress[item.id]?.status === "wrong")
+    .sort((a, b) => b.stars - a.stars);
 }
 
 /* ------------------------------------------------------------------ */
