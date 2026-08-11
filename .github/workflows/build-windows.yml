@@ -2,17 +2,22 @@ name: Build Windows installer
 
 # Chạy máy Windows thật để đóng gói, vì file .exe cần môi trường Windows.
 on:
+  # Nhánh phát triển được build qua pull_request, nên push chỉ cần bắt main và
+  # tag. Nếu bắt cả hai thì mỗi commit trong PR sẽ build hai lần trùng nhau.
   push:
-    # Build cả trên nhánh phát triển để có bản cài đặt tải về thử ngay,
-    # không phải chờ gộp vào main.
-    branches: [main, "claude/**"]
+    branches: [main]
     tags: ["v*"]
   pull_request:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: write
+
+# Đẩy commit mới thì huỷ luôn bản build của commit cũ trên cùng nhánh —
+# không ai cần bản cài đặt của commit vừa bị thay thế.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 jobs:
   build:
