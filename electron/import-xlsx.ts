@@ -19,8 +19,6 @@ import type {
   ImportReport,
   ItemProgress,
   ItemStatus,
-  QuizletDeck,
-  VocabEntry,
 } from "../src/lib/types";
 
 export type { ImportReport };
@@ -151,8 +149,6 @@ export async function importWorkbook(
     notes: 0,
     refLinks: 0,
     scheduled: 0,
-    decks: 0,
-    vocab: 0,
     samples: [],
   };
 
@@ -205,71 +201,5 @@ export async function importWorkbook(
     });
   }
 
-  /* -------------------- sheet Quizlet -------------------- */
-
-  const decks: QuizletDeck[] = [];
-  const vocab: VocabEntry[] = [];
-  const quizlet = book.getWorksheet("Quizlet");
-
-  if (quizlet) {
-    let section: "decks" | "vocab" = "decks";
-
-    quizlet.eachRow((row, rowNumber) => {
-      if (rowNumber === 1) return;
-      const cells = [1, 2, 3, 4, 5].map((index) => text(row.getCell(index).value));
-      if (cells.every((cell) => !cell)) return;
-
-      // Dòng tiêu đề báo hiệu sang khối mới
-      if (cells[0] === "Kanji" || cells[0] === "Từ vựng / Kanji") {
-        section = "vocab";
-        return;
-      }
-      if (cells[0] === "Mon") {
-        section = "decks";
-        return;
-      }
-
-      if (section === "decks") {
-        if (!cells[2]?.startsWith("http")) return;
-        decks.push({
-          id: `deck-${decks.length + 1}`,
-          subject: cells[0] ?? "",
-          name: cells[1] ?? "",
-          url: cells[2],
-          remaining: Number(cells[3]) || 0,
-          total: Number(cells[4]) || 0,
-        });
-      } else {
-        let term = cells[0] ?? "";
-        let reading = cells[1] ?? "";
-        // Cột đầu đôi khi là "過電流 (かでんりゅう)" — tách phần trong ngoặc
-        const bracket = /^(.*?)\s*[（(]([^）)]*)[）)]\s*$/.exec(term);
-        if (bracket) {
-          term = bracket[1]!;
-          reading = bracket[2]!;
-        }
-        vocab.push({
-          id: `vocab-${vocab.length + 1}`,
-          term,
-          reading,
-          meaning: cells[2] ?? "",
-          hint: cells[3] ?? "",
-        });
-      }
-    });
-  }
-
-  report.decks = decks.length;
-  report.vocab = vocab.length;
-
-  return {
-    data: {
-      ...current,
-      progress,
-      // Chỉ thay bộ thẻ và từ vựng khi Excel thực sự có, tránh xoá trắng nhầm.
-      decks: decks.length > 0 ? decks : current.decks,
-      vocab: vocab.length > 0 ? vocab : current.vocab,
-    },
-    report,
-  };
+  return { data: { ...current, progress }, report };
 }

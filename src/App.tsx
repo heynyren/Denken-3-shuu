@@ -8,17 +8,15 @@ import { useStore } from "./state/useStore";
 import Dashboard from "./views/Dashboard";
 import Review from "./views/Review";
 import Browse from "./views/Browse";
-import Quizlet from "./views/Quizlet";
 import Settings from "./views/Settings";
 import type { SubjectKey } from "./lib/types";
 
-type Tab = "dashboard" | "review" | "browse" | "quizlet" | "settings";
+type Tab = "dashboard" | "review" | "browse" | "settings";
 
 const TABS: Array<{ key: Tab; icon: string; label: string }> = [
   { key: "dashboard", icon: "🏠", label: "Hôm nay" },
   { key: "review", icon: "🎯", label: "Ôn tập" },
   { key: "browse", icon: "📚", label: "Danh sách bài" },
-  { key: "quizlet", icon: "🗂️", label: "Từ vựng" },
   { key: "settings", icon: "⚙️", label: "Cài đặt" },
 ];
 
@@ -170,7 +168,6 @@ export default function App() {
             onSubjectHandled={() => setJumpSubject("all")}
           />
         )}
-        {tab === "quizlet" && <Quizlet store={store} />}
         {tab === "settings" && <Settings store={store} view={view} />}
       </main>
 

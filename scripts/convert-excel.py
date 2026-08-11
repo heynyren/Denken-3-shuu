@@ -193,55 +193,6 @@ def read_subject_sheet(worksheet, subject_key: str, seen: Counter) -> list[dict]
     return rows
 
 
-def read_quizlet_sheet(worksheet) -> tuple[list[dict], list[dict]]:
-    """Sheet Quizlet gồm 3 khối: bộ thẻ, bảng kanji, bảng từ vựng."""
-    decks, vocab = [], []
-    section = "decks"
-
-    for row in worksheet.iter_rows(min_row=2, values_only=True):
-        cells = [clean(c) for c in row]
-        if not any(cells):
-            continue
-
-        # Nhận diện dòng tiêu đề để biết đang sang khối mới
-        if cells[0] in ("Kanji", "Từ vựng / Kanji"):
-            section = "vocab"
-            continue
-        if cells[0] == "Mon":
-            section = "decks"
-            continue
-
-        if section == "decks":
-            if not cells[2].startswith("http"):
-                continue
-            decks.append(
-                {
-                    "id": f"deck-{len(decks) + 1}",
-                    "subject": cells[0],
-                    "name": cells[1],
-                    "url": cells[2],
-                    "remaining": int(float(cells[3])) if cells[3] else 0,
-                    "total": int(float(cells[4])) if cells[4] else 0,
-                }
-            )
-        else:
-            # Cột 0 đôi khi là '過電流 (かでんりゅう)' -> tách phần trong ngoặc
-            term, reading = cells[0], cells[1]
-            bracket = re.match(r"^(.*?)\s*[（(]([^）)]*)[）)]\s*$", term)
-            if bracket:
-                term, reading = bracket.group(1), bracket.group(2)
-            vocab.append(
-                {
-                    "id": f"vocab-{len(vocab) + 1}",
-                    "term": term,
-                    "reading": reading,
-                    "meaning": cells[2],
-                    "hint": cells[3],
-                }
-            )
-    return decks, vocab
-
-
 def main() -> None:
     source = Path(sys.argv[1]) if len(sys.argv) > 1 else ROOT / "scripts" / "source.xlsx"
     if not source.exists():
@@ -286,8 +237,6 @@ def main() -> None:
             if entry:
                 progress[row["id"]] = entry
 
-    decks, vocab = read_quizlet_sheet(workbook["Quizlet"])
-
     catalog = {
         "version": 1,
         "generatedAt": datetime.now().isoformat(timespec="seconds"),
@@ -301,11 +250,9 @@ def main() -> None:
     }
 
     seed = {
-        "version": 1,
+        "version": 2,
         "generatedAt": catalog["generatedAt"],
         "progress": progress,
-        "decks": decks,
-        "vocab": vocab,
     }
 
     catalog_path = ROOT / "src" / "data" / "catalog.json"
@@ -327,8 +274,7 @@ def main() -> None:
     print(f"catalog.json : {len(catalog_items)} bài  ({catalog_path})")
     for key, _, ja, vi in SUBJECTS:
         print(f"    {ja} {vi:<10} {by_subject[key]:>5}")
-    print(f"seed.json    : {len(progress)} bài có tiến độ, "
-          f"{len(decks)} bộ Quizlet, {len(vocab)} từ vựng")
+    print(f"seed.json    : {len(progress)} bài có tiến độ")
     print(f"    trạng thái: {dict(by_status)}")
     print(f"    ghi chú: {sum(1 for e in progress.values() if e.get('note'))}"
           f" | link tham khảo: {sum(1 for e in progress.values() if e.get('refLink'))}"

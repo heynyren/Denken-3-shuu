@@ -25,7 +25,9 @@ import path from "node:path";
 import seed from "../src/data/seed.json";
 import type { AppData, DayLog, ItemProgress, Settings } from "../src/lib/types";
 
-export const SCHEMA_VERSION = 1;
+// v2 bỏ hẳn phần từ vựng/Quizlet. Dữ liệu cũ còn hai trường đó sẽ bị lược đi
+// khi nạp — bản sao lưu hằng ngày vẫn giữ nguyên nếu cần lấy lại.
+export const SCHEMA_VERSION = 2;
 
 const DEFAULT_SETTINGS: Settings = {
   dailyGoal: 30,
@@ -60,8 +62,6 @@ function today(): string {
 
 interface SeedShape {
   progress: Record<string, Partial<ItemProgress>>;
-  decks: AppData["decks"];
-  vocab: AppData["vocab"];
 }
 
 function emptyProgress(): ItemProgress {
@@ -91,8 +91,6 @@ function buildFromSeed(): AppData {
     updatedAt: now,
     settings: { ...DEFAULT_SETTINGS },
     progress,
-    decks: raw.decks ?? [],
-    vocab: raw.vocab ?? [],
     dailyLog: {},
     badges: {},
   };
@@ -144,8 +142,6 @@ function normalise(input: unknown): AppData {
     updatedAt: raw.updatedAt ?? base.updatedAt,
     settings: { ...DEFAULT_SETTINGS, ...(raw.settings ?? {}) },
     progress: Object.keys(progress).length > 0 ? progress : base.progress,
-    decks: Array.isArray(raw.decks) ? raw.decks : base.decks,
-    vocab: Array.isArray(raw.vocab) ? raw.vocab : base.vocab,
     dailyLog,
     badges: raw.badges ?? {},
   };
@@ -157,7 +153,8 @@ function normalise(input: unknown): AppData {
  * không bao giờ xoá dữ liệu cũ.
  */
 function migrate(data: AppData): AppData {
-  // Mới có phiên bản 1, chưa cần chuyển đổi gì.
+  // v1 -> v2: normalise() đã lược sẵn hai trường decks/vocab của bản cũ,
+  // nên không còn gì phải chuyển đổi thêm.
   return data;
 }
 

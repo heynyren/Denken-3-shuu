@@ -17,7 +17,6 @@ Danh mục **1608 bài** trên denken-ou.com, chia bốn môn:
 - **Ôn tập** — hàng đợi bài đến hạn, ưu tiên bài quá hạn lâu nhất rồi tới bài khó. Lọc theo môn và theo độ khó ★1–5. Chấm đúng/sai bằng phím `1`/`2`, mở bài bằng `Space`.
 - **Danh sách bài** — cả 1608 bài, lọc theo môn / chủ đề / trạng thái / độ khó, tìm trong tên bài lẫn trong ghi chú.
 - **Ghi chú & link tham khảo** riêng cho từng bài.
-- **Từ vựng** — bộ thẻ Quizlet và sổ từ chuyên ngành.
 - Xuất ra Excel hoặc JSON bất cứ lúc nào.
 
 ## Cập nhật app không mất dữ liệu
@@ -99,7 +98,7 @@ electron/          tiến trình chính — giữ file, gác cổng IPC
 src/
   lib/             kiểu dữ liệu, chu kỳ ôn, thống kê, huy hiệu
   state/           tầng trạng thái, tự lưu sau 600ms
-  views/           5 màn hình
+  views/           4 màn hình
   data/catalog.json  danh mục 1608 bài
 scripts/
   convert-excel.py Excel → catalog.json + seed.json

@@ -155,26 +155,6 @@ function addSubjectSheet(
   sheet.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: HEADERS.length } };
 }
 
-function addQuizletSheet(book: ExcelJS.Workbook, data: AppData): void {
-  const sheet = book.addWorksheet("Quizlet");
-  sheet.columns = [{ width: 14 }, { width: 40 }, { width: 46 }, { width: 18 }, { width: 14 }];
-
-  styleHeaderRow(sheet.addRow(["Môn", "Nội dung", "Link Quizlet", "Số từ còn quên", "Tổng số từ"]));
-  for (const deck of data.decks) {
-    const row = sheet.addRow([deck.subject, deck.name, deck.url, deck.remaining, deck.total]);
-    if (deck.url) {
-      row.getCell(3).value = { text: deck.url, hyperlink: deck.url };
-      row.getCell(3).font = { color: { argb: "FF1155CC" }, underline: true };
-    }
-  }
-
-  sheet.addRow([]);
-  styleHeaderRow(sheet.addRow(["Kanji", "Furigana", "Nghĩa tiếng Việt", "Ghi chú"]));
-  for (const entry of data.vocab) {
-    sheet.addRow([entry.term, entry.reading, entry.meaning, entry.hint]);
-  }
-}
-
 export async function writeWorkbook(filePath: string, data: AppData): Promise<void> {
   const book = new ExcelJS.Workbook();
   book.creator = "電験三種 — Sổ ôn thi";
@@ -185,7 +165,6 @@ export async function writeWorkbook(filePath: string, data: AppData): Promise<vo
     const items = CATALOG.items.filter((item) => item.subject === subject.key);
     addSubjectSheet(book, subject.sheet, items, data);
   }
-  addQuizletSheet(book, data);
 
   await book.xlsx.writeFile(filePath);
 }

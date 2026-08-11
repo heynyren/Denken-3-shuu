@@ -1,1 +1,1 @@
-{"version":1,"note":"Trống có chủ đích. Dữ liệu cá nhân (ghi chú, link tham khảo, tiến độ) KHÔNG nằm trong repo. Nạp dữ liệu của bạn bằng nút 'Nhập từ file Excel' trong Cài đặt, hoặc chạy `npm run convert` trên máy bạn trước khi build.","progress":{},"decks":[],"vocab":[]}
+{"version":2,"note":"Trống có chủ đích. Dữ liệu cá nhân (ghi chú, link tham khảo, tiến độ) KHÔNG nằm trong repo. Nạp dữ liệu của bạn bằng nút 'Nhập từ file Excel' trong Cài đặt, hoặc chạy `npm run convert` trên máy bạn trước khi build.","progress":{}}

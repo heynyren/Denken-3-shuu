@@ -16,7 +16,6 @@ import type {
   AppData,
   ItemProgress,
   ItemStatus,
-  QuizletDeck,
   Settings,
   StoreInfo,
 } from "../lib/types";
@@ -44,9 +43,6 @@ export interface Store {
   snooze(id: string, days: number): void;
 
   updateSettings(patch: Partial<Settings>): void;
-  updateDeck(id: string, patch: Partial<QuizletDeck>): void;
-  addDeck(deck: Omit<QuizletDeck, "id">): void;
-  removeDeck(id: string): void;
 
   reload(): Promise<void>;
   replaceAll(data: AppData): void;
@@ -254,35 +250,6 @@ export function useStore(): Store {
     [update],
   );
 
-  const updateDeck = useCallback(
-    (id: string, patch: Partial<QuizletDeck>) =>
-      update((current) => ({
-        ...current,
-        decks: current.decks.map((deck) =>
-          deck.id === id ? { ...deck, ...patch } : deck,
-        ),
-      })),
-    [update],
-  );
-
-  const addDeck = useCallback(
-    (deck: Omit<QuizletDeck, "id">) =>
-      update((current) => ({
-        ...current,
-        decks: [...current.decks, { ...deck, id: `deck-${Date.now()}` }],
-      })),
-    [update],
-  );
-
-  const removeDeck = useCallback(
-    (id: string) =>
-      update((current) => ({
-        ...current,
-        decks: current.decks.filter((deck) => deck.id !== id),
-      })),
-    [update],
-  );
-
   const replaceAll = useCallback(
     (incoming: AppData) => {
       setData(incoming);
@@ -308,9 +275,6 @@ export function useStore(): Store {
     resetItem,
     snooze,
     updateSettings,
-    updateDeck,
-    addDeck,
-    removeDeck,
     reload,
     replaceAll,
     flush,

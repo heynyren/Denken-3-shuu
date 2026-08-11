@@ -67,23 +67,6 @@ export interface ItemProgress {
   history: ReviewEvent[];
 }
 
-export interface QuizletDeck {
-  id: string;
-  subject: string;
-  name: string;
-  url: string;
-  remaining: number;
-  total: number;
-}
-
-export interface VocabEntry {
-  id: string;
-  term: string;
-  reading: string;
-  meaning: string;
-  hint: string;
-}
-
 /** Thống kê của một ngày, dùng cho streak, biểu đồ và lịch nhiệt. */
 export interface DayLog {
   reviewed: number;
@@ -106,8 +89,6 @@ export interface AppData {
   updatedAt: string;
   settings: Settings;
   progress: Record<string, ItemProgress>;
-  decks: QuizletDeck[];
-  vocab: VocabEntry[];
   dailyLog: Record<string, DayLog>;
   /** id huy hiệu -> ngày đạt được (YYYY-MM-DD). */
   badges: Record<string, string>;
@@ -120,8 +101,6 @@ export interface ImportReport {
   notes: number;
   refLinks: number;
   scheduled: number;
-  decks: number;
-  vocab: number;
   samples: string[];
 }
 

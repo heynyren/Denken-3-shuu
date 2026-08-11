@@ -243,8 +243,7 @@ function registerHandlers(): void {
         message: `Khớp được ${report.matched} bài trong file Excel.`,
         detail:
           `Sẽ nhập: ${report.notes} ghi chú, ${report.refLinks} link tham khảo, ` +
-          `${report.scheduled} bài đang trong chu kỳ ôn, ` +
-          `${report.decks} bộ Quizlet, ${report.vocab} từ vựng.\n\n` +
+          `${report.scheduled} bài đang trong chu kỳ ôn.\n\n` +
           (report.unmatched > 0
             ? `${report.unmatched} dòng không khớp bài nào trong danh mục và sẽ bị bỏ qua.\n\n`
             : "") +
