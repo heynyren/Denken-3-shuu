@@ -3,7 +3,9 @@ name: Build Windows installer
 # Chạy máy Windows thật để đóng gói, vì file .exe cần môi trường Windows.
 on:
   push:
-    branches: [main]
+    # Build cả trên nhánh phát triển để có bản cài đặt tải về thử ngay,
+    # không phải chờ gộp vào main.
+    branches: [main, "claude/**"]
     tags: ["v*"]
   pull_request:
     branches: [main]
