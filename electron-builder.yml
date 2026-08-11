@@ -22,6 +22,8 @@ win:
   artifactName: Denken-3-shuu-Setup-${version}.${ext}
 
 nsis:
+  # Cài đè bản mới lên bản cũ: trình cài đặt tự gỡ bản cũ rồi cài bản mới,
+  # người dùng KHÔNG cần tự gỡ trước. Chỉ cần đóng app đang chạy.
   oneClick: false
   perMachine: false
   allowToChangeInstallationDirectory: true

@@ -52,6 +52,18 @@ Hai bên nối nhau bằng `id` sinh từ link denken-ou.com, nên thêm bài m�
 
 > `src/data/seed.json` trong repo cố ý để **trống**: ghi chú và link tham khảo là dữ liệu cá nhân, không nên nằm trong repo công khai. Nạp dữ liệu của bạn bằng nút **Nhập từ file Excel** trong Cài đặt.
 
+## Cài đặt và cập nhật
+
+Chạy thẳng file `Denken-3-shuu-Setup-*.exe`. **Không cần gỡ bản cũ trước** —
+trình cài đặt tự gỡ bản cũ rồi cài bản mới. Chỉ cần đóng app nếu đang mở.
+
+Kể cả khi bạn tự gỡ rồi cài lại, dữ liệu vẫn còn nguyên: trình gỡ cài đặt được
+cấu hình `deleteAppDataOnUninstall: false` nên không đụng tới thư mục
+`%APPDATA%\Denken 3-shuu`.
+
+Windows có thể cảnh báo SmartScreen vì file chưa mua chứng chỉ ký số —
+bấm **More info → Run anyway**.
+
 ## Tải về
 
 Vào tab [Actions](../../actions) → chọn lần chạy mới nhất → tải `Denken-3-shuu-Setup`.
