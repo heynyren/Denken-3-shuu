@@ -239,7 +239,106 @@ export default function Settings({
       <div className="card">
         <div className="card-head">
           <div className="card-title">
-            Sao lưu tự động
+            Sao lưu ra ngoài máy tính
+            <div className="card-sub">
+              Thứ duy nhất cứu được bạn khi ổ cứng hỏng hoặc mất máy
+            </div>
+          </div>
+        </div>
+
+        <div className="callout warn" style={{ marginBottom: 14 }}>
+          <strong>Bản sao lưu hằng ngày nằm cùng ổ đĩa với bản gốc.</strong> Nó chống
+          được xoá nhầm và ghi hỏng, nhưng ổ cứng hỏng thì mất cả hai. Chọn một thư
+          mục trong Google Drive hoặc OneDrive ở dưới, app sẽ tự chép sang đó sau mỗi
+          lần ghi.
+        </div>
+
+        <div className="field" style={{ marginBottom: 12 }}>
+          <span className="field-label">📁 Thư mục nhân bản</span>
+          <div className="row wrap" style={{ gap: 8 }}>
+            <input
+              className="input"
+              style={{ flex: 1, minWidth: 240 }}
+              placeholder="Chưa chọn — ví dụ G:\My Drive\Denken"
+              value={data.settings.mirrorDir}
+              onChange={(event) =>
+                store.updateSettings({ mirrorDir: event.target.value })
+              }
+            />
+            <button
+              className="btn"
+              onClick={async () => {
+                const result = await window.denken.pickMirrorDir();
+                if (result.ok && result.dir) {
+                  store.updateSettings({ mirrorDir: result.dir });
+                  await store.flush();
+                  const done = await window.denken.mirrorNow();
+                  setMessage(
+                    done.ok
+                      ? { kind: "", text: `Đã nhân bản sang ${result.dir}` }
+                      : { kind: "danger", text: done.error ?? "Nhân bản không thành công." },
+                  );
+                }
+              }}
+            >
+              Chọn thư mục…
+            </button>
+            {data.settings.mirrorDir && (
+              <button
+                className="btn ghost"
+                onClick={() => store.updateSettings({ mirrorDir: "" })}
+              >
+                Tắt
+              </button>
+            )}
+          </div>
+          <div className="field-hint">
+            Chép cả file đính kèm. File đính kèm chỉ chép một lần vì tên không đổi,
+            nên mỗi lần ghi chỉ tốn vài trăm KB của data.json.
+          </div>
+        </div>
+
+        <div className="btn-row">
+          <button
+            className="btn sm"
+            disabled={!data.settings.mirrorDir}
+            onClick={async () => {
+              await store.flush();
+              const result = await window.denken.mirrorNow();
+              setMessage(
+                result.ok
+                  ? {
+                      kind: "",
+                      text: `Đã nhân bản sang ${result.path} (chép thêm ${result.files ?? 0} file đính kèm).`,
+                    }
+                  : { kind: "danger", text: result.error ?? "Nhân bản không thành công." },
+              );
+            }}
+          >
+            🔄 Nhân bản ngay
+          </button>
+          <button
+            className="btn sm"
+            onClick={() =>
+              run(
+                () => window.denken.exportZip(),
+                (path) => `Đã xuất gói đầy đủ: ${path}`,
+              )
+            }
+          >
+            🗜️ Xuất toàn bộ (.zip)
+          </button>
+          <span className="field-hint" style={{ flex: 1, minWidth: 220 }}>
+            Gói .zip có cả ảnh đính kèm; file JSON thì không — khôi phục từ JSON sẽ
+            mất ảnh.
+          </span>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-head">
+          <div className="card-title">
+            Sao lưu tự động trên máy
             <div className="card-sub">Chạy ngầm mỗi lần mở app</div>
           </div>
         </div>

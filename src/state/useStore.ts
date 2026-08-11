@@ -59,13 +59,20 @@ export interface Store {
   flush(): Promise<void>;
 }
 
+/**
+ * Cửa duy nhất để sửa tiến độ một bài.
+ *
+ * Đóng dấu `updatedAt` ngay tại đây, chứ không rải ở từng hành động — chỉ cần
+ * một chỗ quên là dữ liệu sau này không gộp được khi đồng bộ.
+ */
 function withProgress(
   data: AppData,
   id: string,
   change: (current: ItemProgress) => ItemProgress,
 ): AppData {
   const current = data.progress[id] ?? emptyProgress();
-  return { ...data, progress: { ...data.progress, [id]: change(current) } };
+  const next = { ...change(current), updatedAt: new Date().toISOString() };
+  return { ...data, progress: { ...data.progress, [id]: next } };
 }
 
 export function useStore(): Store {

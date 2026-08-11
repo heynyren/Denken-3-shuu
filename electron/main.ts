@@ -13,6 +13,7 @@ import { promises as fs } from "node:fs";
 import * as attachments from "./attachments";
 import { writeWorkbook } from "./export-xlsx";
 import { importWorkbook } from "./import-xlsx";
+import { exportZip, mirrorTo } from "./mirror";
 import type { ImportReport } from "./import-xlsx";
 import { countBackups, load, normalise, paths, referencedFiles, save } from "./store";
 import type { Attachment, AppData, OpResult, StoreInfo } from "../src/lib/types";
@@ -129,8 +130,50 @@ function registerHandlers(): void {
   ipcMain.handle("store:save", async (_event, data: AppData): Promise<OpResult> => {
     try {
       // Không tin thẳng dữ liệu từ giao diện: vá lại cho đúng khuôn rồi mới ghi.
-      await save(normalise(data));
+      const clean = normalise(data);
+      await save(clean);
+
+      // Nhân bản chạy sau lưng và không được phép làm hỏng thao tác ghi chính:
+      // thư mục Drive có thể đang bận, ổ ngoài có thể đã rút ra.
+      const target = clean.settings.mirrorDir;
+      if (target) void mirrorTo(target).catch(() => undefined);
+
       return { ok: true };
+    } catch (error) {
+      return { ok: false, error: (error as Error).message };
+    }
+  });
+
+  ipcMain.handle("mirror:pick", async (): Promise<OpResult & { dir?: string }> => {
+    const picked = await dialog.showOpenDialog(mainWindow!, {
+      title: "Chọn thư mục để nhân bản dữ liệu (nên chọn trong Google Drive)",
+      properties: ["openDirectory", "createDirectory"],
+    });
+    if (picked.canceled || !picked.filePaths[0]) return { ok: false, cancelled: true };
+    return { ok: true, dir: picked.filePaths[0] };
+  });
+
+  ipcMain.handle("mirror:now", async (): Promise<OpResult & { files?: number }> => {
+    const target = (await load()).settings.mirrorDir;
+    if (!target) return { ok: false, error: "Chưa chọn thư mục nhân bản." };
+    try {
+      const report = await mirrorTo(target);
+      return { ok: true, path: target, files: report.filesCopied };
+    } catch (error) {
+      return { ok: false, error: (error as Error).message };
+    }
+  });
+
+  ipcMain.handle("store:export-zip", async (): Promise<OpResult & { bytes?: number }> => {
+    const target = await dialog.showSaveDialog(mainWindow!, {
+      title: "Xuất toàn bộ dữ liệu kèm file đính kèm",
+      defaultPath: `denken-toan-bo-${stamp()}.zip`,
+      filters: [{ name: "ZIP", extensions: ["zip"] }],
+    });
+    if (target.canceled || !target.filePath) return { ok: false, cancelled: true };
+    try {
+      const { bytes } = await exportZip(target.filePath);
+      return { ok: true, path: target.filePath, bytes };
     } catch (error) {
       return { ok: false, error: (error as Error).message };
     }

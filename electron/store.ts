@@ -42,6 +42,7 @@ const DEFAULT_SETTINGS: Settings = {
   dailyGoal: 30,
   examDate: "2027-03-21",
   backupsToKeep: 30,
+  mirrorDir: "",
 };
 
 export const paths = {
@@ -78,6 +79,7 @@ function emptyProgress(): ItemProgress {
     status: "todo",
     notes: [],
     links: [],
+    updatedAt: new Date().toISOString(),
     doneDate: null,
     srsLevel: 0,
     nextReview: null,
@@ -213,6 +215,8 @@ function normalise(input: unknown): AppData {
       status: entry.status ?? "todo",
       notes: cleanNotes(entry),
       links: cleanLinks(entry),
+      updatedAt:
+        typeof entry.updatedAt === "string" ? entry.updatedAt : new Date().toISOString(),
       doneDate: entry.doneDate ?? null,
       srsLevel: Number.isFinite(entry.srsLevel) ? Number(entry.srsLevel) : 0,
       nextReview: entry.nextReview ?? null,

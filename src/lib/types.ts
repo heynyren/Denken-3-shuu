@@ -95,6 +95,15 @@ export interface ItemProgress {
   status: ItemStatus;
   notes: NoteEntry[];
   links: LinkEntry[];
+  /**
+   * Lần cuối bản ghi này thay đổi.
+   *
+   * Chưa dùng tới trong bản chạy trên máy tính, nhưng phải ghi từ bây giờ:
+   * đồng bộ với app Android sau này gộp theo từng bài dựa trên mốc này, mà dữ
+   * liệu ghi ra hôm nay thiếu mốc thì sau không gộp được nữa.
+   * Xem docs/SAO-LUU-VA-DONG-BO.md.
+   */
+  updatedAt: string;
   doneDate: string | null;
   /** 0 = chưa vào chu kỳ ôn; 1..6 ứng với 1/3/7/14/30/90 ngày. */
   srsLevel: number;
@@ -112,6 +121,11 @@ export interface DayLog {
 
 export interface Settings {
   dailyGoal: number;
+  /**
+   * Thư mục nhân bản dữ liệu, thường trỏ vào thư mục Google Drive/OneDrive.
+   * Rỗng = tắt. Đây là thứ cứu bạn khi ổ cứng hỏng.
+   */
+  mirrorDir: string;
   /** Ngày thi, dạng YYYY-MM-DD. Người dùng tự chỉnh trong Cài đặt. */
   examDate: string;
   /** Số ngày tối đa giữ bản sao lưu tự động. */
@@ -168,6 +182,12 @@ export interface DenkenBridge {
   /** Nhập tiến độ từ file Excel gốc — cách đưa dữ liệu riêng của bạn vào app. */
   importXlsx(): Promise<OpResult & { data?: AppData; report?: ImportReport }>;
   revealDataFolder(): Promise<OpResult>;
+  /** Chọn thư mục nhân bản (thường là thư mục Google Drive trên máy). */
+  pickMirrorDir(): Promise<OpResult & { dir?: string }>;
+  /** Nhân bản ngay lập tức, không chờ lần ghi kế tiếp. */
+  mirrorNow(): Promise<OpResult & { files?: number }>;
+  /** Xuất gói .zip gồm cả dữ liệu lẫn file đính kèm. */
+  exportZip(): Promise<OpResult & { bytes?: number }>;
   openExternal(url: string): Promise<OpResult>;
 
   /** Mở hộp thoại chọn file, chép vào thư mục dữ liệu, trả về mô tả file. */

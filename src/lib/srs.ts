@@ -46,6 +46,7 @@ export function emptyProgress(): ItemProgress {
     status: "todo",
     notes: [],
     links: [],
+    updatedAt: new Date().toISOString(),
     doneDate: null,
     srsLevel: 0,
     nextReview: null,

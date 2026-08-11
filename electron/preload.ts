@@ -27,6 +27,10 @@ const bridge: DenkenBridge = {
   attachDataUrl: (file: string) => ipcRenderer.invoke("attach:data-url", file),
   attachOpen: (file: string) => ipcRenderer.invoke("attach:open", file),
   attachDelete: (file: string) => ipcRenderer.invoke("attach:delete", file),
+
+  pickMirrorDir: () => ipcRenderer.invoke("mirror:pick"),
+  mirrorNow: () => ipcRenderer.invoke("mirror:now"),
+  exportZip: () => ipcRenderer.invoke("store:export-zip"),
 };
 
 contextBridge.exposeInMainWorld("denken", bridge);

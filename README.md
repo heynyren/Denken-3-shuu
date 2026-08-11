@@ -14,10 +14,13 @@ Danh mục **1608 bài** trên denken-ou.com, chia bốn môn:
 ## Có gì
 
 - **Hôm nay** — vòng tròn KPI ngày, chuỗi ngày liên tiếp 🔥, đếm ngược tới ngày thi, tiến độ bốn môn, biểu đồ 12 tuần, lịch ôn 14 ngày tới, lịch nhiệt 17 tuần, 15 huy hiệu.
-- **Ôn tập** — hàng đợi bài đến hạn, ưu tiên bài quá hạn lâu nhất rồi tới bài khó. Lọc theo môn và theo độ khó ★1–5. Chấm đúng/sai bằng phím `1`/`2`, mở bài bằng `Space`.
+- **Ôn tập** — ba hàng đợi: đến hạn hôm nay / đang làm sai / chưa làm. Lọc theo môn, chủ đề và độ khó ★1–5. Chấm đúng/sai bằng phím `1`/`2`.
+- **Đồng hồ làm bài** — bấm `Space` là mở bài trên denken-ou.com và bắt đầu đếm ngược: A問題 5 phút, B問題 10 phút. Hết giờ thì chuông reo tới khi bạn tắt.
 - **Danh sách bài** — cả 1608 bài, lọc theo môn / chủ đề / trạng thái / độ khó, tìm trong tên bài lẫn trong ghi chú.
-- **Ghi chú & link tham khảo** riêng cho từng bài.
-- Xuất ra Excel hoặc JSON bất cứ lúc nào.
+- **Ghi chú** — mỗi bài nhiều ghi chú, mỗi ghi chú đính kèm được ảnh/PDF/Word. Ảnh hiện ngay trong app; chụp màn hình rồi `Ctrl+V` thẳng vào ô ghi chú.
+- **Link tham khảo** — mỗi bài nhiều link, mỗi link có nút mở ngay bên cạnh.
+- **Huy hiệu** — giữ kín tới khi bạn chạm mốc, lúc đó mới nhảy lên chúc mừng.
+- Xuất ra Excel, JSON, hoặc gói `.zip` đầy đủ bất cứ lúc nào.
 
 ## Cập nhật app không mất dữ liệu
 
@@ -38,6 +41,21 @@ Bốn lớp bảo vệ:
 4. **Tự cứu hộ** — `data.json` hỏng thì tự lấy bản sao lưu mới nhất còn đọc được, file hỏng cất sang `corrupt/` để soi lại.
 
 Trình gỡ cài đặt cũng **không** xoá thư mục dữ liệu (`deleteAppDataOnUninstall: false`).
+
+### Còn khi ổ cứng hỏng?
+
+Bốn lớp trên nằm cùng một ổ đĩa, nên chúng vô dụng khi ổ cứng hỏng, mất máy, hay
+dính mã độc tống tiền. Vì thế trong **Cài đặt → Sao lưu ra ngoài máy tính** có hai
+thứ nữa:
+
+- **Nhân bản tự động** sang một thư mục bạn chọn — thường là thư mục Google Drive
+  hoặc OneDrive trên máy. Sau mỗi lần ghi, app chép thêm một bản sang đó, kể cả file
+  đính kèm. Không cần tài khoản hay khoá API, chỉ là ghi file.
+- **Xuất toàn bộ (.zip)** gồm cả `data.json` lẫn ảnh đính kèm. Khác với file JSON —
+  JSON chỉ có phần mô tả file, khôi phục từ JSON là mất ảnh.
+
+Chi tiết và thiết kế đồng bộ với app Android sau này:
+[docs/SAO-LUU-VA-DONG-BO.md](docs/SAO-LUU-VA-DONG-BO.md).
 
 ## Ranh giới code / dữ liệu
 
@@ -103,7 +121,9 @@ Giữ đúng chu kỳ trong file Excel gốc. Làm đúng thì lên một cấp,
 ```
 electron/          tiến trình chính — giữ file, gác cổng IPC
   main.ts          cửa sổ, các kênh IPC, chặn điều hướng
-  store.ts         đọc/ghi nguyên tử, sao lưu, cứu hộ
+  store.ts         đọc/ghi nguyên tử, sao lưu, cứu hộ, di trú schema
+  attachments.ts   file đính kèm, chặn đường dẫn vượt thư mục
+  mirror.ts        nhân bản ra thư mục đám mây, xuất .zip
   import-xlsx.ts   nhập tiến độ từ Excel
   export-xlsx.ts   xuất ra Excel giống bố cục gốc
   preload.ts       cầu nối duy nhất sang giao diện
@@ -114,6 +134,8 @@ src/
   data/catalog.json  danh mục 1608 bài
 scripts/
   convert-excel.py Excel → catalog.json + seed.json
+docs/
+  SAO-LUU-VA-DONG-BO.md  phương án sao lưu và đồng bộ Android
 ```
 
 ## Giấy phép
