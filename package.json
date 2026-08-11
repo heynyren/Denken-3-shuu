@@ -1,0 +1,39 @@
+{
+  "name": "denken-3-shuu",
+  "version": "1.0.0",
+  "description": "App ôn thi 電験三種 - theo dõi KPI, ôn tập giãn cách và tiến bộ hằng ngày",
+  "author": "heynyren",
+  "license": "MIT",
+  "private": true,
+  "main": "dist/electron/main.js",
+  "scripts": {
+    "dev": "concurrently -k -n vite,electron -c cyan,magenta \"npm:dev:renderer\" \"npm:dev:electron\"",
+    "dev:renderer": "vite",
+    "dev:electron": "npm run build:electron -- --sourcemap && wait-on tcp:5173 && cross-env NODE_ENV=development electron .",
+    "build:electron": "esbuild electron/main.ts electron/preload.ts --bundle --platform=node --target=node20 --format=cjs --external:electron --outdir=dist/electron",
+    "build:renderer": "vite build",
+    "build": "npm run typecheck && npm run build:electron && npm run build:renderer",
+    "typecheck": "tsc --noEmit",
+    "convert": "python3 scripts/convert-excel.py scripts/source.xlsx",
+    "pack:win": "npm run build && electron-builder --win --publish never",
+    "pack:dir": "npm run build && electron-builder --dir --publish never"
+  },
+  "dependencies": {
+    "exceljs": "^4.4.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^5.0.4",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^43.3.0",
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.25.11",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12",
+    "wait-on": "^9.0.1"
+  }
+}

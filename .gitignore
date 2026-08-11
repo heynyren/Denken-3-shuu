@@ -1,0 +1,9 @@
+node_modules/
+dist/
+release/
+*.log
+.DS_Store
+.vite/
+
+# File Excel gốc chứa ghi chú và link tham khảo cá nhân — không đẩy lên repo công khai.
+scripts/source.xlsx

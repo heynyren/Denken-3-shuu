@@ -1,0 +1,60 @@
+name: Build Windows installer
+
+# Chạy máy Windows thật để đóng gói, vì file .exe cần môi trường Windows.
+on:
+  # Nhánh phát triển được build qua pull_request, nên push chỉ cần bắt main và
+  # tag. Nếu bắt cả hai thì mỗi commit trong PR sẽ build hai lần trùng nhau.
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Đẩy commit mới thì huỷ luôn bản build của commit cũ trên cùng nhánh —
+# không ai cần bản cài đặt của commit vừa bị thay thế.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Cài đặt phụ thuộc
+        run: npm ci
+
+      - name: Kiểm tra kiểu dữ liệu
+        run: npm run typecheck
+
+      - name: Đóng gói bản cài đặt
+        run: npm run pack:win
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Tải lên bản cài đặt
+        uses: actions/upload-artifact@v4
+        with:
+          name: Denken-3-shuu-Setup
+          path: release/*.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      # Đẩy tay một tag dạng v1.0.1 là tự có bản phát hành tải về được.
+      - name: Tạo bản phát hành
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.exe
+          generate_release_notes: true

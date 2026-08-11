@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>電験三種 — biểu tượng app</title>
+  <defs>
+    <linearGradient id="field" x1="0.1" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#182D50"/>
+      <stop offset="0.5" stop-color="#0A1425"/>
+      <stop offset="1" stop-color="#03070D"/>
+    </linearGradient>
+
+    <radialGradient id="halo" cx="0.5" cy="0.4" r="0.56">
+      <stop offset="0" stop-color="#3FD9FF" stop-opacity="0.30"/>
+      <stop offset="0.55" stop-color="#1668B8" stop-opacity="0.09"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="helmet" x1="0.14" y1="0.05" x2="0.88" y2="1">
+      <stop offset="0" stop-color="#FFE293"/>
+      <stop offset="0.36" stop-color="#FFC04A"/>
+      <stop offset="0.76" stop-color="#F0901A"/>
+      <stop offset="1" stop-color="#B25B06"/>
+    </linearGradient>
+
+    <linearGradient id="brimGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD173"/>
+      <stop offset="0.55" stop-color="#EA8D13"/>
+      <stop offset="1" stop-color="#934B03"/>
+    </linearGradient>
+
+    <linearGradient id="visorGrad" x1="0.05" y1="0" x2="0.95" y2="0.9">
+      <stop offset="0" stop-color="#D6FCFF"/>
+      <stop offset="0.3" stop-color="#4FE4FF"/>
+      <stop offset="0.68" stop-color="#12A8E8"/>
+      <stop offset="1" stop-color="#0A5299"/>
+    </linearGradient>
+
+    <linearGradient id="jacketGrad" x1="0.5" y1="0" x2="0.5" y2="1">
+      <stop offset="0" stop-color="#35547A"/>
+      <stop offset="1" stop-color="#0E1D2E"/>
+    </linearGradient>
+
+    <linearGradient id="boltGrad" x1="0.1" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.4" stop-color="#A5F5FF"/>
+      <stop offset="1" stop-color="#1FA9EA"/>
+    </linearGradient>
+
+    <filter id="glow" x="-70%" y="-70%" width="240%" height="240%">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+
+    <filter id="soft" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+
+    <clipPath id="frame">
+      <rect x="0" y="0" width="512" height="512" rx="112" ry="112"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="512" height="512" fill="url(#field)"/>
+    <rect width="512" height="512" fill="url(#halo)"/>
+
+    <!-- Vòng hồ quang -->
+    <circle cx="256" cy="248" r="206" fill="none" stroke="#3ECBF5" stroke-opacity="0.13"
+            stroke-width="3" stroke-dasharray="32 24" stroke-linecap="round"/>
+
+    <!-- ÁO BẢO HỘ -->
+    <path d="M100 512 Q110 418 200 386 L256 444 L312 386 Q402 418 412 512 Z" fill="url(#jacketGrad)"/>
+    <path d="M200 386 L256 444 L312 386 L300 512 L212 512 Z" fill="#0A1420"/>
+    <path d="M200 386 L256 444 L312 386" fill="none" stroke="#3FE3FF" stroke-opacity="0.92"
+          stroke-width="9" stroke-linejoin="round" stroke-linecap="round"/>
+    <!-- Sọc phản quang trên vai -->
+    <path d="M136 496 Q164 438 210 412" fill="none" stroke="#3FE3FF" stroke-opacity="0.42"
+          stroke-width="12" stroke-linecap="round"/>
+    <path d="M376 496 Q348 438 302 412" fill="none" stroke="#3FE3FF" stroke-opacity="0.42"
+          stroke-width="12" stroke-linecap="round"/>
+    <path d="M100 512 Q110 418 200 386" fill="none" stroke="#6FE9FF" stroke-opacity="0.45"
+          stroke-width="5" stroke-linecap="round"/>
+
+    <!-- QUỐC KỲ NHẬT khâu trên vai áo -->
+    <g transform="rotate(-9 348 442)">
+      <rect x="310" y="418" width="78" height="52" rx="5" fill="#0A1420" fill-opacity="0.55"/>
+      <rect x="312" y="420" width="74" height="48" rx="4" fill="#F7F9FC"/>
+      <circle cx="349" cy="444" r="14.5" fill="#BC002D"/>
+      <rect x="312" y="420" width="74" height="48" rx="4" fill="none"
+            stroke="#8FA6BF" stroke-opacity="0.55" stroke-width="2"/>
+    </g>
+
+    <!-- CỔ (vẽ trước mặt để bị mặt che phần trên) -->
+    <path d="M220 340 L292 340 L292 414 L220 414 Z" fill="#101F30"/>
+
+    <!-- KHUÔN MẶT: hàm bạnh, cằm vuông, để dạng bóng đổ -->
+    <path d="M172 232 L340 232 L340 308 Q340 360 302 380 Q256 398 210 380 Q172 360 172 308 Z"
+          fill="#1B3150"/>
+    <!-- Viền sáng rìa trái khuôn mặt -->
+    <path d="M172 250 L172 308 Q172 360 210 380" fill="none" stroke="#54DCFF"
+          stroke-opacity="0.6" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- DÂY QUAI MŨ -->
+    <path d="M190 266 Q187 330 212 366" fill="none" stroke="#0A1522" stroke-width="13"
+          stroke-linecap="round"/>
+    <path d="M322 266 Q325 330 300 366" fill="none" stroke="#0A1522" stroke-width="13"
+          stroke-linecap="round"/>
+    <path d="M190 266 Q187 330 212 366" fill="none" stroke="#E8A93C" stroke-opacity="0.5"
+          stroke-width="5" stroke-linecap="round"/>
+    <path d="M322 266 Q325 330 300 366" fill="none" stroke="#E8A93C" stroke-opacity="0.5"
+          stroke-width="5" stroke-linecap="round"/>
+
+    <!-- KÍNH BẢO HỘ góc cạnh -->
+    <g filter="url(#glow)">
+      <path d="M178 292 L224 280 L288 280 L334 292 L334 312 L288 330 L224 330 L178 312 Z"
+            fill="url(#visorGrad)"/>
+    </g>
+    <path d="M178 292 L224 280 L288 280 L334 292 L334 312 L288 330 L224 330 L178 312 Z"
+          fill="none" stroke="#E4FDFF" stroke-opacity="0.9" stroke-width="3"
+          stroke-linejoin="round"/>
+    <path d="M256 280 L256 330" stroke="#08456F" stroke-opacity="0.5" stroke-width="7"/>
+    <path d="M194 297 L220 290" stroke="#FFFFFF" stroke-opacity="0.95" stroke-width="7"
+          stroke-linecap="round"/>
+
+    <!-- MŨ BẢO HỘ (đỉnh cong tại y≈138) -->
+    <path d="M146 232 C146 106, 366 106, 366 232 Z" fill="url(#helmet)"/>
+    <!-- Gân mũ -->
+    <path d="M192 226 C192 154, 320 154, 320 226" fill="none" stroke="#AF5B04"
+          stroke-opacity="0.30" stroke-width="5"/>
+    <!-- Viền sáng: đúng nửa trái của đường cong đỉnh mũ -->
+    <path d="M146 232 C146 169, 201 138, 256 138" fill="none" stroke="#FFF2C8"
+          stroke-opacity="0.7" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- VÀNH MŨ: võng xuống ở giữa vì nhô về phía trước -->
+    <path d="M138 230 Q256 268 374 230 L374 256 Q256 294 138 256 Z" fill="url(#brimGrad)"/>
+    <path d="M138 230 Q256 268 374 230" fill="none" stroke="#FFE0A0" stroke-opacity="0.55"
+          stroke-width="3.5"/>
+
+    <!-- TIA SÉT -->
+    <g filter="url(#soft)" opacity="0.95">
+      <path d="M272 152 L230 200 L253 200 L244 230 L288 186 L263 186 Z" fill="#7FF0FF"/>
+    </g>
+    <path d="M272 152 L230 200 L253 200 L244 230 L288 186 L263 186 Z" fill="url(#boltGrad)"/>
+    <path d="M272 152 L230 200 L253 200 L244 230 L288 186 L263 186 Z" fill="none"
+          stroke="#EAFEFF" stroke-opacity="0.75" stroke-width="2.5" stroke-linejoin="round"/>
+  </g>
+</svg>
