@@ -73,41 +73,31 @@ export default function Dashboard({
           <div style={{ fontSize: 17, fontWeight: 700 }}>
             👋 Chào mừng bạn đến với sổ ôn thi <span className="ja">電験三種</span>
           </div>
-          <div className="small muted" style={{ marginTop: 5 }}>
+          <div className="small muted" style={{ marginTop: 5, maxWidth: 640 }}>
             App đã có sẵn đầy đủ <strong>{view.total} bài</strong> của cả bốn môn,
-            kèm link tới denken-ou.com và độ khó từng bài. Chọn cách bắt đầu:
+            kèm link tới denken-ou.com và độ khó từng bài. Cứ làm bài, app sẽ tự
+            xếp lịch ôn lại đúng lúc bạn sắp quên.
           </div>
 
-          <div className="grid cols-2" style={{ marginTop: 14 }}>
-            <div className="card tight" style={{ background: "var(--surface-2)" }}>
-              <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                🌱 Mới bắt đầu học
-              </div>
-              <div className="small muted" style={{ marginBottom: 12 }}>
-                Bắt đầu từ con số không. App sẽ tự xếp lịch ôn cho từng bài bạn làm.
-              </div>
-              <button className="btn primary block" onClick={onStartReview}>
-                Học bài đầu tiên →
-              </button>
-            </div>
-
-            <div className="card tight" style={{ background: "var(--surface-2)" }}>
-              <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                📥 Đã có file Excel theo dõi
-              </div>
-              <div className="small muted" style={{ marginBottom: 12 }}>
-                Nhập vào để giữ nguyên ghi chú, link tham khảo và lịch ôn đang có.
-              </div>
-              <button
-                className="btn block"
+          <div className="row wrap" style={{ gap: 14, marginTop: 16 }}>
+            <button className="btn primary lg" onClick={onStartReview}>
+              Học bài đầu tiên →
+            </button>
+            {/* Lối nhập Excel để nhỏ: chỉ người chuyển từ file theo dõi cũ mới cần. */}
+            <span className="small dim">
+              Đã có file Excel theo dõi từ trước?{" "}
+              <span
+                className="link"
+                role="button"
+                tabIndex={0}
                 onClick={async () => {
                   const result = await window.denken.importXlsx();
                   if (result.ok && result.data) store.replaceAll(result.data);
                 }}
               >
-                Chọn file Excel
-              </button>
-            </div>
+                Nhập vào đây
+              </span>
+            </span>
           </div>
         </div>
       )}

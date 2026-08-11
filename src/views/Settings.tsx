@@ -153,9 +153,26 @@ export default function Settings({
           </button>
         </div>
 
-        <div className="btn-row" style={{ marginTop: 10 }}>
+        <div
+          className="row wrap"
+          style={{
+            gap: 10,
+            marginTop: 16,
+            paddingTop: 14,
+            borderTop: "1px solid var(--divider)",
+          }}
+        >
+          <div style={{ flex: 1, minWidth: 260 }}>
+            <div className="small" style={{ fontWeight: 600 }}>
+              Chuyển dữ liệu từ file Excel
+            </div>
+            <div className="field-hint">
+              Chỉ dùng một lần, cho ai trước đây theo dõi tiến độ bằng file Excel
+              “Bài tập điện hạng 3”. Ghi đè tiến độ hiện có của các bài trùng.
+            </div>
+          </div>
           <button
-            className="btn primary"
+            className="btn sm"
             onClick={async () => {
               await store.flush();
               const result = await window.denken.importXlsx();
@@ -180,8 +197,19 @@ export default function Settings({
           >
             📥 Nhập từ file Excel
           </button>
+        </div>
+
+        <div className="row wrap" style={{ gap: 10, marginTop: 12 }}>
+          <div style={{ flex: 1, minWidth: 260 }}>
+            <div className="small" style={{ fontWeight: 600 }}>
+              Khôi phục sau sự cố
+            </div>
+            <div className="field-hint">
+              Lấy lại toàn bộ dữ liệu từ một bản sao lưu. Thay thế tiến độ hiện tại.
+            </div>
+          </div>
           <button
-            className="btn danger"
+            className="btn danger sm"
             onClick={async () => {
               await store.flush();
               const result = await window.denken.importJson();
