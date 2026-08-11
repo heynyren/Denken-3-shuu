@@ -19,13 +19,15 @@ import {
   formatExamClock,
   gradePaper,
   questionsToAnswer,
+  subAnswerCount,
+  SUB_LABELS,
 } from "../lib/exam";
-import type { ExamPaper, SubjectScore } from "../lib/exam";
+import type { AnswerKey, ExamPaper, Picks, SubjectScore } from "../lib/exam";
 import { isPartB } from "../lib/timing";
 import type { SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
 
-const ANSWERS = (answersFile as { answers: Record<string, number> }).answers;
+const ANSWERS = (answersFile as { answers: AnswerKey }).answers;
 
 type Stage = "setup" | "running" | "result";
 
@@ -39,8 +41,8 @@ export default function Exam({ store }: { store: Store }) {
   const [exam, setExam] = useState(examSets[0]?.exam ?? "");
   const [chosen, setChosen] = useState<SubjectKey[]>(["riron"]);
 
-  // Bài làm: id bài -> lựa chọn 1..5
-  const [picks, setPicks] = useState<Record<string, number>>({});
+  // Bài làm: id bài -> lựa chọn từng ý. A問題 một ý, B問題 hai ý (a) và (b).
+  const [picks, setPicks] = useState<Picks>({});
   // 理論/機械 chỉ được làm một trong 問17 hoặc 問18
   const [choice, setChoice] = useState<Partial<Record<SubjectKey, number>>>({});
   const [scores, setScores] = useState<SubjectScore[]>([]);
@@ -58,11 +60,19 @@ export default function Exam({ store }: { store: Store }) {
     [set, chosen],
   );
 
-  /** Bao nhiêu câu của đề đang chọn đã có đáp án để chấm. */
+  /** Bao nhiêu Ý của đề đang chọn đã có đáp án — đếm theo ý vì B問題 có hai ý. */
   const coverage = useMemo(() => {
-    const all = papers.flatMap((paper) => paper.questions);
-    const graded = all.filter((item) => ANSWERS[item.id] !== undefined);
-    return { total: all.length, graded: graded.length };
+    let total = 0;
+    let graded = 0;
+    for (const paper of papers) {
+      for (const item of paper.questions) {
+        const subs = subAnswerCount(item);
+        total += subs;
+        const truth = ANSWERS[item.id] ?? [];
+        for (let i = 0; i < subs; i += 1) if (truth[i] !== undefined) graded += 1;
+      }
+    }
+    return { total, graded };
   }, [papers]);
 
   /* ---------------- đồng hồ ---------------- */
@@ -227,7 +237,7 @@ export default function Exam({ store }: { store: Store }) {
               ) : (
                 <>
                   Mới có đáp án cho <strong>{coverage.graded}/{coverage.total}</strong>{" "}
-                  câu. Điểm sẽ được quy về thang 100 trên phần chấm được, số câu còn
+                  ý (B問題 mỗi câu 2 ý). Điểm sẽ được quy về thang 100 trên phần chấm được, số câu còn
                   lại không tính là sai.
                 </>
               )}
@@ -252,10 +262,18 @@ export default function Exam({ store }: { store: Store }) {
   /* ================= đang làm bài ================= */
 
   if (stage === "running") {
-    const answered = Object.keys(picks).length;
+    // Đếm theo ý: một câu B問題 trả lời được (a) mà bỏ (b) thì mới xong một nửa.
+    const answered = Object.values(picks).reduce(
+      (sum, list) => sum + list.filter((value) => value !== undefined).length,
+      0,
+    );
     const need = papers.reduce(
       (sum, paper) =>
-        sum + questionsToAnswer(paper, choice[paper.subject] ?? null).length,
+        sum +
+        questionsToAnswer(paper, choice[paper.subject] ?? null).reduce(
+          (inner, item) => inner + subAnswerCount(item),
+          0,
+        ),
       0,
     );
 
@@ -275,7 +293,7 @@ export default function Exam({ store }: { store: Store }) {
               {exam} — {papers.map((p) => subjectName(p.subject)).join(" · ")}
             </div>
             <div className="small muted">
-              Đã trả lời {answered}/{need} câu
+              Đã trả lời {answered}/{need} ý
               {left <= 300 && " · sắp hết giờ!"}
             </div>
           </div>
@@ -292,7 +310,13 @@ export default function Exam({ store }: { store: Store }) {
             key={paper.subject}
             paper={paper}
             picks={picks}
-            onPick={(id, value) => setPicks((c) => ({ ...c, [id]: value }))}
+            onPick={(id, index, value) =>
+              setPicks((current) => {
+                const list = [...(current[id] ?? [])];
+                list[index] = value;
+                return { ...current, [id]: list };
+              })
+            }
             choice={choice[paper.subject] ?? null}
             onChoice={(value) =>
               setChoice((c) => ({ ...c, [paper.subject]: value }))
@@ -350,8 +374,8 @@ function PaperSheet({
   onChoice,
 }: {
   paper: ExamPaper;
-  picks: Record<string, number>;
-  onPick(id: string, value: number): void;
+  picks: Picks;
+  onPick(id: string, index: number, value: number): void;
   choice: number | null;
   onChoice(value: number): void;
 }) {
@@ -412,17 +436,25 @@ function PaperSheet({
               {off ? (
                 <div className="small dim">Không làm câu này</div>
               ) : (
-                <div className="exam-choices">
-                  {[1, 2, 3, 4, 5].map((value) => (
-                    <button
-                      key={value}
-                      className={`exam-choice${picks[item.id] === value ? " on" : ""}`}
-                      onClick={() => onPick(item.id, value)}
-                    >
-                      {value}
-                    </button>
-                  ))}
-                </div>
+                // B問題 hai ý, mỗi ý một hàng lựa chọn riêng.
+                Array.from({ length: subAnswerCount(item) }, (_, index) => (
+                  <div className="exam-choices" key={index}>
+                    {subAnswerCount(item) > 1 && (
+                      <span className="exam-sub-label">{SUB_LABELS[index]}</span>
+                    )}
+                    {[1, 2, 3, 4, 5].map((value) => (
+                      <button
+                        key={value}
+                        className={`exam-choice${
+                          picks[item.id]?.[index] === value ? " on" : ""
+                        }`}
+                        onClick={() => onPick(item.id, index, value)}
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                ))
               )}
             </div>
           );
@@ -448,7 +480,7 @@ function ExamResult({
   exam: string;
   scores: SubjectScore[];
   papers: ExamPaper[];
-  picks: Record<string, number>;
+  picks: Picks;
   choice: Partial<Record<SubjectKey, number>>;
   onAgain(): void;
   onSave(): void;
@@ -499,11 +531,13 @@ function ExamResult({
             <div className="small muted" style={{ marginTop: 8, lineHeight: 1.8 }}>
               ✅ Đúng {score.correct} · ❌ Sai {score.wrong}
               {score.blank > 0 && ` · ⬜ Bỏ trống ${score.blank}`}
+              <br />
+              <span className="dim">tính theo ý — B問題 mỗi câu 2 ý</span>
               {score.ungraded > 0 && (
                 <>
                   <br />
                   <span className="dim">
-                    {score.ungraded} câu chưa có đáp án, không tính điểm
+                    {score.ungraded} ý chưa có đáp án, không tính điểm
                   </span>
                 </>
               )}
@@ -523,45 +557,53 @@ function ExamResult({
               </div>
             </div>
             <div className="exam-review">
-              {list.map((item) => {
-                const truth = ANSWERS[item.id];
-                const pick = picks[item.id];
-                const state =
-                  truth === undefined
-                    ? "unknown"
-                    : pick === undefined
-                      ? "blank"
-                      : pick === truth
-                        ? "right"
-                        : "wrong";
-                return (
-                  <div className={`exam-review-q ${state}`} key={item.id}>
-                    <span className="mono">{item.question}</span>
-                    <span className="exam-review-mark">
-                      {state === "right"
-                        ? "✅"
-                        : state === "wrong"
-                          ? "❌"
-                          : state === "blank"
-                            ? "⬜"
-                            : "－"}
-                    </span>
-                    <span className="small dim">
-                      {state === "unknown"
-                        ? "chưa có đáp án"
-                        : `bạn chọn ${pick ?? "—"} · đúng là ${truth}`}
-                    </span>
-                    <span className="spacer" />
-                    <button
-                      className="icon-btn"
-                      title="Mở lời giải trên denken-ou.com"
-                      onClick={() => openLink(item.url)}
+              {list.flatMap((item) =>
+                Array.from({ length: subAnswerCount(item) }, (_, index) => {
+                  const truth = (ANSWERS[item.id] ?? [])[index];
+                  const pick = picks[item.id]?.[index];
+                  const state =
+                    truth === undefined
+                      ? "unknown"
+                      : pick === undefined
+                        ? "blank"
+                        : pick === truth
+                          ? "right"
+                          : "wrong";
+                  return (
+                    <div
+                      className={`exam-review-q ${state}`}
+                      key={`${item.id}-${index}`}
                     >
-                      ↗
-                    </button>
-                  </div>
-                );
-              })}
+                      <span className="mono">
+                        {item.question}
+                        {subAnswerCount(item) > 1 && ` ${SUB_LABELS[index]}`}
+                      </span>
+                      <span className="exam-review-mark">
+                        {state === "right"
+                          ? "✅"
+                          : state === "wrong"
+                            ? "❌"
+                            : state === "blank"
+                              ? "⬜"
+                              : "－"}
+                      </span>
+                      <span className="small dim">
+                        {state === "unknown"
+                          ? "chưa có đáp án"
+                          : `bạn chọn ${pick ?? "—"} · đúng là ${truth}`}
+                      </span>
+                      <span className="spacer" />
+                      <button
+                        className="icon-btn"
+                        title="Mở lời giải trên denken-ou.com"
+                        onClick={() => openLink(item.url)}
+                      >
+                        ↗
+                      </button>
+                    </div>
+                  );
+                }),
+              )}
             </div>
           </div>
         );

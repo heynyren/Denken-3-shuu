@@ -1709,3 +1709,16 @@ select {
   background: var(--surface-2);
   flex-wrap: wrap;
 }
+
+/* Nhãn (a)/(b) cho hai ý của B問題 */
+.exam-choices + .exam-choices {
+  margin-top: 6px;
+}
+.exam-sub-label {
+  min-width: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--amber);
+  display: flex;
+  align-items: center;
+}

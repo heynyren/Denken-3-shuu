@@ -4,8 +4,12 @@ Dựng src/data/answers.json — bảng đáp án cho chức năng thi thử.
 
 Nhận vào một trong hai nguồn:
 
-  CSV    scripts/mau-dap-an.csv đã điền cột `dap_an` (1..5)
-  Excel  file Excel có thêm cột "Đáp án" trong các sheet môn học
+  CSV    file có cột `dap_an_1` (và `dap_an_2` cho B問題), giá trị 1..5
+  Excel  file Excel có thêm cột "Đáp án (a)" và "Đáp án (b)"
+
+A問題 chỉ có một ý -> chỉ điền `dap_an_1`.
+B問題 có hai ý (a) và (b) -> điền cả `dap_an_1` và `dap_an_2`.
+Đáp án của mỗi câu vì thế là một mảng 1 hoặc 2 phần tử.
 
 Chạy:
     python3 scripts/build-answers.py scripts/mau-dap-an.csv
@@ -28,8 +32,9 @@ ROOT = Path(__file__).resolve().parent.parent
 CATALOG = ROOT / "src" / "data" / "catalog.json"
 TARGET = ROOT / "src" / "data" / "answers.json"
 
-# Cột "Đáp án" nếu bạn thêm vào file Excel (đánh số từ 0)
-COL_ANSWER = 12
+# Hai cột đáp án nếu bạn thêm vào file Excel (đánh số từ 0)
+COL_ANSWER_A = 12   # ý (a), hoặc đáp án duy nhất của A問題
+COL_ANSWER_B = 13   # ý (b), chỉ B問題 mới có
 
 
 def valid_ids() -> set[str]:
@@ -53,24 +58,42 @@ def parse_choice(raw) -> int | None:
     return int(match.group()) if match else None
 
 
-def from_csv(path: Path, allowed: set[str]) -> tuple[dict[str, int], Counter]:
-    answers: dict[str, int] = {}
+def collect(first, second, item_id: str, allowed: set[str],
+            answers: dict[str, list[int]], problems: Counter) -> None:
+    """Ghép hai ý thành mảng đáp án của một câu."""
+    a = parse_choice(first)
+    b = parse_choice(second)
+    if a is None and b is None:
+        return
+    if item_id not in allowed:
+        problems["id không có trong danh mục"] += 1
+        return
+    if a is None:
+        # Có ý (b) mà thiếu ý (a) thì câu này chấm được một nửa, vẫn giữ lại
+        # nhưng phải báo để người điền biết mà bổ sung.
+        problems["thiếu ý (a) dù đã có ý (b)"] += 1
+        return
+    answers[item_id] = [a] if b is None else [a, b]
+
+
+def from_csv(path: Path, allowed: set[str]) -> tuple[dict[str, list[int]], Counter]:
+    answers: dict[str, list[int]] = {}
     problems: Counter = Counter()
 
     with path.open(encoding="utf-8-sig", newline="") as handle:
         for row in csv.DictReader(handle):
-            item_id = (row.get("id") or "").strip()
-            choice = parse_choice(row.get("dap_an"))
-            if choice is None:
-                continue
-            if item_id not in allowed:
-                problems["id không có trong danh mục"] += 1
-                continue
-            answers[item_id] = choice
+            collect(
+                row.get("dap_an_1") or row.get("dap_an"),
+                row.get("dap_an_2"),
+                (row.get("id") or "").strip(),
+                allowed,
+                answers,
+                problems,
+            )
     return answers, problems
 
 
-def from_excel(path: Path, allowed: set[str]) -> tuple[dict[str, int], Counter]:
+def from_excel(path: Path, allowed: set[str]) -> tuple[dict[str, list[int]], Counter]:
     import openpyxl
 
     # Sinh id y hệt cách convert-excel.py làm: lấy từ link bài, thêm hậu tố ~2
@@ -83,7 +106,7 @@ def from_excel(path: Path, allowed: set[str]) -> tuple[dict[str, int], Counter]:
     ]
 
     workbook = openpyxl.load_workbook(path, data_only=True)
-    answers: dict[str, int] = {}
+    answers: dict[str, list[int]] = {}
     problems: Counter = Counter()
 
     for key, sheet_name in subjects:
@@ -101,13 +124,14 @@ def from_excel(path: Path, allowed: set[str]) -> tuple[dict[str, int], Counter]:
             seen[base] += 1
             item_id = base if seen[base] == 1 else f"{base}~{seen[base]}"
 
-            choice = parse_choice(row[COL_ANSWER] if len(row) > COL_ANSWER else None)
-            if choice is None:
-                continue
-            if item_id not in allowed:
-                problems["id không có trong danh mục"] += 1
-                continue
-            answers[item_id] = choice
+            collect(
+                row[COL_ANSWER_A] if len(row) > COL_ANSWER_A else None,
+                row[COL_ANSWER_B] if len(row) > COL_ANSWER_B else None,
+                item_id,
+                allowed,
+                answers,
+                problems,
+            )
 
     return answers, problems
 
@@ -131,7 +155,8 @@ def main() -> None:
                 "version": 1,
                 "note": (
                     "Bảng đáp án cho chức năng thi thử. Khoá là id bài (giống "
-                    "catalog.json), giá trị là số lựa chọn đúng từ 1 đến 5. "
+                    "catalog.json), giá trị là MẢNG đáp án theo từng ý: A問題 "
+                    "một phần tử, B問題 hai phần tử cho ý (a) và (b). "
                     "Câu nào chưa có ở đây thì bài thi bỏ qua không chấm, và điểm "
                     "được quy về thang 100 trên phần chấm được. "
                     f"Sinh từ {source.name} bằng scripts/build-answers.py."
@@ -151,7 +176,11 @@ def main() -> None:
         if item["id"] in answers:
             per_exam[item["exam"]] += 1
 
-    print(f"answers.json : {len(answers)} / {len(with_exam)} câu có đáp án")
+    subs = sum(len(v) for v in answers.values())
+    print(f"answers.json : {len(answers)} câu ({subs} ý) có đáp án"
+          f" trên tổng {len(with_exam)} câu")
+    two = sum(1 for v in answers.values() if len(v) == 2)
+    print(f"   trong đó {two} câu có đủ 2 ý (B問題)")
     if problems:
         print("   bỏ qua:", dict(problems))
     if per_exam:

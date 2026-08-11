@@ -118,14 +118,32 @@ Câu nào chưa có đáp án thì bài thi vẫn cho làm và vẫn bấm giờ
 câu đó; điểm được quy về thang 100 trên phần chấm được, **không** coi câu thiếu
 đáp án là sai.
 
+**A問題 một ý, B問題 hai ý.** Đề thật hỏi (a) và (b) riêng, mỗi ý một đáp án và
+chấm điểm riêng — đúng một ý vẫn được nửa số điểm của câu đó. Vì vậy đáp án của
+mỗi câu là một mảng 1 hoặc 2 phần tử:
+
+```jsonc
+"riron:rironr3-1":  [4],      // A問題 — một đáp án
+"riron:rironr3-15": [3, 5]    // B問題 — ý (a) là 3, ý (b) là 5
+```
+
+Trong file CSV, cột `so_y` cho biết câu đó cần mấy đáp án:
+
+| so_y | điền gì |
+|---|---|
+| `1` | chỉ `dap_an_1` |
+| `2` | cả `dap_an_1` (ý a) và `dap_an_2` (ý b) |
+
+Chấp nhận `3`, `(3)` hoặc `③`.
+
 ```bash
-python3 scripts/bao-cao-thieu.py            # còn thiếu câu nào, kỳ nào
+python3 scripts/bao-cao-thieu.py            # còn thiếu gì, kỳ nào (đếm theo ý)
 python3 scripts/bao-cao-thieu.py --chi-tiet # liệt kê từng câu kèm link
 python3 scripts/bao-cao-thieu.py --csv      # xuất CSV để điền
 python3 scripts/build-answers.py scripts/con-thieu.csv   # nạp vào answers.json
 ```
 
-Cũng có thể thêm cột "Đáp án" vào file Excel rồi chạy
+Cũng có thể thêm hai cột "Đáp án (a)" và "Đáp án (b)" vào file Excel rồi chạy
 `python3 scripts/build-answers.py scripts/source.xlsx`.
 
 ## Chu kỳ ôn tập

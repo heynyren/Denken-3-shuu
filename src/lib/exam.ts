@@ -18,6 +18,17 @@ import { items } from "./catalog";
 import { isPartB } from "./timing";
 import type { CatalogItem, SubjectKey } from "./types";
 
+/**
+ * Số ý của một câu. A問題 một ý, B問題 hai ý — đề thật hỏi (a) và (b) riêng,
+ * mỗi ý một đáp án và tính điểm riêng, nên đúng một ý vẫn được nửa số điểm.
+ */
+export function subAnswerCount(item: CatalogItem): number {
+  return isPartB(item) ? 2 : 1;
+}
+
+/** Nhãn của từng ý: A問題 không có nhãn, B問題 là (a) và (b). */
+export const SUB_LABELS = ["(a)", "(b)"] as const;
+
 /** Số phút cho mỗi môn. */
 export const EXAM_MINUTES: Record<SubjectKey, number> = {
   riron: 90,
@@ -159,13 +170,19 @@ export interface SubjectScore {
   passed: boolean;
 }
 
+/**
+ * Lựa chọn của người thi và đáp án đúng đều là mảng theo từng ý:
+ * A問題 một phần tử, B問題 hai phần tử.
+ */
+export type Picks = Record<string, (number | undefined)[]>;
+export type AnswerKey = Record<string, number[]>;
+
 export interface GradeInput {
   paper: ExamPaper;
   choice: number | null;
-  /** id bài -> lựa chọn 1..5 của người thi. */
-  picks: Record<string, number>;
-  /** id bài -> đáp án đúng 1..5. Thiếu id nào thì câu đó không chấm được. */
-  answers: Record<string, number>;
+  picks: Picks;
+  /** Thiếu id nào, hoặc thiếu ý nào, thì phần đó không chấm được. */
+  answers: AnswerKey;
 }
 
 export function gradePaper({
@@ -186,20 +203,27 @@ export function gradePaper({
   let gradablePoints = 0;
 
   for (const item of questions) {
-    const truth = answers[item.id];
-    if (truth === undefined) {
-      ungraded += 1;
-      continue;
-    }
-    const points = pointsFor(item, paper);
-    gradablePoints += points;
+    const subs = subAnswerCount(item);
+    const truth = answers[item.id] ?? [];
+    // Điểm cả câu chia đều cho từng ý: B問題 10 điểm thì mỗi ý 5 điểm, nên
+    // đúng một ý vẫn được nửa số điểm, giống cách chấm của đề thật.
+    const perSub = pointsFor(item, paper) / subs;
 
-    const pick = picks[item.id];
-    if (pick === undefined) blank += 1;
-    else if (pick === truth) {
-      correct += 1;
-      score += points;
-    } else wrong += 1;
+    for (let index = 0; index < subs; index += 1) {
+      const answer = truth[index];
+      if (answer === undefined) {
+        ungraded += 1;
+        continue;
+      }
+      gradablePoints += perSub;
+
+      const pick = picks[item.id]?.[index];
+      if (pick === undefined) blank += 1;
+      else if (pick === answer) {
+        correct += 1;
+        score += perSub;
+      } else wrong += 1;
+    }
   }
 
   const scaled = gradablePoints > 0 ? (score / gradablePoints) * 100 : 0;
@@ -210,7 +234,8 @@ export function gradePaper({
     wrong,
     blank,
     ungraded,
-    total: questions.length,
+    // Đếm theo ý chứ không theo câu, vì B問題 hai ý chấm riêng từng ý.
+    total: questions.reduce((sum, item) => sum + subAnswerCount(item), 0),
     passed: gradablePoints > 0 && scaled >= PASS_MARK,
   };
 }
