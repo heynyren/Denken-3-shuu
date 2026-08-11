@@ -1531,3 +1531,181 @@ select {
   border-radius: 999px;
   padding: 2px 6px;
 }
+
+/* ==========================================================================
+   Thi thử
+   ========================================================================== */
+
+.exam-subjects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+.exam-subject {
+  background: var(--surface-2);
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  padding: 14px 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.12s;
+}
+.exam-subject:hover:not(:disabled) {
+  background: var(--surface-3);
+}
+.exam-subject.on {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+.exam-subject:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.exam-subject-name {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+/* Thanh đồng hồ dính trên đầu khi đang làm bài */
+.exam-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 12px 16px;
+}
+.exam-clock {
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.exam-questions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.exam-q {
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+/* Câu bị bỏ vì đã chọn câu kia trong cặp 問17/問18 */
+.exam-q.off {
+  opacity: 0.4;
+}
+.exam-q-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.exam-q-no {
+  font-weight: 800;
+  font-size: 13px;
+  min-width: 46px;
+  color: var(--text-2);
+}
+.exam-q-no.partb {
+  color: var(--amber);
+}
+.exam-q-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.exam-choices {
+  display: flex;
+  gap: 8px;
+}
+.exam-choice {
+  width: 46px;
+  height: 38px;
+  border: 1px solid var(--divider);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text-2);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+.exam-choice:hover {
+  border-color: var(--blue);
+  color: var(--text);
+}
+.exam-choice.on {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+/* Kết luận đạt / chưa đạt */
+.exam-verdict {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.exam-verdict.pass {
+  background: linear-gradient(135deg, #1b3324 0%, var(--surface) 60%);
+}
+.exam-verdict.fail {
+  background: linear-gradient(135deg, #33201f 0%, var(--surface) 60%);
+}
+.exam-verdict-icon {
+  font-size: 46px;
+}
+.exam-verdict-title {
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.exam-review {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.exam-review-q {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: var(--radius);
+  font-size: 13px;
+}
+.exam-review-q.right {
+  background: var(--green-soft);
+}
+.exam-review-q.wrong {
+  background: var(--red-soft);
+}
+.exam-review-q.blank {
+  background: var(--surface-2);
+}
+.exam-review-q.unknown {
+  background: transparent;
+  opacity: 0.55;
+}
+.exam-review-mark {
+  min-width: 22px;
+}
+
+.exam-history-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  flex-wrap: wrap;
+}

@@ -76,9 +76,6 @@ export default function About({ onClose }: { onClose(): void }) {
         </div>
 
         <div className="modal-foot">
-          <ExternalLink url="https://github.com/heynyren/Denken-3-shuu">
-            <span className="btn sm">🐙 Mã nguồn trên GitHub</span>
-          </ExternalLink>
           <span className="spacer" />
           <button className="btn primary sm" onClick={onClose}>
             Đóng

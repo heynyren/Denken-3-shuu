@@ -1,0 +1,5 @@
+{
+ "version": 1,
+ "note": "Bảng đáp án cho chức năng thi thử. Khoá là id bài (giống catalog.json), giá trị là số lựa chọn đúng từ 1 đến 5. Câu nào chưa có ở đây thì bài thi bỏ qua không chấm, và điểm được quy về thang 100 trên phần chấm được. Điền bằng scripts/build-answers.py — xem scripts/bao-cao-thieu.py để biết còn thiếu câu nào.",
+ "answers": {}
+}

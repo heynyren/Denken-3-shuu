@@ -15,6 +15,7 @@ import { computeOverview } from "../lib/stats";
 import type {
   AppData,
   Attachment,
+  ExamResult,
   ItemProgress,
   ItemStatus,
   LinkEntry,
@@ -53,6 +54,8 @@ export interface Store {
   snooze(id: string, days: number): void;
 
   updateSettings(patch: Partial<Settings>): void;
+  saveExamResult(result: ExamResult): void;
+  removeExamResult(id: string): void;
 
   reload(): Promise<void>;
   replaceAll(data: AppData): void;
@@ -373,6 +376,25 @@ export function useStore(): Store {
     [update],
   );
 
+  const saveExamResult = useCallback(
+    (result: ExamResult) =>
+      // Giữ 100 lần gần nhất là đủ vẽ tiến bộ mà không phình file.
+      update((current) => ({
+        ...current,
+        examResults: [...current.examResults, result].slice(-100),
+      })),
+    [update],
+  );
+
+  const removeExamResult = useCallback(
+    (id: string) =>
+      update((current) => ({
+        ...current,
+        examResults: current.examResults.filter((entry) => entry.id !== id),
+      })),
+    [update],
+  );
+
   const replaceAll = useCallback(
     (incoming: AppData) => {
       setData(incoming);
@@ -404,6 +426,8 @@ export function useStore(): Store {
     resetItem,
     snooze,
     updateSettings,
+    saveExamResult,
+    removeExamResult,
     reload,
     replaceAll,
     flush,

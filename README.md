@@ -19,6 +19,7 @@ Danh mục **1608 bài** trên denken-ou.com, chia bốn môn:
 - **Danh sách bài** — cả 1608 bài, lọc theo môn / chủ đề / trạng thái / độ khó, tìm trong tên bài lẫn trong ghi chú.
 - **Ghi chú** — mỗi bài nhiều ghi chú, mỗi ghi chú đính kèm được ảnh/PDF/Word. Ảnh hiện ngay trong app; chụp màn hình rồi `Ctrl+V` thẳng vào ô ghi chú.
 - **Link tham khảo** — mỗi bài nhiều link, mỗi link có nút mở ngay bên cạnh.
+- **Thi thử** — làm nguyên một kỳ thi thật, 24 kỳ từ H18 tới R07下. Bấm giờ 90 phút (理論/電力/機械) và 65 phút (法規), 理論/機械 chỉ được chọn một trong 問17 hoặc 問18. Chấm điểm thang 100, mốc đạt 60, kèm bảng đối chiếu từng câu.
 - **Huy hiệu** — giữ kín tới khi bạn chạm mốc, lúc đó mới nhảy lên chúc mừng.
 - Xuất ra Excel, JSON, hoặc gói `.zip` đầy đủ bất cứ lúc nào.
 
@@ -108,6 +109,25 @@ npm run convert      # sinh catalog.json + seed.json
 npm run pack:win
 ```
 
+## Bảng đáp án cho thi thử
+
+Chức năng thi thử cần biết đáp án đúng của từng câu. Đáp án là dữ liệu chung cho
+mọi người dùng nên nằm ở `src/data/answers.json`, đi kèm code.
+
+Câu nào chưa có đáp án thì bài thi vẫn cho làm và vẫn bấm giờ, chỉ là không chấm
+câu đó; điểm được quy về thang 100 trên phần chấm được, **không** coi câu thiếu
+đáp án là sai.
+
+```bash
+python3 scripts/bao-cao-thieu.py            # còn thiếu câu nào, kỳ nào
+python3 scripts/bao-cao-thieu.py --chi-tiet # liệt kê từng câu kèm link
+python3 scripts/bao-cao-thieu.py --csv      # xuất CSV để điền
+python3 scripts/build-answers.py scripts/con-thieu.csv   # nạp vào answers.json
+```
+
+Cũng có thể thêm cột "Đáp án" vào file Excel rồi chạy
+`python3 scripts/build-answers.py scripts/source.xlsx`.
+
 ## Chu kỳ ôn tập
 
 Giữ đúng chu kỳ trong file Excel gốc. Làm đúng thì lên một cấp, làm sai thì về cấp 1:
@@ -130,10 +150,12 @@ electron/          tiến trình chính — giữ file, gác cổng IPC
 src/
   lib/             kiểu dữ liệu, chu kỳ ôn, thống kê, huy hiệu
   state/           tầng trạng thái, tự lưu sau 600ms
-  views/           4 màn hình
+  views/           5 màn hình
   data/catalog.json  danh mục 1608 bài
 scripts/
   convert-excel.py Excel → catalog.json + seed.json
+  build-answers.py CSV/Excel → answers.json (đáp án thi thử)
+  bao-cao-thieu.py báo cáo câu thiếu và đáp án thiếu
 docs/
   SAO-LUU-VA-DONG-BO.md  phương án sao lưu và đồng bộ Android
 ```

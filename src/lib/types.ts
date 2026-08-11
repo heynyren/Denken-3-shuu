@@ -132,6 +132,24 @@ export interface Settings {
   backupsToKeep: number;
 }
 
+/** Điểm một môn trong một lần thi thử. */
+export interface ExamSubjectScore {
+  subject: SubjectKey;
+  score: number;
+  correct: number;
+  total: number;
+  passed: boolean;
+}
+
+/** Một lần thi thử đã lưu. */
+export interface ExamResult {
+  id: string;
+  /** Kỳ thi, ví dụ "R07下". */
+  exam: string;
+  takenAt: string;
+  scores: ExamSubjectScore[];
+}
+
 export interface AppData {
   schemaVersion: number;
   createdAt: string;
@@ -141,6 +159,7 @@ export interface AppData {
   dailyLog: Record<string, DayLog>;
   /** id huy hiệu -> ngày đạt được (YYYY-MM-DD). */
   badges: Record<string, string>;
+  examResults: ExamResult[];
 }
 
 /** Kết quả sau một lần nhập từ Excel, để báo lại cho người dùng. */

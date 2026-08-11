@@ -36,7 +36,8 @@ import type {
 // v2 bỏ phần từ vựng/Quizlet.
 // v3 đổi một ghi chú/một link thành danh sách nhiều ghi chú và nhiều link,
 //    mỗi ghi chú kèm được file. Dữ liệu cũ được chuyển đổi tự động khi nạp.
-export const SCHEMA_VERSION = 3;
+// v4 thêm lịch sử thi thử.
+export const SCHEMA_VERSION = 4;
 
 const DEFAULT_SETTINGS: Settings = {
   dailyGoal: 30,
@@ -191,6 +192,7 @@ function buildFromSeed(): AppData {
     progress,
     dailyLog: {},
     badges: {},
+    examResults: [],
   };
 }
 
@@ -244,6 +246,7 @@ function normalise(input: unknown): AppData {
     progress: Object.keys(progress).length > 0 ? progress : base.progress,
     dailyLog,
     badges: raw.badges ?? {},
+    examResults: Array.isArray(raw.examResults) ? raw.examResults : [],
   };
 }
 
