@@ -54,12 +54,47 @@ export interface ReviewEvent {
   level: number;
 }
 
+export type AttachmentKind = "image" | "pdf" | "docx" | "other";
+
+/**
+ * File đính kèm một ghi chú.
+ *
+ * Chỉ phần mô tả nằm trong data.json; nội dung file nằm riêng ở thư mục
+ * `attachments/`. Nhồi cả file vào JSON sẽ khiến mỗi lần gõ một chữ trong ghi
+ * chú là phải ghi lại vài chục MB xuống đĩa.
+ */
+export interface Attachment {
+  id: string;
+  /** Tên gốc, hiện cho người dùng thấy. */
+  name: string;
+  /** Tên file trong thư mục attachments/ — luôn là tên trơn, không có đường dẫn. */
+  file: string;
+  kind: AttachmentKind;
+  size: number;
+  addedAt: string;
+}
+
+/** Một ghi chú. Mỗi bài có thể có nhiều ghi chú, mỗi ghi chú kèm nhiều file. */
+export interface NoteEntry {
+  id: string;
+  text: string;
+  createdAt: string;
+  attachments: Attachment[];
+}
+
+/** Một link tham khảo riêng của người dùng (Gemini, YouTube, blog…). */
+export interface LinkEntry {
+  id: string;
+  url: string;
+  /** Tên tự đặt cho dễ nhớ; để trống thì hiện chính đường link. */
+  label: string;
+}
+
 /** Tiến độ của một bài. Đây là dữ liệu của người dùng. */
 export interface ItemProgress {
   status: ItemStatus;
-  note: string;
-  /** Link tham khảo riêng của từng người (Gemini, ghi chú, video…). */
-  refLink: string;
+  notes: NoteEntry[];
+  links: LinkEntry[];
   doneDate: string | null;
   /** 0 = chưa vào chu kỳ ôn; 1..6 ứng với 1/3/7/14/30/90 ngày. */
   srsLevel: number;
@@ -134,6 +169,20 @@ export interface DenkenBridge {
   importXlsx(): Promise<OpResult & { data?: AppData; report?: ImportReport }>;
   revealDataFolder(): Promise<OpResult>;
   openExternal(url: string): Promise<OpResult>;
+
+  /** Mở hộp thoại chọn file, chép vào thư mục dữ liệu, trả về mô tả file. */
+  attachPick(): Promise<OpResult & { attachments?: Attachment[] }>;
+  /** Lưu file dán từ clipboard hoặc kéo thả. */
+  attachSave(
+    name: string,
+    bytes: ArrayBuffer,
+  ): Promise<OpResult & { attachment?: Attachment }>;
+  /** Đọc file ảnh thành data URL để hiện ngay trong app. */
+  attachDataUrl(file: string): Promise<OpResult & { dataUrl?: string }>;
+  /** Mở file bằng ứng dụng mặc định của hệ điều hành. */
+  attachOpen(file: string): Promise<OpResult>;
+  /** Xoá file khỏi thư mục dữ liệu. */
+  attachDelete(file: string): Promise<OpResult>;
 }
 
 declare global {

@@ -1,16 +1,16 @@
 /**
- * Khối chi tiết một bài: mở link bài, ghi chú, link tham khảo riêng.
+ * Khối chi tiết một bài: mở link bài, nhiều ghi chú (kèm file), nhiều link tham khảo.
  *
- * Ghi chú và link tham khảo gõ vào ô cục bộ trước, chỉ đẩy lên store khi rời ô
- * hoặc sau một nhịp dừng gõ. Nếu đẩy lên sau mỗi phím thì cả cây React sẽ vẽ
- * lại 1608 dòng mỗi lần bấm phím.
+ * Ghi chú gõ vào ô cục bộ trước, chỉ đẩy lên store khi ngừng gõ hoặc rời ô.
+ * Nếu đẩy lên sau mỗi phím thì cả cây React sẽ vẽ lại 1608 dòng mỗi lần bấm phím.
  */
 
 import { useEffect, useRef, useState } from "react";
 
 import { levelLabel, overdueDays, todayISO } from "../lib/srs";
-import type { CatalogItem, ItemProgress } from "../lib/types";
-import { ExternalLink, Stars, StatusPill, openLink } from "./ui";
+import type { Attachment, CatalogItem, ItemProgress, NoteEntry } from "../lib/types";
+import type { Store } from "../state/useStore";
+import { Stars, StatusPill, openLink } from "./ui";
 
 const TYPING_PAUSE_MS = 400;
 
@@ -37,35 +37,309 @@ function useDeferredField(value: string, commit: (next: string) => void) {
 
   const onBlur = () => {
     if (timer.current) clearTimeout(timer.current);
-    if (draft !== value) commit(draft);
+    if (draft !== latest.current || draft !== value) commit(draft);
   };
 
-  useEffect(() => () => {
-    if (timer.current) clearTimeout(timer.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (timer.current) clearTimeout(timer.current);
+    },
+    [],
+  );
 
   return { draft, onChange, onBlur };
 }
 
+function prettySize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+}
+
+const KIND_ICON: Record<Attachment["kind"], string> = {
+  image: "🖼️",
+  pdf: "📕",
+  docx: "📘",
+  other: "📎",
+};
+
+/* ------------------------------------------------------------------ */
+/* Một file đính kèm                                                   */
+/* ------------------------------------------------------------------ */
+
+/** Ảnh hiện luôn thành ô xem trước; file khác hiện thành chip bấm để mở. */
+function AttachmentChip({
+  attachment,
+  onRemove,
+}: {
+  attachment: Attachment;
+  onRemove(): void;
+}) {
+  const [src, setSrc] = useState<string | null>(null);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    if (attachment.kind !== "image") return;
+    let alive = true;
+    void window.denken.attachDataUrl(attachment.file).then((result) => {
+      if (!alive) return;
+      if (result.ok && result.dataUrl) setSrc(result.dataUrl);
+      else setFailed(true);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [attachment.file, attachment.kind]);
+
+  if (attachment.kind === "image") {
+    return (
+      <div className="attach-image" title={`${attachment.name} · ${prettySize(attachment.size)}`}>
+        {src ? (
+          <img
+            src={src}
+            alt={attachment.name}
+            onClick={() => void window.denken.attachOpen(attachment.file)}
+          />
+        ) : (
+          <div className="attach-image-loading">{failed ? "⚠️ mất file" : "…"}</div>
+        )}
+        <button className="attach-remove" onClick={onRemove} title="Gỡ file này">
+          ✕
+        </button>
+        <div className="attach-caption">{attachment.name}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="attach-file">
+      <span
+        className="attach-file-main"
+        role="button"
+        tabIndex={0}
+        title={`Mở ${attachment.name}`}
+        onClick={() => void window.denken.attachOpen(attachment.file)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") void window.denken.attachOpen(attachment.file);
+        }}
+      >
+        <span className="attach-file-icon">{KIND_ICON[attachment.kind]}</span>
+        <span className="attach-file-text">
+          <span className="attach-file-name">{attachment.name}</span>
+          <span className="attach-file-size">{prettySize(attachment.size)}</span>
+        </span>
+      </span>
+      <button className="icon-btn" onClick={onRemove} title="Gỡ file này">
+        🗑
+      </button>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Một ghi chú                                                         */
+/* ------------------------------------------------------------------ */
+
+function NoteCard({
+  note,
+  index,
+  itemId,
+  store,
+  autoFocus,
+  onError,
+}: {
+  note: NoteEntry;
+  index: number;
+  itemId: string;
+  store: Store;
+  autoFocus: boolean;
+  onError(message: string): void;
+}) {
+  const field = useDeferredField(note.text, (text) =>
+    store.setNoteText(itemId, note.id, text),
+  );
+  const box = useRef<HTMLTextAreaElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (autoFocus) box.current?.focus();
+  }, [autoFocus]);
+
+  const pick = async () => {
+    setBusy(true);
+    const result = await window.denken.attachPick();
+    setBusy(false);
+    if (result.cancelled) return;
+    if (result.attachments?.length) {
+      store.addAttachments(itemId, note.id, result.attachments);
+    }
+    if (result.error) onError(result.error);
+  };
+
+  /** Dán ảnh thẳng từ clipboard — chụp màn hình xong Ctrl+V là xong. */
+  const onPaste = async (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const images = [...event.clipboardData.items].filter((entry) =>
+      entry.type.startsWith("image/"),
+    );
+    if (images.length === 0) return; // dán chữ thì để trình duyệt xử lý như thường
+    event.preventDefault();
+
+    setBusy(true);
+    for (const entry of images) {
+      const file = entry.getAsFile();
+      if (!file) continue;
+      const ext = (file.type.split("/")[1] ?? "png").replace("jpeg", "jpg");
+      const name = file.name || `anh-dan-${Date.now()}.${ext}`;
+      const result = await window.denken.attachSave(name, await file.arrayBuffer());
+      if (result.ok && result.attachment) {
+        store.addAttachments(itemId, note.id, [result.attachment]);
+      } else {
+        onError(result.error ?? "Không lưu được ảnh dán vào.");
+      }
+    }
+    setBusy(false);
+  };
+
+  const images = note.attachments.filter((a) => a.kind === "image");
+  const files = note.attachments.filter((a) => a.kind !== "image");
+
+  return (
+    <div className="note-card">
+      <div className="note-head">
+        <span className="small dim">Ghi chú {index + 1}</span>
+        <span className="spacer" />
+        <button
+          className="icon-btn"
+          onClick={() => store.removeNote(itemId, note.id)}
+          title="Xoá ghi chú này"
+        >
+          🗑
+        </button>
+      </div>
+
+      <textarea
+        ref={box}
+        className="textarea"
+        placeholder="Cách giải, chỗ hay nhầm, công thức cần nhớ… (dán ảnh chụp màn hình thẳng vào đây được)"
+        value={field.draft}
+        onChange={(event) => field.onChange(event.target.value)}
+        onBlur={field.onBlur}
+        onPaste={onPaste}
+      />
+
+      {images.length > 0 && (
+        <div className="attach-grid">
+          {images.map((attachment) => (
+            <AttachmentChip
+              key={attachment.id}
+              attachment={attachment}
+              onRemove={() => store.removeAttachment(itemId, note.id, attachment.id)}
+            />
+          ))}
+        </div>
+      )}
+
+      {files.length > 0 && (
+        <div className="attach-list">
+          {files.map((attachment) => (
+            <AttachmentChip
+              key={attachment.id}
+              attachment={attachment}
+              onRemove={() => store.removeAttachment(itemId, note.id, attachment.id)}
+            />
+          ))}
+        </div>
+      )}
+
+      <div className="note-foot">
+        <button className="btn sm" onClick={() => void pick()} disabled={busy}>
+          📎 {busy ? "Đang thêm…" : "Đính kèm file"}
+        </button>
+        <span className="field-hint">Ảnh, PDF, Word — hoặc dán ảnh vào ô trên.</span>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Một link tham khảo                                                  */
+/* ------------------------------------------------------------------ */
+
+function LinkRow({
+  link,
+  itemId,
+  store,
+}: {
+  link: { id: string; url: string; label: string };
+  itemId: string;
+  store: Store;
+}) {
+  const url = useDeferredField(link.url, (value) =>
+    store.setLink(itemId, link.id, { url: value }),
+  );
+  const label = useDeferredField(link.label, (value) =>
+    store.setLink(itemId, link.id, { label: value }),
+  );
+  const openable = url.draft.trim().startsWith("http");
+
+  return (
+    <div className="link-row">
+      <input
+        className="input link-label"
+        placeholder="Tên gợi nhớ"
+        value={label.draft}
+        onChange={(event) => label.onChange(event.target.value)}
+        onBlur={label.onBlur}
+      />
+      <input
+        className="input link-url"
+        placeholder="https://…"
+        value={url.draft}
+        onChange={(event) => url.onChange(event.target.value)}
+        onBlur={url.onBlur}
+      />
+      {/* Nút mở nằm ngay cạnh chính đường link đó */}
+      <button
+        className="btn sm"
+        disabled={!openable}
+        title={openable ? `Mở ${url.draft}` : "Link phải bắt đầu bằng http"}
+        onClick={() => openLink(url.draft.trim())}
+      >
+        ↗ Mở
+      </button>
+      <button
+        className="icon-btn"
+        onClick={() => store.removeLink(itemId, link.id)}
+        title="Xoá link này"
+      >
+        🗑
+      </button>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+
 export default function ItemDetail({
   item,
   progress,
-  onNote,
-  onRefLink,
+  store,
   compact,
 }: {
   item: CatalogItem;
   progress: ItemProgress | undefined;
-  onNote(text: string): void;
-  onRefLink(url: string): void;
+  store: Store;
   compact?: boolean;
 }) {
-  const note = useDeferredField(progress?.note ?? "", onNote);
-  const ref = useDeferredField(progress?.refLink ?? "", onRefLink);
+  const [focusNote, setFocusNote] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const late = overdueDays(progress, todayISO());
 
+  const notes = progress?.notes ?? [];
+  const links = progress?.links ?? [];
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
       {!compact && (
         <div className="row wrap" style={{ gap: 8 }}>
           <StatusPill status={progress?.status ?? "todo"} />
@@ -86,51 +360,83 @@ export default function ItemDetail({
         <button className="btn primary" onClick={() => openLink(item.url)}>
           ↗ Mở bài trên denken-ou.com
         </button>
-        {ref.draft.trim().startsWith("http") && (
-          <button className="btn" onClick={() => openLink(ref.draft.trim())}>
-            🔖 Mở link tham khảo
+      </div>
+
+      {/* ---------------- Ghi chú ---------------- */}
+      <div>
+        <div className="row between" style={{ marginBottom: 8 }}>
+          <span className="field-label">
+            📝 Ghi chú {notes.length > 0 && <span className="dim">({notes.length})</span>}
+          </span>
+          <button
+            className="btn sm"
+            onClick={() => setFocusNote(store.addNote(item.id))}
+          >
+            + Thêm ghi chú
           </button>
+        </div>
+
+        {notes.length === 0 ? (
+          <div className="field-hint" style={{ padding: "6px 0" }}>
+            Chưa có ghi chú nào. Bấm “Thêm ghi chú” để viết cách giải hoặc chỗ hay nhầm.
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {notes.map((note, index) => (
+              <NoteCard
+                key={note.id}
+                note={note}
+                index={index}
+                itemId={item.id}
+                store={store}
+                autoFocus={focusNote === note.id}
+                onError={setError}
+              />
+            ))}
+          </div>
         )}
       </div>
 
-      <div className="field">
-        <label className="field-label" htmlFor={`note-${item.id}`}>
-          📝 Ghi chú
-        </label>
-        <textarea
-          id={`note-${item.id}`}
-          className="textarea"
-          placeholder="Cách giải, chỗ hay nhầm, công thức cần nhớ…"
-          value={note.draft}
-          onChange={(event) => note.onChange(event.target.value)}
-          onBlur={note.onBlur}
-        />
-      </div>
+      {/* ---------------- Link tham khảo ---------------- */}
+      <div>
+        <div className="row between" style={{ marginBottom: 8 }}>
+          <span className="field-label">
+            🔗 Link tham khảo của bạn{" "}
+            {links.length > 0 && <span className="dim">({links.length})</span>}
+          </span>
+          <button className="btn sm" onClick={() => store.addLink(item.id)}>
+            + Thêm link
+          </button>
+        </div>
 
-      <div className="field">
-        <label className="field-label" htmlFor={`ref-${item.id}`}>
-          🔗 Link tham khảo của bạn
-        </label>
-        <input
-          id={`ref-${item.id}`}
-          className="input"
-          placeholder="Dán link Gemini, YouTube, ghi chú… (link riêng của bạn)"
-          value={ref.draft}
-          onChange={(event) => ref.onChange(event.target.value)}
-          onBlur={ref.onBlur}
-        />
-        <div className="field-hint">
-          Link bài tập đi kèm app, còn link tham khảo là của riêng bạn — cập nhật
-          app không làm mất phần này.
+        {links.length === 0 ? (
+          <div className="field-hint" style={{ padding: "6px 0" }}>
+            Chưa có link nào. Dán link Gemini, YouTube, blog… mà bạn dùng cho bài này.
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {links.map((link) => (
+              <LinkRow key={link.id} link={link} itemId={item.id} store={store} />
+            ))}
+          </div>
+        )}
+
+        <div className="field-hint" style={{ marginTop: 8 }}>
+          Link bài tập đi kèm app, còn ghi chú và link tham khảo là của riêng bạn —
+          cập nhật app không làm mất phần này.
         </div>
       </div>
 
-      {!compact && (
-        <div className="small dim">
-          Link bài:{" "}
-          <ExternalLink url={item.url}>
-            <span className="mono">{item.url}</span>
-          </ExternalLink>
+      {error && (
+        <div className="callout danger">
+          {error}
+          <button
+            className="btn sm ghost"
+            style={{ marginLeft: 10 }}
+            onClick={() => setError(null)}
+          >
+            Đóng
+          </button>
         </div>
       )}
     </div>

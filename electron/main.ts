@@ -10,11 +10,12 @@ import { app, BrowserWindow, dialog, ipcMain, Menu, shell } from "electron";
 import path from "node:path";
 import { promises as fs } from "node:fs";
 
+import * as attachments from "./attachments";
 import { writeWorkbook } from "./export-xlsx";
 import { importWorkbook } from "./import-xlsx";
 import type { ImportReport } from "./import-xlsx";
-import { countBackups, load, normalise, paths, save } from "./store";
-import type { AppData, OpResult, StoreInfo } from "../src/lib/types";
+import { countBackups, load, normalise, paths, referencedFiles, save } from "./store";
+import type { Attachment, AppData, OpResult, StoreInfo } from "../src/lib/types";
 
 const isDev = process.env.NODE_ENV === "development";
 const DEV_URL = "http://localhost:5173";
@@ -266,6 +267,86 @@ function registerHandlers(): void {
   });
 
   ipcMain.handle("shell:open-external", async (_event, url: string) => openExternal(url));
+
+  /* ------------------------ File đính kèm ------------------------ */
+
+  ipcMain.handle(
+    "attach:pick",
+    async (): Promise<OpResult & { attachments?: Attachment[] }> => {
+      const picked = await dialog.showOpenDialog(mainWindow!, {
+        title: "Chọn file đính kèm vào ghi chú",
+        properties: ["openFile", "multiSelections"],
+        filters: [
+          {
+            name: "Ảnh và tài liệu",
+            extensions: ["png", "jpg", "jpeg", "gif", "webp", "bmp", "pdf", "docx", "doc"],
+          },
+          { name: "Tất cả", extensions: ["*"] },
+        ],
+      });
+      if (picked.canceled || picked.filePaths.length === 0) {
+        return { ok: false, cancelled: true };
+      }
+
+      const saved: Attachment[] = [];
+      const failed: string[] = [];
+      for (const source of picked.filePaths) {
+        try {
+          saved.push(await attachments.copyIn(source));
+        } catch (error) {
+          failed.push((error as Error).message);
+        }
+      }
+      // Chép được file nào tính file nấy; chỉ báo lỗi khi không được file nào.
+      if (saved.length === 0) return { ok: false, error: failed.join("\n") };
+      return { ok: true, attachments: saved, error: failed.join("\n") || undefined };
+    },
+  );
+
+  ipcMain.handle(
+    "attach:save",
+    async (
+      _event,
+      name: string,
+      bytes: ArrayBuffer,
+    ): Promise<OpResult & { attachment?: Attachment }> => {
+      try {
+        const saved = await attachments.writeBytes(name, new Uint8Array(bytes));
+        return { ok: true, attachment: saved };
+      } catch (error) {
+        return { ok: false, error: (error as Error).message };
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "attach:data-url",
+    async (_event, file: string): Promise<OpResult & { dataUrl?: string }> => {
+      try {
+        return { ok: true, dataUrl: await attachments.dataUrl(file) };
+      } catch (error) {
+        return { ok: false, error: (error as Error).message };
+      }
+    },
+  );
+
+  ipcMain.handle("attach:open", async (_event, file: string): Promise<OpResult> => {
+    try {
+      await attachments.openWithSystem(file);
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: (error as Error).message };
+    }
+  });
+
+  ipcMain.handle("attach:delete", async (_event, file: string): Promise<OpResult> => {
+    try {
+      await attachments.remove(file);
+      return { ok: true };
+    } catch (error) {
+      return { ok: false, error: (error as Error).message };
+    }
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -286,6 +367,12 @@ if (!app.requestSingleInstanceLock()) {
     Menu.setApplicationMenu(null);
     registerHandlers();
     createWindow();
+
+    // Xoá ghi chú chỉ bỏ phần mô tả trong data.json, file vẫn nằm lại trên đĩa.
+    // Dọn một lượt lúc khởi động để thư mục đính kèm không phình mãi.
+    void load()
+      .then((data) => attachments.pruneOrphans(referencedFiles(data)))
+      .catch(() => 0);
 
     app.on("activate", () => {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();

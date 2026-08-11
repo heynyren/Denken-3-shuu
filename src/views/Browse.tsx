@@ -69,9 +69,12 @@ export default function Browse({
       }
 
       if (needle) {
-        const haystack = `${item.name} ${item.topic} ${item.category} ${item.exam} ${
-          progress?.note ?? ""
-        }`.toLowerCase();
+        const notes = (progress?.notes ?? []).map((note) => note.text).join(" ");
+        const labels = (progress?.links ?? [])
+          .map((link) => `${link.label} ${link.url}`)
+          .join(" ");
+        const haystack =
+          `${item.name} ${item.topic} ${item.category} ${item.exam} ${notes} ${labels}`.toLowerCase();
         if (!haystack.includes(needle)) return false;
       }
       return true;
@@ -271,8 +274,7 @@ export default function Browse({
           <ItemDetail
             item={selectedItem}
             progress={data.progress[selectedItem.id]}
-            onNote={(text) => store.setNote(selectedItem.id, text)}
-            onRefLink={(url) => store.setRefLink(selectedItem.id, url)}
+            store={store}
           />
 
           <div className="btn-row" style={{ marginTop: 16 }}>
@@ -337,8 +339,19 @@ function Row({
           <span>
             {item.exam} {item.question}
           </span>
-          {progress?.note && <span title={progress.note}>📝</span>}
-          {progress?.refLink && <span title={progress.refLink}>🔗</span>}
+          {(progress?.notes.length ?? 0) > 0 && (
+            <span title={`${progress!.notes.length} ghi chú`}>
+              📝{progress!.notes.length > 1 && progress!.notes.length}
+            </span>
+          )}
+          {(progress?.links.length ?? 0) > 0 && (
+            <span title={`${progress!.links.length} link tham khảo`}>
+              🔗{progress!.links.length > 1 && progress!.links.length}
+            </span>
+          )}
+          {(progress?.notes.some((n) => n.attachments.length > 0) ?? false) && (
+            <span title="Có file đính kèm">📎</span>
+          )}
         </div>
       </div>
 
@@ -357,11 +370,11 @@ function Row({
         >
           ↗
         </button>
-        {progress?.refLink && (
+        {progress?.links.length === 1 && (
           <button
             className="icon-btn on"
-            title={`Mở link tham khảo: ${progress.refLink}`}
-            onClick={() => openLink(progress.refLink)}
+            title={`Mở link tham khảo: ${progress.links[0]!.url}`}
+            onClick={() => openLink(progress.links[0]!.url)}
           >
             🔖
           </button>

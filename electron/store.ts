@@ -23,11 +23,20 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 
 import seed from "../src/data/seed.json";
-import type { AppData, DayLog, ItemProgress, Settings } from "../src/lib/types";
+import type {
+  AppData,
+  Attachment,
+  DayLog,
+  ItemProgress,
+  LinkEntry,
+  NoteEntry,
+  Settings,
+} from "../src/lib/types";
 
-// v2 bỏ hẳn phần từ vựng/Quizlet. Dữ liệu cũ còn hai trường đó sẽ bị lược đi
-// khi nạp — bản sao lưu hằng ngày vẫn giữ nguyên nếu cần lấy lại.
-export const SCHEMA_VERSION = 2;
+// v2 bỏ phần từ vựng/Quizlet.
+// v3 đổi một ghi chú/một link thành danh sách nhiều ghi chú và nhiều link,
+//    mỗi ghi chú kèm được file. Dữ liệu cũ được chuyển đổi tự động khi nạp.
+export const SCHEMA_VERSION = 3;
 
 const DEFAULT_SETTINGS: Settings = {
   dailyGoal: 30,
@@ -67,13 +76,100 @@ interface SeedShape {
 function emptyProgress(): ItemProgress {
   return {
     status: "todo",
-    note: "",
-    refLink: "",
+    notes: [],
+    links: [],
     doneDate: null,
     srsLevel: 0,
     nextReview: null,
     history: [],
   };
+}
+
+/** id ổn định cho ghi chú/link sinh ra lúc chuyển đổi dữ liệu cũ. */
+let counter = 0;
+function newId(prefix: string): string {
+  counter += 1;
+  return `${prefix}-${Date.now().toString(36)}-${counter.toString(36)}`;
+}
+
+function cleanAttachments(input: unknown): Attachment[] {
+  if (!Array.isArray(input)) return [];
+  return input.flatMap((raw) => {
+    if (typeof raw !== "object" || raw === null) return [];
+    const entry = raw as Partial<Attachment>;
+    // Không có tên file trên đĩa thì mô tả này vô dụng, bỏ đi.
+    if (typeof entry.file !== "string" || !entry.file) return [];
+    return [
+      {
+        id: entry.id ?? newId("att"),
+        name: typeof entry.name === "string" ? entry.name : entry.file,
+        file: entry.file,
+        kind: entry.kind ?? "other",
+        size: Number(entry.size) || 0,
+        addedAt: entry.addedAt ?? new Date().toISOString(),
+      },
+    ];
+  });
+}
+
+/**
+ * Đọc phần ghi chú, chấp nhận cả dạng cũ (một chuỗi) lẫn dạng mới (danh sách).
+ * Đây là toàn bộ đường di trú v2 -> v3 cho ghi chú.
+ */
+function cleanNotes(entry: Record<string, unknown>): NoteEntry[] {
+  if (Array.isArray(entry.notes)) {
+    return entry.notes.flatMap((raw) => {
+      if (typeof raw !== "object" || raw === null) return [];
+      const note = raw as Partial<NoteEntry>;
+      const text = typeof note.text === "string" ? note.text : "";
+      const attachments = cleanAttachments(note.attachments);
+      // Ghi chú rỗng và không có file thì không giữ lại làm gì.
+      if (!text.trim() && attachments.length === 0) return [];
+      return [
+        {
+          id: note.id ?? newId("note"),
+          text,
+          createdAt: note.createdAt ?? new Date().toISOString(),
+          attachments,
+        },
+      ];
+    });
+  }
+
+  // Dạng cũ: một chuỗi ghi chú duy nhất.
+  const legacy = typeof entry.note === "string" ? entry.note : "";
+  if (!legacy.trim()) return [];
+  return [
+    {
+      id: newId("note"),
+      text: legacy,
+      createdAt:
+        typeof entry.doneDate === "string" ? entry.doneDate : new Date().toISOString(),
+      attachments: [],
+    },
+  ];
+}
+
+/** Như trên, cho link tham khảo. */
+function cleanLinks(entry: Record<string, unknown>): LinkEntry[] {
+  if (Array.isArray(entry.links)) {
+    return entry.links.flatMap((raw) => {
+      if (typeof raw !== "object" || raw === null) return [];
+      const link = raw as Partial<LinkEntry>;
+      const url = typeof link.url === "string" ? link.url.trim() : "";
+      if (!url) return [];
+      return [
+        {
+          id: link.id ?? newId("link"),
+          url,
+          label: typeof link.label === "string" ? link.label : "",
+        },
+      ];
+    });
+  }
+
+  const legacy = typeof entry.refLink === "string" ? entry.refLink.trim() : "";
+  return legacy ? [{ id: newId("link"), url: legacy, label: "" }] : [];
 }
 
 function buildFromSeed(): AppData {
@@ -112,11 +208,11 @@ function normalise(input: unknown): AppData {
   const progress: Record<string, ItemProgress> = {};
   for (const [id, value] of Object.entries(raw.progress ?? {})) {
     if (typeof value !== "object" || value === null) continue;
-    const entry = value as Partial<ItemProgress>;
+    const entry = value as Record<string, unknown> & Partial<ItemProgress>;
     progress[id] = {
       status: entry.status ?? "todo",
-      note: typeof entry.note === "string" ? entry.note : "",
-      refLink: typeof entry.refLink === "string" ? entry.refLink : "",
+      notes: cleanNotes(entry),
+      links: cleanLinks(entry),
       doneDate: entry.doneDate ?? null,
       srsLevel: Number.isFinite(entry.srsLevel) ? Number(entry.srsLevel) : 0,
       nextReview: entry.nextReview ?? null,
@@ -153,9 +249,21 @@ function normalise(input: unknown): AppData {
  * không bao giờ xoá dữ liệu cũ.
  */
 function migrate(data: AppData): AppData {
-  // v1 -> v2: normalise() đã lược sẵn hai trường decks/vocab của bản cũ,
-  // nên không còn gì phải chuyển đổi thêm.
+  // normalise() đã lo trọn cả hai bước chuyển đổi:
+  //   v1 -> v2  lược bỏ decks/vocab
+  //   v2 -> v3  đổi note/refLink dạng chuỗi thành notes[]/links[]
   return data;
+}
+
+/** Tên mọi file đính kèm còn được nhắc tới, để dọn file mồ côi. */
+export function referencedFiles(data: AppData): Set<string> {
+  const names = new Set<string>();
+  for (const entry of Object.values(data.progress)) {
+    for (const note of entry.notes) {
+      for (const attachment of note.attachments) names.add(attachment.file);
+    }
+  }
+  return names;
 }
 
 /* ------------------------------------------------------------------ */

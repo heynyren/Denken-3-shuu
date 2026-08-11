@@ -51,8 +51,8 @@ function styleHeaderRow(row: ExcelJS.Row): void {
 function emptyProgress(): ItemProgress {
   return {
     status: "todo",
-    note: "",
-    refLink: "",
+    notes: [],
+    links: [],
     doneDate: null,
     srsLevel: 0,
     nextReview: null,
@@ -131,9 +131,17 @@ function addSubjectSheet(
       }》〈${item.category}〉[${item.exam}:${item.question}]${item.name}`,
       item.url,
       STATUS_LABEL[progress.status] ?? "⬜ Chưa làm",
-      progress.note,
+      // Nhiều ghi chú gộp lại thành một ô, ngăn bằng dòng kẻ cho dễ đọc.
+      progress.notes
+        .map((note) => {
+          const files = note.attachments.map((a) => a.name).join(", ");
+          return files ? `${note.text}\n[File: ${files}]` : note.text;
+        })
+        .join("\n────────\n"),
       progress.doneDate ?? "",
-      progress.refLink,
+      progress.links
+        .map((link) => (link.label ? `${link.label}: ${link.url}` : link.url))
+        .join("\n"),
       progress.srsLevel || "",
       cycle ?? "",
       progress.nextReview ?? "",
@@ -145,11 +153,14 @@ function addSubjectSheet(
       row.getCell(4).value = { text: item.url, hyperlink: item.url };
       row.getCell(4).font = { color: { argb: "FF1155CC" }, underline: true };
     }
-    if (progress.refLink.startsWith("http")) {
-      row.getCell(8).value = { text: progress.refLink, hyperlink: progress.refLink };
+    // Chỉ bấm được khi có đúng một link; nhiều link thì để dạng chữ nhiều dòng.
+    const onlyLink = progress.links.length === 1 ? progress.links[0]! : null;
+    if (onlyLink && onlyLink.url.startsWith("http")) {
+      row.getCell(8).value = { text: onlyLink.url, hyperlink: onlyLink.url };
       row.getCell(8).font = { color: { argb: "FF1155CC" }, underline: true };
     }
     row.getCell(6).alignment = { wrapText: true, vertical: "top" };
+    row.getCell(8).alignment = { wrapText: true, vertical: "top" };
   });
 
   sheet.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: HEADERS.length } };

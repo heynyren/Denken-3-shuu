@@ -183,12 +183,25 @@ export async function importWorkbook(
       const refLink = text(row.getCell(COL.refLink).value);
       const nextReview = dateCell(row.getCell(COL.nextReview).value);
 
+      // Excel chỉ có một ô ghi chú và một ô link, nên nhập vào thành một mục.
+      const previous = progress[id];
       progress[id] = {
         ...emptyProgress(),
-        ...progress[id],
+        ...previous,
         status: STATUS_MAP[text(row.getCell(COL.status).value)] ?? "todo",
-        note,
-        refLink,
+        notes: note
+          ? [
+              {
+                id: `note-${id}`,
+                text: note,
+                createdAt: new Date().toISOString(),
+                attachments: [],
+              },
+            ]
+          : (previous?.notes ?? []),
+        links: refLink
+          ? [{ id: `link-${id}`, url: refLink, label: "" }]
+          : (previous?.links ?? []),
         doneDate: dateCell(row.getCell(COL.doneDate).value),
         srsLevel: cycleToLevel(row.getCell(COL.cycle).value),
         nextReview,

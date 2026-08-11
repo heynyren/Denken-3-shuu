@@ -1194,3 +1194,157 @@ select {
   background: var(--surface-2);
   color: var(--text);
 }
+
+/* ==========================================================================
+   Ghi chú, file đính kèm, link tham khảo
+   ========================================================================== */
+
+.note-card {
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+}
+.note-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.note-card .textarea {
+  background: var(--bg);
+}
+.note-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* Ảnh đính kèm: xem được ngay, bấm vào mở cỡ đầy đủ */
+.attach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+.attach-image {
+  position: relative;
+  background: var(--bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.attach-image img {
+  display: block;
+  width: 100%;
+  height: 104px;
+  object-fit: cover;
+  cursor: zoom-in;
+  transition: opacity 0.12s;
+}
+.attach-image img:hover {
+  opacity: 0.82;
+}
+.attach-image-loading {
+  height: 104px;
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+  font-size: 12px;
+}
+.attach-caption {
+  padding: 5px 8px;
+  font-size: 11px;
+  color: var(--text-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attach-remove {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.66);
+  color: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+.attach-image:hover .attach-remove {
+  opacity: 1;
+}
+
+/* File tài liệu: chip bấm để mở bằng app mặc định */
+.attach-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+.attach-file {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg);
+  border-radius: var(--radius);
+  padding: 6px 8px 6px 10px;
+}
+.attach-file-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+.attach-file-icon {
+  font-size: 19px;
+}
+.attach-file-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.attach-file-name {
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attach-file-main:hover .attach-file-name {
+  color: var(--blue);
+  text-decoration: underline;
+}
+.attach-file-size {
+  font-size: 11px;
+  color: var(--text-3);
+}
+
+/* Một dòng link tham khảo: tên, đường link, nút mở ngay cạnh */
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.link-row .link-label {
+  flex: 0 0 168px;
+}
+.link-row .link-url {
+  flex: 1;
+  min-width: 0;
+}
+@media (max-width: 900px) {
+  .link-row {
+    flex-wrap: wrap;
+  }
+  .link-row .link-label {
+    flex: 1 0 100%;
+  }
+}

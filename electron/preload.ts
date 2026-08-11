@@ -20,6 +20,13 @@ const bridge: DenkenBridge = {
   importXlsx: () => ipcRenderer.invoke("store:import-xlsx"),
   revealDataFolder: () => ipcRenderer.invoke("store:reveal"),
   openExternal: (url: string) => ipcRenderer.invoke("shell:open-external", url),
+
+  attachPick: () => ipcRenderer.invoke("attach:pick"),
+  attachSave: (name: string, bytes: ArrayBuffer) =>
+    ipcRenderer.invoke("attach:save", name, bytes),
+  attachDataUrl: (file: string) => ipcRenderer.invoke("attach:data-url", file),
+  attachOpen: (file: string) => ipcRenderer.invoke("attach:open", file),
+  attachDelete: (file: string) => ipcRenderer.invoke("attach:delete", file),
 };
 
 contextBridge.exposeInMainWorld("denken", bridge);

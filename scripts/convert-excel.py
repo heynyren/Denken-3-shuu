@@ -55,6 +55,18 @@ STATUS_MAP = {
 # Chu kỳ ôn tập (ngày) theo từng cấp độ - lấy đúng từ bảng trong Excel
 SRS_INTERVALS = [1, 3, 7, 14, 30, 90]
 
+# Vài chủ đề trong file Excel được ghi bằng tiếng Việt. Đổi sang thuật ngữ
+# tiếng Nhật mà chính trang denken-ou dùng trong nhãn 〈...〉 của tên bài,
+# để tên chủ đề trong app khớp với tài liệu ôn thi.
+# Đổi tên chủ đề KHÔNG ảnh hưởng tiến độ: id của bài sinh từ link, không từ chủ đề.
+TOPIC_RENAME = {
+    "Máy biến áp": "変圧器",
+    "Điện tử công suất": "パワーエレクトロニクス",
+    "Chiếu sáng": "照明",
+    "Điện nhiệt": "電熱",
+    "Thông tin truyền tải và xử lý": "情報伝送及び処理",
+}
+
 
 # Giá trị lỗi của Excel: là công thức hỏng chứ không phải nội dung người dùng gõ.
 EXCEL_ERROR_RE = re.compile(r"^#(VALUE|REF|DIV/0|N/A|NAME\?|NULL|NUM|SPILL|CALC)!?$")
@@ -176,7 +188,9 @@ def read_subject_sheet(worksheet, subject_key: str, seen: Counter) -> list[dict]
             {
                 "id": item_id,
                 "subject": subject_key,
-                "topic": clean(row[COL_TOPIC]),
+                "topic": TOPIC_RENAME.get(
+                    clean(row[COL_TOPIC]), clean(row[COL_TOPIC])
+                ),
                 "no": int(float(no)) if re.fullmatch(r"[\d.]+", no) else 0,
                 "url": url,
                 "raw_title": raw_title,

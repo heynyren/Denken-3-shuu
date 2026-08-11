@@ -14,8 +14,10 @@ import { applyReview, emptyProgress, todayISO } from "../lib/srs";
 import { computeOverview } from "../lib/stats";
 import type {
   AppData,
+  Attachment,
   ItemProgress,
   ItemStatus,
+  LinkEntry,
   Settings,
   StoreInfo,
 } from "../lib/types";
@@ -36,8 +38,16 @@ export interface Store {
   clearJustEarned(): void;
 
   review(id: string, result: "correct" | "wrong"): void;
-  setNote(id: string, note: string): void;
-  setRefLink(id: string, refLink: string): void;
+
+  addNote(id: string): string;
+  setNoteText(id: string, noteId: string, text: string): void;
+  removeNote(id: string, noteId: string): void;
+  addAttachments(id: string, noteId: string, files: Attachment[]): void;
+  removeAttachment(id: string, noteId: string, attachmentId: string): void;
+
+  addLink(id: string, url?: string): void;
+  setLink(id: string, linkId: string, patch: Partial<LinkEntry>): void;
+  removeLink(id: string, linkId: string): void;
   setStatus(id: string, status: ItemStatus): void;
   resetItem(id: string): void;
   snooze(id: string, days: number): void;
@@ -199,15 +209,121 @@ export function useStore(): Store {
     [update],
   );
 
-  const setNote = useCallback(
-    (id: string, note: string) =>
-      update((current) => withProgress(current, id, (p) => ({ ...p, note }))),
+  /* ---------------- ghi chú ---------------- */
+
+  // id sinh tại chỗ và trả về ngay, để giao diện mở sẵn ô nhập của ghi chú mới.
+  const nextId = useRef(0);
+  const makeId = (prefix: string) => {
+    nextId.current += 1;
+    return `${prefix}-${Date.now().toString(36)}-${nextId.current.toString(36)}`;
+  };
+
+  const addNote = useCallback(
+    (id: string) => {
+      const noteId = makeId("note");
+      update((current) =>
+        withProgress(current, id, (p) => ({
+          ...p,
+          notes: [
+            ...p.notes,
+            { id: noteId, text: "", createdAt: new Date().toISOString(), attachments: [] },
+          ],
+        })),
+      );
+      return noteId;
+    },
     [update],
   );
 
-  const setRefLink = useCallback(
-    (id: string, refLink: string) =>
-      update((current) => withProgress(current, id, (p) => ({ ...p, refLink }))),
+  const setNoteText = useCallback(
+    (id: string, noteId: string, text: string) =>
+      update((current) =>
+        withProgress(current, id, (p) => ({
+          ...p,
+          notes: p.notes.map((note) => (note.id === noteId ? { ...note, text } : note)),
+        })),
+      ),
+    [update],
+  );
+
+  const removeNote = useCallback(
+    (id: string, noteId: string) =>
+      update((current) =>
+        withProgress(current, id, (p) => ({
+          ...p,
+          notes: p.notes.filter((note) => note.id !== noteId),
+        })),
+      ),
+    [update],
+  );
+
+  const addAttachments = useCallback(
+    (id: string, noteId: string, files: Attachment[]) =>
+      update((current) =>
+        withProgress(current, id, (p) => ({
+          ...p,
+          notes: p.notes.map((note) =>
+            note.id === noteId
+              ? { ...note, attachments: [...note.attachments, ...files] }
+              : note,
+          ),
+        })),
+      ),
+    [update],
+  );
+
+  const removeAttachment = useCallback(
+    (id: string, noteId: string, attachmentId: string) =>
+      update((current) =>
+        withProgress(current, id, (p) => ({
+          ...p,
+          notes: p.notes.map((note) =>
+            note.id === noteId
+              ? {
+                  ...note,
+                  attachments: note.attachments.filter((a) => a.id !== attachmentId),
+                }
+              : note,
+          ),
+        })),
+      ),
+    [update],
+  );
+
+  /* ---------------- link tham khảo ---------------- */
+
+  const addLink = useCallback(
+    (id: string, url = "") =>
+      update((current) =>
+        withProgress(current, id, (p) => ({
+          ...p,
+          links: [...p.links, { id: makeId("link"), url, label: "" }],
+        })),
+      ),
+    [update],
+  );
+
+  const setLink = useCallback(
+    (id: string, linkId: string, patch: Partial<LinkEntry>) =>
+      update((current) =>
+        withProgress(current, id, (p) => ({
+          ...p,
+          links: p.links.map((link) =>
+            link.id === linkId ? { ...link, ...patch } : link,
+          ),
+        })),
+      ),
+    [update],
+  );
+
+  const removeLink = useCallback(
+    (id: string, linkId: string) =>
+      update((current) =>
+        withProgress(current, id, (p) => ({
+          ...p,
+          links: p.links.filter((link) => link.id !== linkId),
+        })),
+      ),
     [update],
   );
 
@@ -223,8 +339,8 @@ export function useStore(): Store {
         withProgress(current, id, (p) => ({
           ...emptyProgress(),
           // Giữ lại công sức đã bỏ ra: ghi chú và link tham khảo không xoá.
-          note: p.note,
-          refLink: p.refLink,
+          notes: p.notes,
+          links: p.links,
         })),
       ),
     [update],
@@ -269,8 +385,14 @@ export function useStore(): Store {
     justEarned,
     clearJustEarned,
     review,
-    setNote,
-    setRefLink,
+    addNote,
+    setNoteText,
+    removeNote,
+    addAttachments,
+    removeAttachment,
+    addLink,
+    setLink,
+    removeLink,
     setStatus,
     resetItem,
     snooze,

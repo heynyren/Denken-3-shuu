@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import ItemDetail from "../components/ItemDetail";
 import { Bar, Empty, Stars, StatusPill } from "../components/ui";
-import { subjectName } from "../lib/catalog";
+import { subjectName, topicsBySubject } from "../lib/catalog";
 import { levelLabel, overdueDays, todayISO } from "../lib/srs";
 import { dueQueue, freshQueue, wrongQueue } from "../lib/stats";
 import type { Overview } from "../lib/stats";
@@ -25,6 +25,7 @@ export default function Review({ store, view }: { store: Store; view: Overview }
   // chưa làm, để không rơi vào một danh sách trống rồi phải tự mò.
   const [mode, setMode] = useState<Mode>(view.dueToday > 0 ? "due" : "fresh");
   const [subject, setSubject] = useState<SubjectKey | "all">("all");
+  const [topic, setTopic] = useState("all");
   // Lọc theo độ khó: tập sao nào đang bật. Rỗng = không lọc.
   const [stars, setStars] = useState<Set<number>>(new Set());
   const [cursor, setCursor] = useState(0);
@@ -40,14 +41,15 @@ export default function Review({ store, view }: { store: Store; view: Overview }
     return base.filter(
       (item) =>
         (subject === "all" || item.subject === subject) &&
+        (topic === "all" || item.topic === topic) &&
         (stars.size === 0 || stars.has(item.stars)),
     );
-  }, [data, mode, subject, stars]);
+  }, [data, mode, subject, topic, stars]);
 
   // Đổi bộ lọc thì quay về đầu hàng đợi.
   useEffect(() => {
     setCursor(0);
-  }, [mode, subject, stars]);
+  }, [mode, subject, topic, stars]);
 
   // Chấm xong một bài thì bài đó rời hàng đợi, con trỏ giữ nguyên vị trí là đã
   // sang bài kế. Chỉ lùi lại khi con trỏ vượt quá cuối danh sách.
@@ -126,12 +128,34 @@ export default function Review({ store, view }: { store: Store; view: Overview }
             <button
               key={entry.key}
               className={`chip${subject === entry.key ? " on" : ""}`}
-              onClick={() => setSubject(entry.key)}
+              onClick={() => {
+                setSubject(entry.key);
+                setTopic("all");
+              }}
             >
               <span className={entry.key === "all" ? "" : "ja"}>{entry.label}</span>
             </button>
           ))}
         </div>
+
+        {subject !== "all" && (
+          <div className="row" style={{ marginTop: 10 }}>
+            <select
+              className="select"
+              value={topic}
+              onChange={(event) => setTopic(event.target.value)}
+            >
+              <option value="all">
+                Tất cả chủ đề ({topicsBySubject[subject].length})
+              </option>
+              {topicsBySubject[subject].map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="chip-row" style={{ marginTop: 10 }}>
           <span className="small dim">Độ khó:</span>
@@ -171,7 +195,7 @@ export default function Review({ store, view }: { store: Store; view: Overview }
           {mode === "wrong" ? (
             <Empty icon="🎉" title="Không còn bài nào đang sai">
               <p className="muted">
-                {stars.size > 0 || subject !== "all"
+                {stars.size > 0 || subject !== "all" || topic !== "all"
                   ? "Không có bài sai nào khớp bộ lọc."
                   : "Mọi bài từng sai đều đã được sửa thành đúng. Quá tốt!"}
               </p>
@@ -179,7 +203,7 @@ export default function Review({ store, view }: { store: Store; view: Overview }
           ) : mode === "due" ? (
             <Empty icon="🌤️" title="Không còn bài nào đến hạn">
               <p className="muted">
-                {stars.size > 0 || subject !== "all"
+                {stars.size > 0 || subject !== "all" || topic !== "all"
                   ? "Không có bài nào khớp bộ lọc. Thử bỏ bớt điều kiện xem sao."
                   : "Bàn học sạch sẽ. Muốn học thêm thì chuyển sang “Bài chưa làm”."}
               </p>
@@ -264,13 +288,7 @@ export default function Review({ store, view }: { store: Store; view: Overview }
           </div>
 
           <div className="card">
-            <ItemDetail
-              item={item}
-              progress={progress}
-              compact
-              onNote={(text) => store.setNote(item.id, text)}
-              onRefLink={(url) => store.setRefLink(item.id, url)}
-            />
+            <ItemDetail item={item} progress={progress} store={store} compact />
           </div>
 
           <div className="callout">

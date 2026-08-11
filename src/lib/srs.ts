@@ -44,8 +44,8 @@ export function daysBetween(from: string, to: string): number {
 export function emptyProgress(): ItemProgress {
   return {
     status: "todo",
-    note: "",
-    refLink: "",
+    notes: [],
+    links: [],
     doneDate: null,
     srsLevel: 0,
     nextReview: null,
