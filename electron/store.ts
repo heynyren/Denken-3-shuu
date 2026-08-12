@@ -27,6 +27,8 @@ import type {
   AppData,
   Attachment,
   DayLog,
+  ExamAnswerRecord,
+  ExamResult,
   ItemProgress,
   LinkEntry,
   NoteEntry,
@@ -37,7 +39,9 @@ import type {
 // v3 đổi một ghi chú/một link thành danh sách nhiều ghi chú và nhiều link,
 //    mỗi ghi chú kèm được file. Dữ liệu cũ được chuyển đổi tự động khi nạp.
 // v4 thêm lịch sử thi thử.
-export const SCHEMA_VERSION = 4;
+// v5 mỗi lượt thi lưu thêm bài làm từng câu (scores[].answers) để dựng bảng
+//    phân tích. Lượt thi cũ không có trường này và vẫn đọc được bình thường.
+export const SCHEMA_VERSION = 5;
 
 const DEFAULT_SETTINGS: Settings = {
   dailyGoal: 30,
@@ -246,8 +250,61 @@ function normalise(input: unknown): AppData {
     progress: Object.keys(progress).length > 0 ? progress : base.progress,
     dailyLog,
     badges: raw.badges ?? {},
-    examResults: Array.isArray(raw.examResults) ? raw.examResults : [],
+    examResults: cleanExamResults(raw.examResults),
   };
+}
+
+/**
+ * Lọc lịch sử thi thử về đúng hình dạng.
+ *
+ * Bài làm từng câu (`answers`) chỉ có ở lượt thi lưu từ v5 trở đi; lượt cũ giữ
+ * nguyên phần điểm, chỉ là không có bảng phân tích chi tiết.
+ */
+function cleanExamResults(input: unknown): ExamResult[] {
+  if (!Array.isArray(input)) return [];
+  const out: ExamResult[] = [];
+
+  for (const entry of input) {
+    if (typeof entry !== "object" || entry === null) continue;
+    const raw = entry as Partial<ExamResult>;
+    if (typeof raw.id !== "string" || !Array.isArray(raw.scores)) continue;
+
+    out.push({
+      id: raw.id,
+      exam: typeof raw.exam === "string" ? raw.exam : "",
+      takenAt: typeof raw.takenAt === "string" ? raw.takenAt : new Date().toISOString(),
+      scores: raw.scores.map((score) => {
+        const answers = Array.isArray(score?.answers)
+          ? score.answers
+              .filter(
+                (record): record is ExamAnswerRecord =>
+                  typeof record?.id === "string" &&
+                  Array.isArray(record.picked) &&
+                  Array.isArray(record.truth),
+              )
+              .map((record) => ({
+                id: record.id,
+                picked: record.picked.map((value) =>
+                  typeof value === "number" ? value : null,
+                ),
+                truth: record.truth.map((value) =>
+                  typeof value === "number" ? value : null,
+                ),
+              }))
+          : undefined;
+
+        return {
+          subject: score.subject,
+          score: Number(score.score) || 0,
+          correct: Number(score.correct) || 0,
+          total: Number(score.total) || 0,
+          passed: Boolean(score.passed),
+          ...(answers ? { answers } : {}),
+        };
+      }),
+    });
+  }
+  return out;
 }
 
 /**
@@ -256,9 +313,11 @@ function normalise(input: unknown): AppData {
  * không bao giờ xoá dữ liệu cũ.
  */
 function migrate(data: AppData): AppData {
-  // normalise() đã lo trọn cả hai bước chuyển đổi:
+  // normalise() đã lo trọn các bước chuyển đổi:
   //   v1 -> v2  lược bỏ decks/vocab
   //   v2 -> v3  đổi note/refLink dạng chuỗi thành notes[]/links[]
+  //   v4 -> v5  lượt thi cũ không có scores[].answers, để trống là đúng —
+  //             không dựng lại được bài làm từ điểm số, và cũng không nên đoán.
   return data;
 }
 

@@ -244,6 +244,36 @@ export function wrongQueue(data: AppData): CatalogItem[] {
     .sort((a, b) => b.stars - a.stars);
 }
 
+/**
+ * Toàn bộ bài của một chủ đề — dùng khi bấm vào một chủ đề yếu ở trang Hôm nay.
+ *
+ * Lấy hết, kể cả bài đã làm đúng: mục đích là ôn lại cả mảng kiến thức đang
+ * hổng chứ không chỉ vá vài bài lẻ. Xếp theo mức cần xử lý: đang sai → chưa làm
+ * → đến hạn → còn lại; trong mỗi nhóm thì bài khó lên trước.
+ */
+export function topicQueue(
+  data: AppData,
+  subject: SubjectKey,
+  topic: string,
+  today = todayISO(),
+): CatalogItem[] {
+  const rank = (item: CatalogItem) => {
+    const progress = data.progress[item.id];
+    if (progress?.status === "wrong") return 0;
+    if ((progress?.status ?? "todo") === "todo") return 1;
+    if (isDue(progress, today)) return 2;
+    return 3;
+  };
+  return items
+    .filter((item) => item.subject === subject && item.topic === topic)
+    .sort((a, b) => {
+      const diff = rank(a) - rank(b);
+      if (diff !== 0) return diff;
+      if (b.stars !== a.stars) return b.stars - a.stars;
+      return a.no - b.no;
+    });
+}
+
 /* ------------------------------------------------------------------ */
 /* Dữ liệu biểu đồ                                                     */
 /* ------------------------------------------------------------------ */

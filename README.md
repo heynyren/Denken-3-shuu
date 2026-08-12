@@ -14,12 +14,13 @@ Danh mục **1608 bài** trên denken-ou.com, chia bốn môn:
 ## Có gì
 
 - **Hôm nay** — vòng tròn KPI ngày, chuỗi ngày liên tiếp 🔥, đếm ngược tới ngày thi, tiến độ bốn môn, biểu đồ 12 tuần, lịch ôn 14 ngày tới, lịch nhiệt 17 tuần, 15 huy hiệu.
-- **Ôn tập** — ba hàng đợi: đến hạn hôm nay / đang làm sai / chưa làm. Lọc theo môn, chủ đề và độ khó ★1–5. Chấm đúng/sai bằng phím `1`/`2`.
+- **Ôn tập** — ba hàng đợi: đến hạn hôm nay / đang làm sai / chưa làm. Lọc theo môn, chủ đề và độ khó ★1–5. Chấm đúng/sai bằng phím `1`/`2`. **Chấm xong app không tự nhảy bài** — bạn ở lại ghi chú bao lâu tuỳ ý, chuyển bài bằng `←` `→`, quay lại bài cũ lúc nào cũng được, bấm nhầm thì chấm lại ngay tại chỗ.
 - **Đồng hồ làm bài** — bấm `Space` là mở bài trên denken-ou.com và bắt đầu đếm ngược: A問題 5 phút, B問題 10 phút. Hết giờ thì chuông reo tới khi bạn tắt.
 - **Danh sách bài** — cả 1608 bài, lọc theo môn / chủ đề / trạng thái / độ khó, tìm trong tên bài lẫn trong ghi chú.
 - **Ghi chú** — mỗi bài nhiều ghi chú, mỗi ghi chú đính kèm được ảnh/PDF/Word. Ảnh hiện ngay trong app; chụp màn hình rồi `Ctrl+V` thẳng vào ô ghi chú.
 - **Link tham khảo** — mỗi bài nhiều link, mỗi link có nút mở ngay bên cạnh.
-- **Thi thử** — làm nguyên một kỳ thi thật, 24 kỳ từ H18 tới R07下. Chọn nhiều môn thì thi **lần lượt**: mỗi môn một đồng hồ riêng — 90 phút (理論/電力/機械), 65 phút (法規) — nộp xong môn này mới mở môn kia, thời gian **không cộng dồn**. 理論/機械 chỉ được chọn một trong 問17 hoặc 問18. Chấm điểm thang 100, mốc đạt 60, kèm bảng đối chiếu từng câu.
+- **Thi thử** — làm nguyên một kỳ thi thật, 24 kỳ từ H18 tới R07下. Chọn nhiều môn thì thi **lần lượt**: mỗi môn một đồng hồ riêng — 90 phút (理論/電力/機械), 65 phút (法規) — nộp xong môn này mới mở môn kia, thời gian **không cộng dồn**. 理論/機械 chỉ được chọn một trong 問17 hoặc 問18. Chấm điểm thang 100, mốc đạt 60, kèm **bảng phân tích**: đúng bao nhiêu phần trăm ở từng chủ đề ra trong đề đó, rồi tới từng câu — bạn chọn gì, đáp án đúng là gì. Mở lại lượt thi cũ trong lịch sử vẫn xem được đúng bảng đó.
+- **Đang yếu ở đâu** — ngay trang Hôm nay: top 5 chủ đề có tỉ lệ sai cao nhất của mỗi môn, tính gộp cả lượt ôn tập hằng ngày lẫn từng ý trong đề thi thử. Bấm một chủ đề là mở màn Ôn tập với **toàn bộ** bài của chủ đề đó, bài đang sai và chưa làm xếp lên trước.
 - **Huy hiệu** — giữ kín tới khi bạn chạm mốc, lúc đó mới nhảy lên chúc mừng.
 - Xuất ra Excel, JSON, hoặc gói `.zip` đầy đủ bất cứ lúc nào.
 
@@ -167,6 +168,8 @@ electron/          tiến trình chính — giữ file, gác cổng IPC
   preload.ts       cầu nối duy nhất sang giao diện
 src/
   lib/             kiểu dữ liệu, chu kỳ ôn, thống kê, huy hiệu
+  lib/exam.ts      luật đề thi, chấm điểm, phân tích theo chủ đề
+  lib/weakness.ts  xếp hạng chủ đề yếu từ ôn tập + thi thử
   state/           tầng trạng thái, tự lưu sau 600ms
   views/           5 màn hình
   data/catalog.json  danh mục 1608 bài

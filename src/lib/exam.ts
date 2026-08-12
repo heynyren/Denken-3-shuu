@@ -14,9 +14,9 @@
  * 問17 hoặc 問18**, nên số câu thực sự tính điểm là 3.
  */
 
-import { items } from "./catalog";
+import { itemById, items } from "./catalog";
 import { isPartB } from "./timing";
-import type { CatalogItem, SubjectKey } from "./types";
+import type { CatalogItem, ExamAnswerRecord, SubjectKey } from "./types";
 
 /**
  * Số ý của một câu. A問題 một ý, B問題 hai ý — đề thật hỏi (a) và (b) riêng,
@@ -217,6 +217,8 @@ export interface SubjectScore {
   ungraded: number;
   total: number;
   passed: boolean;
+  /** Bài làm từng câu, để dựng bảng phân tích và thống kê chỗ yếu. */
+  answers: ExamAnswerRecord[];
 }
 
 /**
@@ -242,6 +244,7 @@ export function gradePaper({
 }: GradeInput): SubjectScore {
   const questions = questionsToAnswer(paper, choice);
 
+  const records: ExamAnswerRecord[] = [];
   let score = 0;
   let correct = 0;
   let wrong = 0;
@@ -258,21 +261,26 @@ export function gradePaper({
     // đúng một ý vẫn được nửa số điểm, giống cách chấm của đề thật.
     const perSub = pointsFor(item, paper) / subs;
 
+    const record: ExamAnswerRecord = { id: item.id, picked: [], truth: [] };
     for (let index = 0; index < subs; index += 1) {
       const answer = truth[index];
+      const pick = picks[item.id]?.[index];
+      record.picked.push(pick ?? null);
+      record.truth.push(answer ?? null);
+
       if (answer === undefined) {
         ungraded += 1;
         continue;
       }
       gradablePoints += perSub;
 
-      const pick = picks[item.id]?.[index];
       if (pick === undefined) blank += 1;
       else if (pick === answer) {
         correct += 1;
         score += perSub;
       } else wrong += 1;
     }
+    records.push(record);
   }
 
   const scaled = gradablePoints > 0 ? (score / gradablePoints) * 100 : 0;
@@ -286,7 +294,89 @@ export function gradePaper({
     // Đếm theo ý chứ không theo câu, vì B問題 hai ý chấm riêng từng ý.
     total: questions.reduce((sum, item) => sum + subAnswerCount(item), 0),
     passed: gradablePoints > 0 && scaled >= PASS_MARK,
+    answers: records,
   };
+}
+
+/* ------------------------------------------------------------------ */
+/* Phân tích một lượt thi                                              */
+/* ------------------------------------------------------------------ */
+
+/** Kết quả của một ý trong bảng phân tích. */
+export type SubState = "right" | "wrong" | "blank" | "unknown";
+
+export function subState(
+  picked: number | null | undefined,
+  truth: number | null | undefined,
+): SubState {
+  if (truth === null || truth === undefined) return "unknown";
+  if (picked === null || picked === undefined) return "blank";
+  return picked === truth ? "right" : "wrong";
+}
+
+/** Một chủ đề trong bảng phân tích của lượt thi. */
+export interface TopicScore {
+  topic: string;
+  subject: SubjectKey;
+  /** Số ý chấm được (bỏ qua ý chưa có đáp án). */
+  graded: number;
+  correct: number;
+  wrong: number;
+  blank: number;
+  /** Số câu của chủ đề đó ra trong đề này. */
+  questions: number;
+  /** Tỉ lệ đúng trên phần chấm được, 0..1. */
+  ratio: number;
+}
+
+/**
+ * Đúng bao nhiêu phần trăm ở từng chủ đề trong lượt thi này.
+ *
+ * Mẫu số là số ý của chủ đề đó **ra trong chính đề này** và chấm được, nên đọc
+ * được ngay "chủ đề nào vừa mất điểm", chứ không pha loãng với các đề khác.
+ * Chủ đề yếu xếp lên trước, chủ đề chưa chấm được xuống cuối.
+ */
+export function topicBreakdown(records: ExamAnswerRecord[]): TopicScore[] {
+  const byTopic = new Map<string, TopicScore>();
+
+  for (const record of records) {
+    const item = itemById.get(record.id);
+    if (!item) continue;
+    const key = `${item.subject} ${item.topic}`;
+    const row =
+      byTopic.get(key) ??
+      ({
+        topic: item.topic,
+        subject: item.subject,
+        graded: 0,
+        correct: 0,
+        wrong: 0,
+        blank: 0,
+        questions: 0,
+        ratio: 0,
+      } satisfies TopicScore);
+    row.questions += 1;
+
+    record.truth.forEach((truth, index) => {
+      const state = subState(record.picked[index], truth);
+      if (state === "unknown") return;
+      row.graded += 1;
+      if (state === "right") row.correct += 1;
+      else if (state === "wrong") row.wrong += 1;
+      else row.blank += 1;
+    });
+
+    byTopic.set(key, row);
+  }
+
+  return [...byTopic.values()]
+    .map((row) => ({ ...row, ratio: row.graded > 0 ? row.correct / row.graded : 0 }))
+    .sort((a, b) => {
+      // Chủ đề chưa chấm được xuống cuối, còn lại yếu nhất lên đầu.
+      if (a.graded === 0 !== (b.graded === 0)) return a.graded === 0 ? 1 : -1;
+      if (a.ratio !== b.ratio) return a.ratio - b.ratio;
+      return b.graded - a.graded;
+    });
 }
 
 /** 5400 -> "90:00" */

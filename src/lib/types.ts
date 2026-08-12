@@ -132,6 +132,22 @@ export interface Settings {
   backupsToKeep: number;
 }
 
+/**
+ * Bài làm của một câu trong một lần thi: chọn gì, đáp án đúng là gì.
+ *
+ * Lưu cả `truth` chứ không tra lại bảng đáp án lúc xem: bảng đáp án còn được bổ
+ * sung dần, tra lại sau này sẽ ra bảng phân tích không khớp với điểm đã lưu.
+ * Mỗi mảng một phần tử cho A問題, hai phần tử cho B問題 — ý (a) và ý (b).
+ */
+export interface ExamAnswerRecord {
+  /** id bài trong danh mục, để tra ngược ra môn, chủ đề, tên bài và link. */
+  id: string;
+  /** Đáp án đã chọn từng ý; null = bỏ trống. */
+  picked: (number | null)[];
+  /** Đáp án đúng từng ý lúc chấm; thiếu phần tử = lúc đó chưa có đáp án. */
+  truth: (number | null)[];
+}
+
 /** Điểm một môn trong một lần thi thử. */
 export interface ExamSubjectScore {
   subject: SubjectKey;
@@ -139,6 +155,11 @@ export interface ExamSubjectScore {
   correct: number;
   total: number;
   passed: boolean;
+  /**
+   * Chi tiết từng câu, dùng cho bảng phân tích và thống kê chỗ yếu.
+   * Lượt thi lưu từ bản cũ không có trường này — giao diện phải chịu được.
+   */
+  answers?: ExamAnswerRecord[];
 }
 
 /** Một lần thi thử đã lưu. */

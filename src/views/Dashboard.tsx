@@ -1,12 +1,15 @@
 import { useMemo } from "react";
 
 import { BADGES } from "../lib/badges";
+import { subjectName, subjectViName } from "../lib/catalog";
 import { dailySeries, upcomingLoad, weeklySeries } from "../lib/stats";
 import { todayISO } from "../lib/srs";
+import { MIN_ATTEMPTS, weakTopics } from "../lib/weakness";
 import type { Overview } from "../lib/stats";
 import type { SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
 import {
+  Bar,
   BarChart,
   Heatmap,
   Ring,
@@ -41,17 +44,24 @@ export default function Dashboard({
   view,
   onStartReview,
   onOpenSubject,
+  onOpenTopic,
 }: {
   store: Store;
   view: Overview;
   onStartReview(): void;
   onOpenSubject(subject: SubjectKey): void;
+  /** Bấm một chủ đề yếu thì mở màn Ôn tập với toàn bộ chủ đề đó. */
+  onOpenTopic(subject: SubjectKey, topic: string): void;
 }) {
   const data = store.data!;
 
   const heat = useMemo(() => dailySeries(data, 119), [data]);
   const weeks = useMemo(() => weeklySeries(data, 12), [data]);
   const upcoming = useMemo(() => upcomingLoad(data, 14), [data]);
+  const weak = useMemo(() => weakTopics(data, 5), [data]);
+  const weakSubjects = view.bySubject.filter(
+    (subject) => weak[subject.key].length > 0,
+  );
 
   // Huy hiệu chưa đạt không hiện ở đâu cả — bất ngờ thì mới vui.
   const today = todayISO();
@@ -253,6 +263,60 @@ export default function Dashboard({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Đang yếu ở đâu — gộp cả ôn tập lẫn thi thử */}
+      <div className="card">
+        <div className="card-head">
+          <div className="card-title">
+            🩹 Đang yếu ở đâu
+            <div className="card-sub">
+              Top 5 chủ đề có tỉ lệ sai cao nhất mỗi môn, tính gộp cả lượt ôn tập
+              lẫn từng ý trong đề thi thử. Bấm vào một chủ đề để ôn lại cả chủ đề đó.
+            </div>
+          </div>
+        </div>
+
+        {weakSubjects.length === 0 ? (
+          <div className="empty small">
+            Chưa đủ dữ liệu để kết luận chỗ nào yếu. Một chủ đề phải có ít nhất{" "}
+            {MIN_ATTEMPTS} lượt chấm (ôn tập hoặc thi thử) mới được xếp hạng — làm
+            đúng một bài rồi sai một bài thì con số 50% chẳng nói lên điều gì.
+          </div>
+        ) : (
+          <div className="weak-grid">
+            {weakSubjects.map((subject) => (
+              <div className="weak-subject" key={subject.key}>
+                <div className="row" style={{ gap: 8, marginBottom: 8 }}>
+                  <span className="ja" style={{ fontWeight: 700 }}>
+                    {subjectName(subject.key)}
+                  </span>
+                  <span className="small dim">{subjectViName(subject.key)}</span>
+                </div>
+
+                {weak[subject.key].map((row) => (
+                  <button
+                    className="weak-row"
+                    key={row.topic}
+                    onClick={() => onOpenTopic(row.subject, row.topic)}
+                    title={`Ôn lại cả ${row.totalItems} bài của chủ đề này`}
+                  >
+                    <span className="weak-topic ja">{row.topic}</span>
+                    <span className="weak-bar">
+                      <Bar ratio={row.ratio} color="var(--red)" thin />
+                    </span>
+                    <span className="weak-pct">{Math.round(row.ratio * 100)}%</span>
+                    <span className="small dim nowrap">
+                      sai {row.wrong}/{row.attempts}
+                      {row.fromExam > 0 && ` · ${row.fromExam} ý từ thi thử`}
+                    </span>
+                    <span className="weak-go">ôn lại {row.totalItems} bài →</span>
+                  </button>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Biểu đồ tiến bộ */}

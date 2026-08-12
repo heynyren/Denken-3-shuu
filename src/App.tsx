@@ -10,6 +10,7 @@ import Review from "./views/Review";
 import Browse from "./views/Browse";
 import Exam from "./views/Exam";
 import Settings from "./views/Settings";
+import type { TopicFocus } from "./views/Review";
 import type { SubjectKey } from "./lib/types";
 
 type Tab = "dashboard" | "review" | "browse" | "exam" | "settings";
@@ -35,6 +36,9 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("dashboard");
   // Bấm một môn ở sidebar thì nhảy sang danh sách bài đã lọc sẵn môn đó.
   const [jumpSubject, setJumpSubject] = useState<SubjectKey | "all">("all");
+  // Bấm một chủ đề yếu (ở Hôm nay hoặc ở bảng phân tích bài thi) thì mở màn Ôn
+  // tập với đúng chủ đề đó, để ôn lại cả mảng kiến thức chứ không vá từng bài.
+  const [reviewFocus, setReviewFocus] = useState<TopicFocus | null>(null);
   const [showAbout, setShowAbout] = useState(false);
 
   const view = useMemo(
@@ -56,6 +60,11 @@ export default function App() {
   const goSubject = (subject: SubjectKey) => {
     setJumpSubject(subject);
     setTab("browse");
+  };
+
+  const goTopic = (subject: SubjectKey, topic: string) => {
+    setReviewFocus({ subject, topic });
+    setTab("review");
   };
 
   return (
@@ -153,9 +162,17 @@ export default function App() {
             view={view}
             onStartReview={() => setTab("review")}
             onOpenSubject={goSubject}
+            onOpenTopic={goTopic}
           />
         )}
-        {tab === "review" && <Review store={store} view={view} />}
+        {tab === "review" && (
+          <Review
+            store={store}
+            view={view}
+            focus={reviewFocus}
+            onFocusHandled={() => setReviewFocus(null)}
+          />
+        )}
         {tab === "browse" && (
           <Browse
             store={store}
@@ -163,7 +180,7 @@ export default function App() {
             onSubjectHandled={() => setJumpSubject("all")}
           />
         )}
-        {tab === "exam" && <Exam store={store} />}
+        {tab === "exam" && <Exam store={store} onOpenTopic={goTopic} />}
         {tab === "settings" && <Settings store={store} view={view} />}
       </main>
 

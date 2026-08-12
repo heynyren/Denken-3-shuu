@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { AttemptAnalysis, QuestionTable, TopicTable } from "../components/ExamAnalysis";
 import { Ring, Stars, openLink } from "../components/ui";
 import { subjectName, subjectViName, subjects } from "../lib/catalog";
 import { createAlarm } from "../lib/alarm";
@@ -43,7 +44,14 @@ function paperSeconds(subject: SubjectKey): number {
   return EXAM_MINUTES[subject] * 60;
 }
 
-export default function Exam({ store }: { store: Store }) {
+export default function Exam({
+  store,
+  onOpenTopic,
+}: {
+  store: Store;
+  /** Bấm "Ôn lại" ở bảng phân tích thì nhảy sang màn Ôn tập với cả chủ đề đó. */
+  onOpenTopic(subject: SubjectKey, topic: string): void;
+}) {
   const [stage, setStage] = useState<Stage>("setup");
   const [exam, setExam] = useState(examSets[0]?.exam ?? "");
   const [chosen, setChosen] = useState<SubjectKey[]>(["riron"]);
@@ -302,7 +310,7 @@ export default function Exam({ store }: { store: Store }) {
           </button>
         </div>
 
-        <ExamHistory store={store} />
+        <ExamHistory store={store} onOpenTopic={onOpenTopic} />
       </div>
     );
   }
@@ -452,12 +460,7 @@ export default function Exam({ store }: { store: Store }) {
     <ExamResult
       exam={exam}
       scores={scores}
-      // Chỉ đối chiếu những môn đã thật sự nộp; môn bỏ dở không có gì để soi.
-      papers={papers.filter((paper) =>
-        scores.some((score) => score.subject === paper.subject),
-      )}
-      picks={picks}
-      choice={choice}
+      onOpenTopic={onOpenTopic}
       onAgain={() => leaveResult(() => setStage("setup"))}
       onSave={() =>
         leaveResult(() => {
@@ -471,6 +474,9 @@ export default function Exam({ store }: { store: Store }) {
               correct: s.correct,
               total: s.total,
               passed: s.passed,
+              // Bài làm từng câu: đây là thứ dựng nên bảng phân tích khi mở
+              // lại lượt thi này, và cũng là dữ liệu cho mục "đang yếu ở đâu".
+              answers: s.answers,
             })),
           });
           setStage("setup");
@@ -589,17 +595,13 @@ function PaperSheet({
 function ExamResult({
   exam,
   scores,
-  papers,
-  picks,
-  choice,
+  onOpenTopic,
   onAgain,
   onSave,
 }: {
   exam: string;
   scores: SubjectScore[];
-  papers: ExamPaper[];
-  picks: Picks;
-  choice: Partial<Record<SubjectKey, number>>;
+  onOpenTopic?(subject: SubjectKey, topic: string): void;
   onAgain(): void;
   onSave(): void;
 }) {
@@ -664,68 +666,26 @@ function ExamResult({
         ))}
       </div>
 
-      {/* Bảng đối chiếu từng câu để biết sai ở đâu */}
-      {papers.map((paper) => {
-        const list = questionsToAnswer(paper, choice[paper.subject] ?? null);
-        return (
-          <div className="card" key={paper.subject}>
-            <div className="card-head">
-              <div className="card-title ja">
-                {subjectName(paper.subject)} — từng câu
+      {/* Phân tích: chủ đề nào yếu, rồi tới từng câu sai ở đâu */}
+      {scores.map((score) => (
+        <div className="card" key={score.subject}>
+          <div className="card-head">
+            <div className="card-title">
+              <span className="ja">{subjectName(score.subject)}</span> — phân tích
+              <div className="card-sub">
+                Đúng bao nhiêu phần trăm ở từng chủ đề vừa ra trong đề này
               </div>
             </div>
-            <div className="exam-review">
-              {list.flatMap((item) =>
-                Array.from({ length: subAnswerCount(item) }, (_, index) => {
-                  const truth = (ANSWERS[item.id] ?? [])[index];
-                  const pick = picks[item.id]?.[index];
-                  const state =
-                    truth === undefined
-                      ? "unknown"
-                      : pick === undefined
-                        ? "blank"
-                        : pick === truth
-                          ? "right"
-                          : "wrong";
-                  return (
-                    <div
-                      className={`exam-review-q ${state}`}
-                      key={`${item.id}-${index}`}
-                    >
-                      <span className="mono">
-                        {item.question}
-                        {subAnswerCount(item) > 1 && ` ${SUB_LABELS[index]}`}
-                      </span>
-                      <span className="exam-review-mark">
-                        {state === "right"
-                          ? "✅"
-                          : state === "wrong"
-                            ? "❌"
-                            : state === "blank"
-                              ? "⬜"
-                              : "－"}
-                      </span>
-                      <span className="small dim">
-                        {state === "unknown"
-                          ? "chưa có đáp án"
-                          : `bạn chọn ${pick ?? "—"} · đúng là ${truth}`}
-                      </span>
-                      <span className="spacer" />
-                      <button
-                        className="icon-btn"
-                        title="Mở lời giải trên denken-ou.com"
-                        onClick={() => openLink(item.url)}
-                      >
-                        ↗
-                      </button>
-                    </div>
-                  );
-                }),
-              )}
-            </div>
           </div>
-        );
-      })}
+
+          <TopicTable records={score.answers} onOpenTopic={onOpenTopic} />
+
+          <div className="small dim" style={{ margin: "16px 0 6px" }}>
+            Từng câu — bạn chọn gì, đáp án đúng là gì
+          </div>
+          <QuestionTable records={score.answers} />
+        </div>
+      ))}
 
       <div className="card center">
         <div className="btn-row" style={{ justifyContent: "center" }}>
@@ -745,8 +705,16 @@ function ExamResult({
 /* Lịch sử thi                                                         */
 /* ------------------------------------------------------------------ */
 
-function ExamHistory({ store }: { store: Store }) {
+function ExamHistory({
+  store,
+  onOpenTopic,
+}: {
+  store: Store;
+  onOpenTopic?(subject: SubjectKey, topic: string): void;
+}) {
   const results = store.data!.examResults;
+  // Mở một lượt để soi chi tiết; mở cái khác thì cái đang mở tự đóng.
+  const [openId, setOpenId] = useState<string | null>(null);
   if (results.length === 0) return null;
 
   return (
@@ -754,40 +722,66 @@ function ExamHistory({ store }: { store: Store }) {
       <div className="card-head">
         <div className="card-title">
           Lịch sử thi thử
-          <div className="card-sub">{results.length} lần</div>
+          <div className="card-sub">
+            {results.length} lần · bấm vào một lượt để xem phân tích từng câu
+          </div>
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
         {[...results]
           .reverse()
           .slice(0, 20)
-          .map((result) => (
-            <div className="exam-history-row" key={result.id}>
-              <span style={{ fontWeight: 700, minWidth: 64 }}>{result.exam}</span>
-              <span className="small dim" style={{ minWidth: 96 }}>
-                {result.takenAt.slice(0, 10)}
-              </span>
-              <div className="row wrap" style={{ gap: 6, flex: 1 }}>
-                {result.scores.map((score) => (
-                  <span
-                    key={score.subject}
-                    className={`pill ${score.passed ? "correct" : "wrong"}`}
-                    title={`${score.correct}/${score.total} câu đúng`}
-                  >
-                    <span className="ja">{subjectName(score.subject)}</span>{" "}
-                    {score.score}
+          .map((result) => {
+            const open = openId === result.id;
+            return (
+              <div key={result.id}>
+                <div
+                  className={`exam-history-row${open ? " open" : ""}`}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setOpenId(open ? null : result.id)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      setOpenId(open ? null : result.id);
+                    }
+                  }}
+                >
+                  <span className="history-caret">{open ? "▾" : "▸"}</span>
+                  <span style={{ fontWeight: 700, minWidth: 64 }}>{result.exam}</span>
+                  <span className="small dim" style={{ minWidth: 96 }}>
+                    {result.takenAt.slice(0, 10)}
                   </span>
-                ))}
+                  <div className="row wrap" style={{ gap: 6, flex: 1 }}>
+                    {result.scores.map((score) => (
+                      <span
+                        key={score.subject}
+                        className={`pill ${score.passed ? "correct" : "wrong"}`}
+                        title={`${score.correct}/${score.total} ý đúng`}
+                      >
+                        <span className="ja">{subjectName(score.subject)}</span>{" "}
+                        {score.score}
+                      </span>
+                    ))}
+                  </div>
+                  <button
+                    className="icon-btn"
+                    title="Xoá lần thi này"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      store.removeExamResult(result.id);
+                    }}
+                  >
+                    🗑
+                  </button>
+                </div>
+
+                {open && (
+                  <AttemptAnalysis result={result} onOpenTopic={onOpenTopic} />
+                )}
               </div>
-              <button
-                className="icon-btn"
-                title="Xoá lần thi này"
-                onClick={() => store.removeExamResult(result.id)}
-              >
-                🗑
-              </button>
-            </div>
-          ))}
+            );
+          })}
       </div>
     </div>
   );
