@@ -29,11 +29,18 @@ import type { Store } from "../state/useStore";
 
 const ANSWERS = (answersFile as { answers: AnswerKey }).answers;
 
-type Stage = "setup" | "running" | "result";
+/**
+ * Bốn bước: chọn đề → làm một môn → nghỉ giữa hai môn → xem kết quả.
+ *
+ * Chọn nhiều môn thì **thi lần lượt**, mỗi môn một đồng hồ riêng đúng bằng thời
+ * gian của môn đó. Không gộp thời gian các môn lại thành một đồng hồ chung: ở
+ * kỳ thi thật hết giờ môn nào là nộp môn đó, không được mượn thời gian môn sau.
+ */
+type Stage = "setup" | "running" | "break" | "result";
 
-/** Tổng thời gian cho các môn đã chọn, tính bằng giây. */
-function totalSeconds(list: SubjectKey[]): number {
-  return list.reduce((sum, key) => sum + EXAM_MINUTES[key] * 60, 0);
+/** Thời gian của một môn, tính bằng giây. */
+function paperSeconds(subject: SubjectKey): number {
+  return EXAM_MINUTES[subject] * 60;
 }
 
 export default function Exam({ store }: { store: Store }) {
@@ -46,6 +53,8 @@ export default function Exam({ store }: { store: Store }) {
   // 理論/機械 chỉ được làm một trong 問17 hoặc 問18
   const [choice, setChoice] = useState<Partial<Record<SubjectKey, number>>>({});
   const [scores, setScores] = useState<SubjectScore[]>([]);
+  /** Đang thi tới môn thứ mấy trong danh sách đã chọn. */
+  const [step, setStep] = useState(0);
 
   const [endsAt, setEndsAt] = useState<number | null>(null);
   const [left, setLeft] = useState(0);
@@ -75,7 +84,14 @@ export default function Exam({ store }: { store: Store }) {
     return { total, graded };
   }, [papers]);
 
+  const current = papers[step];
+  const next = papers[step + 1];
+
   /* ---------------- đồng hồ ---------------- */
+
+  // Hết giờ thì tự nộp môn đang làm. Giữ trong ref để đồng hồ luôn gọi bản mới
+  // nhất, không kẹt lại bài làm của lần render cũ.
+  const submitRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     if (endsAt === null) return;
@@ -85,19 +101,28 @@ export default function Exam({ store }: { store: Store }) {
       if (remain === 0) {
         setEndsAt(null);
         alarm.current.start();
-        finish();
+        submitRef.current();
       }
     };
     tick();
     const id = setInterval(tick, 500);
     return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endsAt]);
 
   const alarmRef = alarm.current;
   useEffect(() => () => alarmRef.stop(), [alarmRef]);
 
   /* ---------------- các bước ---------------- */
+
+  /** Mở đồng hồ riêng cho một môn rồi vào phòng thi. */
+  const startPaper = (index: number) => {
+    const paper = papers[index];
+    if (!paper) return;
+    alarm.current.stop();
+    setStep(index);
+    setEndsAt(Date.now() + paperSeconds(paper.subject) * 1000);
+    setStage("running");
+  };
 
   const begin = () => {
     if (papers.length === 0) return;
@@ -108,29 +133,40 @@ export default function Exam({ store }: { store: Store }) {
         papers.filter((p) => p.hasChoice).map((p) => [p.subject, CHOICE_PAIR[0]]),
       ),
     );
-    setEndsAt(Date.now() + totalSeconds(chosen) * 1000);
-    setStage("running");
+    startPaper(0);
   };
 
-  const finish = () => {
-    setScores(
-      papers.map((paper) =>
-        gradePaper({
-          paper,
-          choice: choice[paper.subject] ?? null,
-          picks,
-          answers: ANSWERS,
-        }),
-      ),
-    );
+  /**
+   * Nộp môn đang làm: chấm ngay môn đó rồi sang phòng chờ, hoặc ra kết quả nếu
+   * đây là môn cuối. Chấm từng môn một nên điểm không phụ thuộc vào việc các
+   * môn sau có làm hay không.
+   */
+  const submitPaper = () => {
+    if (!current) return;
+    const score = gradePaper({
+      paper: current,
+      choice: choice[current.subject] ?? null,
+      picks,
+      answers: ANSWERS,
+    });
+    setScores((list) => [...list.filter((s) => s.subject !== score.subject), score]);
     setEndsAt(null);
-    setStage("result");
+    setStage(next ? "break" : "result");
   };
+  submitRef.current = submitPaper;
 
   const quit = () => {
     alarm.current.stop();
     setEndsAt(null);
+    setStep(0);
+    setScores([]);
     setStage("setup");
+  };
+
+  const leaveResult = (after: () => void) => {
+    alarm.current.stop();
+    setStep(0);
+    after();
   };
 
   /* ================= chọn đề ================= */
@@ -214,11 +250,23 @@ export default function Exam({ store }: { store: Store }) {
             </button>
           </div>
 
-          {chosen.length > 0 && (
+          {papers.length > 0 && (
             <div className="callout" style={{ marginTop: 16 }}>
-              Sẽ thi <strong>{chosen.length} môn</strong>, tổng thời gian{" "}
-              <strong>{Math.round(totalSeconds(chosen) / 60)} phút</strong>. Điểm đạt
-              là <strong>{PASS_MARK}/100</strong> mỗi môn.
+              Thi <strong>lần lượt từng môn</strong>, xong môn này mới sang môn kia:
+              <div className="exam-order">
+                {papers.map((paper, index) => (
+                  <span className="exam-order-step" key={paper.subject}>
+                    {index > 0 && <span className="dim">→</span>}
+                    <span className="ja">{subjectName(paper.subject)}</span>
+                    <span className="small dim">
+                      {EXAM_MINUTES[paper.subject]} phút
+                    </span>
+                  </span>
+                ))}
+              </div>
+              Mỗi môn có đồng hồ riêng, <strong>không cộng dồn thời gian</strong> — hết
+              giờ môn nào là nộp môn đó. Điểm đạt là <strong>{PASS_MARK}/100</strong>{" "}
+              mỗi môn.
             </div>
           )}
 
@@ -261,27 +309,24 @@ export default function Exam({ store }: { store: Store }) {
 
   /* ================= đang làm bài ================= */
 
-  if (stage === "running") {
-    // Đếm theo ý: một câu B問題 trả lời được (a) mà bỏ (b) thì mới xong một nửa.
-    const answered = Object.values(picks).reduce(
-      (sum, list) => sum + list.filter((value) => value !== undefined).length,
+  if (stage === "running" && current) {
+    // Chỉ đếm trong môn đang thi — môn sau chưa mở nên không tính vào đây.
+    const need = questionsToAnswer(current, choice[current.subject] ?? null);
+    const needIds = new Set(need.map((item) => item.id));
+    const answered = Object.entries(picks).reduce(
+      (sum, [id, list]) =>
+        needIds.has(id)
+          ? sum + list.filter((value) => value !== undefined).length
+          : sum,
       0,
     );
-    const need = papers.reduce(
-      (sum, paper) =>
-        sum +
-        questionsToAnswer(paper, choice[paper.subject] ?? null).reduce(
-          (inner, item) => inner + subAnswerCount(item),
-          0,
-        ),
-      0,
-    );
+    const needCount = need.reduce((sum, item) => sum + subAnswerCount(item), 0);
 
     return (
       <div className="container">
         <div className="exam-bar">
           <Ring
-            ratio={left / Math.max(1, totalSeconds(chosen))}
+            ratio={left / paperSeconds(current.subject)}
             size={64}
             width={7}
             color={left <= 300 ? "var(--red)" : "var(--blue)"}
@@ -290,44 +335,112 @@ export default function Exam({ store }: { store: Store }) {
           </Ring>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontWeight: 700 }}>
-              {exam} — {papers.map((p) => subjectName(p.subject)).join(" · ")}
+              {exam} — <span className="ja">{subjectName(current.subject)}</span>
+              {papers.length > 1 && (
+                <span className="small dim">
+                  {" "}
+                  (môn {step + 1}/{papers.length})
+                </span>
+              )}
             </div>
             <div className="small muted">
-              Đã trả lời {answered}/{need} ý
+              Đã trả lời {answered}/{needCount} ý
               {left <= 300 && " · sắp hết giờ!"}
             </div>
           </div>
-          <button className="btn success" onClick={finish}>
-            Nộp bài
+          <button className="btn success" onClick={submitPaper}>
+            {next ? "Nộp môn này" : "Nộp bài"}
           </button>
           <button className="btn ghost sm" onClick={quit}>
             Thoát
           </button>
         </div>
 
-        {papers.map((paper) => (
-          <PaperSheet
-            key={paper.subject}
-            paper={paper}
-            picks={picks}
-            onPick={(id, index, value) =>
-              setPicks((current) => {
-                const list = [...(current[id] ?? [])];
-                list[index] = value;
-                return { ...current, [id]: list };
-              })
-            }
-            choice={choice[paper.subject] ?? null}
-            onChoice={(value) =>
-              setChoice((c) => ({ ...c, [paper.subject]: value }))
-            }
-          />
-        ))}
+        <PaperSheet
+          paper={current}
+          picks={picks}
+          onPick={(id, index, value) =>
+            setPicks((list) => {
+              const row = [...(list[id] ?? [])];
+              row[index] = value;
+              return { ...list, [id]: row };
+            })
+          }
+          choice={choice[current.subject] ?? null}
+          onChoice={(value) =>
+            setChoice((c) => ({ ...c, [current.subject]: value }))
+          }
+        />
 
         <div className="card center">
-          <button className="btn success lg" onClick={finish}>
-            Nộp bài và xem điểm
+          <button className="btn success lg" onClick={submitPaper}>
+            {next ? (
+              <>
+                Nộp <span className="ja">{subjectName(current.subject)}</span> và sang{" "}
+                <span className="ja">{subjectName(next.subject)}</span> →
+              </>
+            ) : (
+              "Nộp bài và xem điểm"
+            )}
           </button>
+          {next && (
+            <div className="small dim" style={{ marginTop: 10 }}>
+              Nộp rồi là không quay lại sửa được, giống phòng thi thật.
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  /* ================= nghỉ giữa hai môn ================= */
+
+  if (stage === "break" && next) {
+    const justDone = papers[step];
+    return (
+      <div className="container">
+        <div className="card center exam-break">
+          <div className="exam-break-icon">☕</div>
+          <div className="exam-break-title">
+            Xong <span className="ja">{justDone && subjectName(justDone.subject)}</span>
+          </div>
+          <p className="muted">
+            Nghỉ một chút rồi thi tiếp. Môn sau có đồng hồ riêng, bấm nút mới bắt đầu
+            tính giờ — thời gian nghỉ không bị trừ vào bài.
+          </p>
+
+          <div className="exam-order" style={{ justifyContent: "center" }}>
+            {papers.map((paper, index) => (
+              <span
+                className={`exam-order-step${
+                  index < step + 1 ? " done" : index === step + 1 ? " now" : ""
+                }`}
+                key={paper.subject}
+              >
+                {index > 0 && <span className="dim">→</span>}
+                <span className="ja">{subjectName(paper.subject)}</span>
+                <span className="small dim">
+                  {index < step + 1 ? "đã nộp" : `${EXAM_MINUTES[paper.subject]} phút`}
+                </span>
+              </span>
+            ))}
+          </div>
+
+          <div className="btn-row" style={{ justifyContent: "center", marginTop: 18 }}>
+            <button className="btn primary lg" onClick={() => startPaper(step + 1)}>
+              Bắt đầu <span className="ja">{subjectName(next.subject)}</span> —{" "}
+              {EXAM_MINUTES[next.subject]} phút →
+            </button>
+            <button
+              className="btn ghost"
+              onClick={() => {
+                alarm.current.stop();
+                setStage("result");
+              }}
+            >
+              Dừng ở đây, xem điểm
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -339,25 +452,30 @@ export default function Exam({ store }: { store: Store }) {
     <ExamResult
       exam={exam}
       scores={scores}
-      papers={papers}
+      // Chỉ đối chiếu những môn đã thật sự nộp; môn bỏ dở không có gì để soi.
+      papers={papers.filter((paper) =>
+        scores.some((score) => score.subject === paper.subject),
+      )}
       picks={picks}
       choice={choice}
-      onAgain={() => setStage("setup")}
-      onSave={() => {
-        store.saveExamResult({
-          id: `exam-${Date.now()}`,
-          exam,
-          takenAt: new Date().toISOString(),
-          scores: scores.map((s) => ({
-            subject: s.subject,
-            score: s.score,
-            correct: s.correct,
-            total: s.total,
-            passed: s.passed,
-          })),
-        });
-        setStage("setup");
-      }}
+      onAgain={() => leaveResult(() => setStage("setup"))}
+      onSave={() =>
+        leaveResult(() => {
+          store.saveExamResult({
+            id: `exam-${Date.now()}`,
+            exam,
+            takenAt: new Date().toISOString(),
+            scores: scores.map((s) => ({
+              subject: s.subject,
+              score: s.score,
+              correct: s.correct,
+              total: s.total,
+              passed: s.passed,
+            })),
+          });
+          setStage("setup");
+        })
+      }
     />
   );
 }

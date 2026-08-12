@@ -19,7 +19,7 @@ Danh mục **1608 bài** trên denken-ou.com, chia bốn môn:
 - **Danh sách bài** — cả 1608 bài, lọc theo môn / chủ đề / trạng thái / độ khó, tìm trong tên bài lẫn trong ghi chú.
 - **Ghi chú** — mỗi bài nhiều ghi chú, mỗi ghi chú đính kèm được ảnh/PDF/Word. Ảnh hiện ngay trong app; chụp màn hình rồi `Ctrl+V` thẳng vào ô ghi chú.
 - **Link tham khảo** — mỗi bài nhiều link, mỗi link có nút mở ngay bên cạnh.
-- **Thi thử** — làm nguyên một kỳ thi thật, 24 kỳ từ H18 tới R07下. Bấm giờ 90 phút (理論/電力/機械) và 65 phút (法規), 理論/機械 chỉ được chọn một trong 問17 hoặc 問18. Chấm điểm thang 100, mốc đạt 60, kèm bảng đối chiếu từng câu.
+- **Thi thử** — làm nguyên một kỳ thi thật, 24 kỳ từ H18 tới R07下. Chọn nhiều môn thì thi **lần lượt**: mỗi môn một đồng hồ riêng — 90 phút (理論/電力/機械), 65 phút (法規) — nộp xong môn này mới mở môn kia, thời gian **không cộng dồn**. 理論/機械 chỉ được chọn một trong 問17 hoặc 問18. Chấm điểm thang 100, mốc đạt 60, kèm bảng đối chiếu từng câu.
 - **Huy hiệu** — giữ kín tới khi bạn chạm mốc, lúc đó mới nhảy lên chúc mừng.
 - Xuất ra Excel, JSON, hoặc gói `.zip` đầy đủ bất cứ lúc nào.
 

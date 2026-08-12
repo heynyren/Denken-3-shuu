@@ -40,6 +40,17 @@ export const EXAM_MINUTES: Record<SubjectKey, number> = {
 /** Điểm đạt trên thang 100. Kỳ thi thật đôi khi hạ chuẩn, nhưng 60 là mốc gốc. */
 export const PASS_MARK = 60;
 
+/**
+ * Số hiệu câu chuẩn của mỗi môn trong đề thật.
+ * Câu nào mang số ngoài khoảng này là dữ liệu sai, không đưa vào đề thi thử.
+ */
+export const STANDARD_QUESTIONS: Record<SubjectKey, number> = {
+  riron: 18,
+  denryoku: 17,
+  kikai: 18,
+  houki: 13,
+};
+
 /** Hai môn này cho chọn một trong hai câu cuối. */
 export const CHOICE_SUBJECTS: ReadonlySet<SubjectKey> = new Set(["riron", "kikai"]);
 /** Cặp câu được chọn: làm 問17 hoặc 問18, không làm cả hai. */
@@ -79,6 +90,44 @@ export function examOrder(exam: string): number {
   return era * 100_000 + year * 10 + half;
 }
 
+/**
+ * Dọn một đề: bỏ câu trùng, bỏ câu ngoài chuẩn.
+ *
+ * Danh mục có 26 chỗ trùng, chủ yếu vì một bài liên môn được liệt kê ở hai chủ
+ * đề khác nhau — cùng link, cùng tên, nhưng thành hai dòng. Đưa nguyên vào đề
+ * thi thử thì 法規 H18 có tới 15 câu và 問2 hiện ba lần.
+ *
+ * Khử theo hai vòng:
+ *   1. Trùng link  -> chắc chắn cùng một bài, giữ một.
+ *   2. Trùng số hiệu mà khác link -> giữ bài có link đúng môn. Ví dụ 法規 R4下
+ *      問11 có một dòng mang link denryoku…, đó là bài của môn 電力 bị xếp nhầm.
+ */
+function tidyPaper(subject: SubjectKey, questions: CatalogItem[]): CatalogItem[] {
+  const byUrl = new Map<string, CatalogItem>();
+  for (const item of questions) {
+    const key = item.url || item.id;
+    if (!byUrl.has(key)) byUrl.set(key, item);
+  }
+
+  const byNumber = new Map<number, CatalogItem>();
+  for (const item of byUrl.values()) {
+    const number = questionNo(item);
+    if (number < 1 || number > STANDARD_QUESTIONS[subject]) continue;
+
+    const kept = byNumber.get(number);
+    if (!kept) {
+      byNumber.set(number, item);
+      continue;
+    }
+    // Link bắt đầu bằng tên môn thì mới là bài của môn này.
+    const belongs = (entry: CatalogItem) =>
+      entry.url.toLowerCase().includes(`/${subject}`);
+    if (!belongs(kept) && belongs(item)) byNumber.set(number, item);
+  }
+
+  return [...byNumber.values()].sort((a, b) => questionNo(a) - questionNo(b));
+}
+
 /** Toàn bộ kỳ thi có trong danh mục, mới nhất trước. */
 export const examSets: ExamSet[] = (() => {
   const grouped = new Map<string, ExamSet>();
@@ -101,7 +150,7 @@ export const examSets: ExamSet[] = (() => {
 
   for (const set of grouped.values()) {
     for (const paper of Object.values(set.papers)) {
-      paper.questions.sort((a, b) => questionNo(a) - questionNo(b));
+      paper.questions = tidyPaper(paper.subject, paper.questions);
       const numbers = new Set(paper.questions.map(questionNo));
       paper.hasChoice =
         CHOICE_SUBJECTS.has(paper.subject) &&

@@ -1566,6 +1566,44 @@ select {
   font-weight: 700;
 }
 
+/* Thứ tự các môn sẽ thi — mỗi môn một đồng hồ riêng, không cộng dồn */
+.exam-order {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+.exam-order-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border-radius: var(--radius-pill);
+  padding: 5px 12px;
+  font-weight: 700;
+}
+.exam-order-step.done {
+  opacity: 0.55;
+}
+.exam-order-step.now {
+  background: color-mix(in srgb, var(--blue) 22%, var(--surface-2));
+  box-shadow: inset 0 0 0 1px var(--blue);
+}
+
+/* Phòng chờ giữa hai môn */
+.exam-break {
+  padding: 34px 24px;
+}
+.exam-break-icon {
+  font-size: 46px;
+}
+.exam-break-title {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 6px 0 4px;
+}
+
 /* Thanh đồng hồ dính trên đầu khi đang làm bài */
 .exam-bar {
   position: sticky;
@@ -1721,4 +1759,25 @@ select {
   color: var(--amber);
   display: flex;
   align-items: center;
+}
+
+/* Chip lọc độ khó: sao luôn vàng, phần chưa đạt để mờ cho thấy thang 5 sao */
+.chip.star-chip {
+  color: var(--amber);
+  letter-spacing: 1px;
+  font-size: 12px;
+}
+.chip.star-chip:hover {
+  color: var(--amber);
+}
+.chip.star-chip.on {
+  background: var(--amber-soft);
+  border-color: var(--amber);
+  color: var(--amber);
+}
+.chip.star-chip .star-off {
+  color: var(--surface-3);
+}
+.chip.star-chip.on .star-off {
+  color: rgba(247, 185, 40, 0.35);
 }

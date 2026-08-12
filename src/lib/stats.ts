@@ -63,8 +63,14 @@ export interface Overview {
   bySubject: SubjectStats[];
   examDate: string;
   daysToExam: number;
-  /** Số bài cần làm mỗi ngày để quét hết phần chưa làm trước ngày thi. */
+  /**
+   * Số bài cần làm mỗi ngày để xử lý hết phần còn nợ trước ngày thi.
+   * Nợ = chưa làm + đang sai — bài đang sai cũng phải quay lại làm cho đúng,
+   * bỏ nó ra ngoài thì con số này lạc quan quá mức.
+   */
   paceNeeded: number;
+  /** Chưa làm + đang sai. */
+  remaining: number;
 }
 
 export function statusOf(data: AppData, id: string): ItemStatus {
@@ -189,8 +195,11 @@ export function computeOverview(data: AppData, today = todayISO()): Overview {
     }),
     examDate: data.settings.examDate,
     daysToExam,
+    remaining: counts.todo + counts.wrong,
     paceNeeded:
-      daysToExam > 0 ? Math.ceil(counts.todo / daysToExam) : counts.todo,
+      daysToExam > 0
+        ? Math.ceil((counts.todo + counts.wrong) / daysToExam)
+        : counts.todo + counts.wrong,
   };
 }
 

@@ -171,11 +171,12 @@ export default function Review({ store, view }: { store: Store; view: Overview }
           {[1, 2, 3, 4, 5].map((value) => (
             <button
               key={value}
-              className={`chip${stars.has(value) ? " on" : ""}`}
+              className={`chip star-chip${stars.has(value) ? " on" : ""}`}
               onClick={() => toggleStar(value)}
               title={`Chỉ ôn bài ${value} sao`}
             >
               {"★".repeat(value)}
+              <span className="star-off">{"★".repeat(5 - value)}</span>
             </button>
           ))}
           {stars.size > 0 && (

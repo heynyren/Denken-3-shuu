@@ -157,10 +157,11 @@ export default function Dashboard({
           <div className="stat-foot" style={{ marginTop: 6 }}>
             Ngày thi {view.examDate}
           </div>
-          {view.counts.todo > 0 && view.daysToExam > 0 && (
+          {view.remaining > 0 && view.daysToExam > 0 && (
             <div className="small muted" style={{ marginTop: 10 }}>
-              Cần <strong>{view.paceNeeded} bài/ngày</strong> để quét hết{" "}
-              {view.counts.todo} bài chưa làm.
+              Cần <strong>{view.paceNeeded} bài/ngày</strong> để xử lý hết{" "}
+              {view.remaining} bài còn nợ ({view.counts.todo} chưa làm +{" "}
+              {view.counts.wrong} đang sai).
             </div>
           )}
         </div>
