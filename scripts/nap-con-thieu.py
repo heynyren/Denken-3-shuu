@@ -57,6 +57,14 @@ def main() -> None:
         for item in catalog["items"]
         if item["exam"]
     }
+    # Một bài có thể nằm nhiều dòng trong danh mục (cùng link, được xếp vào hai
+    # chủ đề), mỗi dòng một id. Đáp án phải gán cho **cả nhóm**: đề thi thử khử
+    # trùng theo link và giữ lại dòng nào là chuyện của nó, gán lệch dòng là câu
+    # đó thành "chưa có đáp án" ngay trong bài thi.
+    same_url: dict[str, list[dict]] = {}
+    for item in catalog["items"]:
+        if item["url"]:
+            same_url.setdefault(item["url"], []).append(item)
 
     answers_file = json.loads(ANSWERS.read_text(encoding="utf-8"))
     answers: dict[str, list[int]] = dict(answers_file.get("answers", {}))
@@ -96,7 +104,8 @@ def main() -> None:
                     else:
                         if answers.get(item["id"]) != values:
                             stats["đáp án"] += 1
-                        answers[item["id"]] = values
+                        for twin in same_url.get(item["url"], [item]):
+                            answers[twin["id"]] = values
                 elif second is not None:
                     problems.append(f"dòng {line}: có dap_an_2 mà thiếu dap_an_1")
 

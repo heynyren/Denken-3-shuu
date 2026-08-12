@@ -115,9 +115,11 @@ npm run pack:win
 Chức năng thi thử cần biết đáp án đúng của từng câu. Đáp án là dữ liệu chung cho
 mọi người dùng nên nằm ở `src/data/answers.json`, đi kèm code.
 
-**Đã có sẵn 21/24 kỳ**, lấy từ bảng đáp án chính thức (PDF) của
-一般財団法人 電気技術者試験センター: từ 平成21年度 (H21) tới 令和7年度下期 (R07下).
-Còn thiếu **H18, H19, H20** — ai có ba tờ đáp án đó thì nạp thêm bằng:
+**Đã đủ cả 24 kỳ — 1920/1920 ý**, không câu nào thiếu đáp án. Phần lớn lấy từ
+bảng đáp án chính thức (PDF) của 一般財団法人 電気技術者試験センター (H21 →
+R07下); riêng H18, H19, H20 do người dùng tra tay và nạp qua CSV.
+
+Nạp thêm tờ đáp án PDF mới (kỳ thi sau này) bằng:
 
 ```bash
 python3 scripts/dap-an-pdf.py --thu duong/dan/*.pdf   # xem trước, chưa ghi
@@ -132,8 +134,12 @@ không ghi bừa vào bảng đáp án.
 
 Câu nào chưa có đáp án thì bài thi vẫn cho làm và vẫn bấm giờ, chỉ là không chấm
 câu đó; điểm được quy về thang 100 trên phần chấm được, **không** coi câu thiếu
-đáp án là sai. Câu bị đánh dấu ※ (đề có sai sót, mọi đáp án đều được chấp nhận —
-như 機械 問8 của H26) cũng để trống, nên không ai bị trừ điểm vì câu đó.
+đáp án là sai.
+
+> **機械 問8 của H26** bị hội đồng đánh dấu ※ — đề có sai sót nên *mọi* đáp án
+> đều được tính đúng. Trong app câu này đang để đáp án `5` (đáp án đúng theo lời
+> giải), nên thi thử chọn khác 5 sẽ bị tính sai, trong khi kỳ thi thật thì không.
+> Muốn đúng y như kỳ thi thật thì xoá câu đó khỏi `answers.json`.
 
 **A問題 một ý, B問題 hai ý.** Đề thật hỏi (a) và (b) riêng, mỗi ý một đáp án và
 chấm điểm riêng — đúng một ý vẫn được nửa số điểm của câu đó. Vì vậy đáp án của
@@ -152,7 +158,7 @@ cần mấy đáp án: `1` chỉ điền `dap_an_1`, `2` điền cả `dap_an_1`
 python3 scripts/bao-cao-thieu.py            # còn thiếu gì, kỳ nào (đếm theo ý)
 python3 scripts/bao-cao-thieu.py --chi-tiet # liệt kê từng câu kèm link
 python3 scripts/bao-cao-thieu.py --csv      # xuất CSV để điền
-python3 scripts/build-answers.py scripts/con-thieu.csv   # nạp vào answers.json
+python3 scripts/nap-con-thieu.py scripts/con-thieu.csv   # nạp CSV đã điền
 ```
 
 ## Vá danh mục khi thiếu link
@@ -176,7 +182,8 @@ python3 scripts/sua-danh-muc.py --thu   # xem trước
 python3 scripts/sua-danh-muc.py         # vá thật
 ```
 
-Hiện danh mục đã **đủ cả 24 kỳ × 4 môn = 96 đề**, không đề nào thiếu câu.
+Hiện danh mục đã **đủ cả 24 kỳ × 4 môn = 96 đề**, không đề nào thiếu câu, và
+cả 96 đề đều chấm điểm được trọn vẹn.
 
 ## Chu kỳ ôn tập
 

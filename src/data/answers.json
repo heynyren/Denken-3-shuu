@@ -2,6 +2,175 @@
  "generatedAt": "",
  "source": "Bảng đáp án chính thức của 電気技術者試験センター",
  "answers": {
+  "denryoku:denryokuh18-1": [
+   5
+  ],
+  "denryoku:denryokuh18-10": [
+   5
+  ],
+  "denryoku:denryokuh18-11": [
+   5
+  ],
+  "denryoku:denryokuh18-12": [
+   4
+  ],
+  "denryoku:denryokuh18-13": [
+   3
+  ],
+  "denryoku:denryokuh18-14": [
+   2
+  ],
+  "denryoku:denryokuh18-15": [
+   4,
+   3
+  ],
+  "denryoku:denryokuh18-16": [
+   4,
+   2
+  ],
+  "denryoku:denryokuh18-17": [
+   2,
+   4
+  ],
+  "denryoku:denryokuh18-2": [
+   2
+  ],
+  "denryoku:denryokuh18-3": [
+   3
+  ],
+  "denryoku:denryokuh18-4": [
+   4
+  ],
+  "denryoku:denryokuh18-5": [
+   1
+  ],
+  "denryoku:denryokuh18-6": [
+   1
+  ],
+  "denryoku:denryokuh18-7": [
+   1
+  ],
+  "denryoku:denryokuh18-8": [
+   2
+  ],
+  "denryoku:denryokuh18-9": [
+   3
+  ],
+  "denryoku:denryokuh19-1": [
+   3
+  ],
+  "denryoku:denryokuh19-10": [
+   1
+  ],
+  "denryoku:denryokuh19-11": [
+   2
+  ],
+  "denryoku:denryokuh19-12": [
+   3
+  ],
+  "denryoku:denryokuh19-13": [
+   5
+  ],
+  "denryoku:denryokuh19-14": [
+   4
+  ],
+  "denryoku:denryokuh19-15": [
+   5,
+   1
+  ],
+  "denryoku:denryokuh19-15~2": [
+   5,
+   1
+  ],
+  "denryoku:denryokuh19-16": [
+   2,
+   3
+  ],
+  "denryoku:denryokuh19-17": [
+   2,
+   4
+  ],
+  "denryoku:denryokuh19-2": [
+   2
+  ],
+  "denryoku:denryokuh19-3": [
+   3
+  ],
+  "denryoku:denryokuh19-4": [
+   1
+  ],
+  "denryoku:denryokuh19-5": [
+   4
+  ],
+  "denryoku:denryokuh19-5~2": [
+   4
+  ],
+  "denryoku:denryokuh19-6": [
+   5
+  ],
+  "denryoku:denryokuh19-7": [
+   5
+  ],
+  "denryoku:denryokuh19-8": [
+   1
+  ],
+  "denryoku:denryokuh19-9": [
+   4
+  ],
+  "denryoku:denryokuh20-1": [
+   5
+  ],
+  "denryoku:denryokuh20-10": [
+   5
+  ],
+  "denryoku:denryokuh20-11": [
+   4
+  ],
+  "denryoku:denryokuh20-12": [
+   5
+  ],
+  "denryoku:denryokuh20-13": [
+   4
+  ],
+  "denryoku:denryokuh20-14": [
+   2
+  ],
+  "denryoku:denryokuh20-15": [
+   4,
+   2
+  ],
+  "denryoku:denryokuh20-16": [
+   3,
+   4
+  ],
+  "denryoku:denryokuh20-17": [
+   2,
+   3
+  ],
+  "denryoku:denryokuh20-2": [
+   3
+  ],
+  "denryoku:denryokuh20-3": [
+   1
+  ],
+  "denryoku:denryokuh20-4": [
+   3
+  ],
+  "denryoku:denryokuh20-5": [
+   2
+  ],
+  "denryoku:denryokuh20-6": [
+   5
+  ],
+  "denryoku:denryokuh20-7": [
+   2
+  ],
+  "denryoku:denryokuh20-8": [
+   3
+  ],
+  "denryoku:denryokuh20-9": [
+   2
+  ],
   "denryoku:denryokuh21-1": [
    2
   ],
@@ -1150,6 +1319,144 @@
    4,
    1
   ],
+  "houki:houkih18-1": [
+   5
+  ],
+  "houki:houkih18-10": [
+   1
+  ],
+  "houki:houkih18-11": [
+   2,
+   4
+  ],
+  "houki:houkih18-12": [
+   5,
+   4
+  ],
+  "houki:houkih18-13": [
+   2,
+   2
+  ],
+  "houki:houkih18-2": [
+   2
+  ],
+  "houki:houkih18-2~2": [
+   2
+  ],
+  "houki:houkih18-2~3": [
+   2
+  ],
+  "houki:houkih18-3": [
+   5
+  ],
+  "houki:houkih18-4": [
+   3
+  ],
+  "houki:houkih18-5": [
+   3
+  ],
+  "houki:houkih18-6": [
+   1
+  ],
+  "houki:houkih18-7": [
+   4
+  ],
+  "houki:houkih18-8": [
+   4
+  ],
+  "houki:houkih18-9": [
+   3
+  ],
+  "houki:houkih19-1": [
+   5
+  ],
+  "houki:houkih19-10": [
+   4
+  ],
+  "houki:houkih19-11": [
+   2,
+   3
+  ],
+  "houki:houkih19-12": [
+   3,
+   3
+  ],
+  "houki:houkih19-13": [
+   3,
+   4
+  ],
+  "houki:houkih19-2": [
+   2
+  ],
+  "houki:houkih19-3": [
+   5
+  ],
+  "houki:houkih19-4": [
+   4
+  ],
+  "houki:houkih19-4~2": [
+   4
+  ],
+  "houki:houkih19-5": [
+   5
+  ],
+  "houki:houkih19-6": [
+   2
+  ],
+  "houki:houkih19-7": [
+   5
+  ],
+  "houki:houkih19-8": [
+   1
+  ],
+  "houki:houkih19-9": [
+   4
+  ],
+  "houki:houkih20-1": [
+   4
+  ],
+  "houki:houkih20-10": [
+   1
+  ],
+  "houki:houkih20-11": [
+   2,
+   2
+  ],
+  "houki:houkih20-12": [
+   3,
+   4
+  ],
+  "houki:houkih20-13": [
+   3,
+   4
+  ],
+  "houki:houkih20-2": [
+   1
+  ],
+  "houki:houkih20-3": [
+   2
+  ],
+  "houki:houkih20-4": [
+   2
+  ],
+  "houki:houkih20-5": [
+   4
+  ],
+  "houki:houkih20-6": [
+   4
+  ],
+  "houki:houkih20-7": [
+   2
+  ],
+  "houki:houkih20-8": [
+   5
+  ],
+  "houki:houkih20-8~2": [
+   5
+  ],
+  "houki:houkih20-9": [
+   3
+  ],
   "houki:houkih21-1": [
    3
   ],
@@ -2063,6 +2370,180 @@
   "houki:houkir7-2-9": [
    2
   ],
+  "kikai:kikaih18-1": [
+   4
+  ],
+  "kikai:kikaih18-10": [
+   3
+  ],
+  "kikai:kikaih18-11": [
+   1
+  ],
+  "kikai:kikaih18-12": [
+   4
+  ],
+  "kikai:kikaih18-13": [
+   1
+  ],
+  "kikai:kikaih18-14": [
+   5
+  ],
+  "kikai:kikaih18-15": [
+   3,
+   1
+  ],
+  "kikai:kikaih18-16": [
+   3,
+   2
+  ],
+  "kikai:kikaih18-17": [
+   3,
+   2
+  ],
+  "kikai:kikaih18-18": [
+   4,
+   5
+  ],
+  "kikai:kikaih18-2": [
+   5
+  ],
+  "kikai:kikaih18-3": [
+   4
+  ],
+  "kikai:kikaih18-4": [
+   1
+  ],
+  "kikai:kikaih18-5": [
+   2
+  ],
+  "kikai:kikaih18-6": [
+   5
+  ],
+  "kikai:kikaih18-7": [
+   4
+  ],
+  "kikai:kikaih18-8": [
+   1
+  ],
+  "kikai:kikaih18-9": [
+   3
+  ],
+  "kikai:kikaih19-1": [
+   5
+  ],
+  "kikai:kikaih19-10": [
+   1
+  ],
+  "kikai:kikaih19-11": [
+   2
+  ],
+  "kikai:kikaih19-12": [
+   1
+  ],
+  "kikai:kikaih19-13": [
+   4
+  ],
+  "kikai:kikaih19-14": [
+   3
+  ],
+  "kikai:kikaih19-15": [
+   4,
+   3
+  ],
+  "kikai:kikaih19-16": [
+   1,
+   4
+  ],
+  "kikai:kikaih19-17": [
+   2,
+   3
+  ],
+  "kikai:kikaih19-18": [
+   5,
+   1
+  ],
+  "kikai:kikaih19-2": [
+   5
+  ],
+  "kikai:kikaih19-3": [
+   2
+  ],
+  "kikai:kikaih19-4": [
+   3
+  ],
+  "kikai:kikaih19-5": [
+   1
+  ],
+  "kikai:kikaih19-6": [
+   2
+  ],
+  "kikai:kikaih19-7": [
+   2
+  ],
+  "kikai:kikaih19-8": [
+   4
+  ],
+  "kikai:kikaih19-9": [
+   5
+  ],
+  "kikai:kikaih20-1": [
+   1
+  ],
+  "kikai:kikaih20-10": [
+   5
+  ],
+  "kikai:kikaih20-11": [
+   2
+  ],
+  "kikai:kikaih20-12": [
+   1
+  ],
+  "kikai:kikaih20-13": [
+   1
+  ],
+  "kikai:kikaih20-14": [
+   2
+  ],
+  "kikai:kikaih20-15": [
+   4,
+   1
+  ],
+  "kikai:kikaih20-16": [
+   1,
+   4
+  ],
+  "kikai:kikaih20-17": [
+   5,
+   3
+  ],
+  "kikai:kikaih20-18": [
+   4,
+   2
+  ],
+  "kikai:kikaih20-2": [
+   3
+  ],
+  "kikai:kikaih20-3": [
+   5
+  ],
+  "kikai:kikaih20-4": [
+   4
+  ],
+  "kikai:kikaih20-5": [
+   3
+  ],
+  "kikai:kikaih20-6": [
+   1
+  ],
+  "kikai:kikaih20-7": [
+   3
+  ],
+  "kikai:kikaih20-8": [
+   2
+  ],
+  "kikai:kikaih20-9": [
+   3
+  ],
   "kikai:kikaih21-1": [
    2
   ],
@@ -2404,6 +2885,9 @@
   ],
   "kikai:kikaih26-7": [
    1
+  ],
+  "kikai:kikaih26-8": [
+   5
   ],
   "kikai:kikaih26-9": [
    1
@@ -3280,6 +3764,180 @@
   ],
   "riron:kikaih24-13": [
    5
+  ],
+  "riron:rironh18-1": [
+   1
+  ],
+  "riron:rironh18-10": [
+   4
+  ],
+  "riron:rironh18-11": [
+   2
+  ],
+  "riron:rironh18-12": [
+   2
+  ],
+  "riron:rironh18-13": [
+   1
+  ],
+  "riron:rironh18-14": [
+   1
+  ],
+  "riron:rironh18-15": [
+   3,
+   4
+  ],
+  "riron:rironh18-16": [
+   3,
+   4
+  ],
+  "riron:rironh18-17": [
+   3,
+   3
+  ],
+  "riron:rironh18-18": [
+   1,
+   3
+  ],
+  "riron:rironh18-2": [
+   3
+  ],
+  "riron:rironh18-3": [
+   2
+  ],
+  "riron:rironh18-4": [
+   3
+  ],
+  "riron:rironh18-5": [
+   4
+  ],
+  "riron:rironh18-6": [
+   5
+  ],
+  "riron:rironh18-7": [
+   4
+  ],
+  "riron:rironh18-8": [
+   5
+  ],
+  "riron:rironh18-9": [
+   5
+  ],
+  "riron:rironh19-1": [
+   2
+  ],
+  "riron:rironh19-10": [
+   4
+  ],
+  "riron:rironh19-11": [
+   5
+  ],
+  "riron:rironh19-12": [
+   5
+  ],
+  "riron:rironh19-13": [
+   2
+  ],
+  "riron:rironh19-14": [
+   1
+  ],
+  "riron:rironh19-15": [
+   5,
+   3
+  ],
+  "riron:rironh19-16": [
+   1,
+   1
+  ],
+  "riron:rironh19-17": [
+   2,
+   3
+  ],
+  "riron:rironh19-18": [
+   3,
+   1
+  ],
+  "riron:rironh19-2": [
+   4
+  ],
+  "riron:rironh19-3": [
+   4
+  ],
+  "riron:rironh19-4": [
+   4
+  ],
+  "riron:rironh19-5": [
+   5
+  ],
+  "riron:rironh19-6": [
+   3
+  ],
+  "riron:rironh19-7": [
+   2
+  ],
+  "riron:rironh19-8": [
+   3
+  ],
+  "riron:rironh19-9": [
+   2
+  ],
+  "riron:rironh20-1": [
+   5
+  ],
+  "riron:rironh20-10": [
+   5
+  ],
+  "riron:rironh20-11": [
+   2
+  ],
+  "riron:rironh20-12": [
+   2
+  ],
+  "riron:rironh20-13": [
+   2
+  ],
+  "riron:rironh20-14": [
+   3
+  ],
+  "riron:rironh20-15": [
+   4,
+   4
+  ],
+  "riron:rironh20-16": [
+   3,
+   1
+  ],
+  "riron:rironh20-17": [
+   4,
+   4
+  ],
+  "riron:rironh20-18": [
+   5,
+   1
+  ],
+  "riron:rironh20-2": [
+   4
+  ],
+  "riron:rironh20-3": [
+   4
+  ],
+  "riron:rironh20-4": [
+   3
+  ],
+  "riron:rironh20-5": [
+   3
+  ],
+  "riron:rironh20-6": [
+   5
+  ],
+  "riron:rironh20-7": [
+   3
+  ],
+  "riron:rironh20-8": [
+   1
+  ],
+  "riron:rironh20-9": [
+   2
   ],
   "riron:rironh21-1": [
    4
