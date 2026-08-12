@@ -22,7 +22,7 @@ Danh mục **1609 bài** trên denken-ou.com, chia bốn môn:
 - **Link tham khảo** — mỗi bài nhiều link, mỗi link có nút mở ngay bên cạnh.
 - **Thi thử** — làm nguyên một kỳ thi thật, 24 kỳ từ H18 tới R07下. Chọn nhiều môn thì thi **lần lượt**: mỗi môn một đồng hồ riêng — 90 phút (理論/電力/機械), 65 phút (法規) — nộp xong môn này mới mở môn kia, thời gian **không cộng dồn**. 理論/機械 chỉ được chọn một trong 問17 hoặc 問18. Chấm điểm thang 100, mốc đạt 60, kèm **bảng phân tích**: đúng bao nhiêu phần trăm ở từng chủ đề ra trong đề đó, rồi tới từng câu — bạn chọn gì, đáp án đúng là gì. Mở lại lượt thi cũ trong lịch sử vẫn xem được đúng bảng đó.
 - **Đang yếu ở đâu** — ngay trang Hôm nay: top 5 chủ đề có tỉ lệ sai cao nhất của mỗi môn, tính gộp cả lượt ôn tập hằng ngày lẫn từng ý trong đề thi thử. Bấm một chủ đề là mở màn Ôn tập với **toàn bộ** bài của chủ đề đó, bài đang sai và chưa làm xếp lên trước.
-- **Tiếng Việt** — chế độ Ôn tập hiện tên chủ đề bằng tiếng Việt ngay dưới tên bài tiếng Nhật. Màn Thi thử cố ý **không** có: thi thì nên quen với chữ Nhật như đề thật.
+- **Tiếng Việt** — chế độ Ôn tập hiện **bản dịch tên bài của chính bạn** — bản dịch viết sẵn trong file Excel gốc, 1608/1609 bài — ngay dưới tên bài tiếng Nhật; bài chưa dịch thì lùi về tên chủ đề. Ô tìm kiếm lục cả bản dịch này, nên gõ nguyên cụm như `suy ra lượng điện tích` cũng ra bài. Màn Thi thử cố ý **không** có: thi thì nên quen với chữ Nhật như đề thật.
 - **Huy hiệu** — giữ kín tới khi bạn chạm mốc, lúc đó mới nhảy lên chúc mừng.
 - Xuất ra Excel, JSON, hoặc gói `.zip` đầy đủ bất cứ lúc nào.
 
@@ -229,6 +229,28 @@ python3 scripts/sua-danh-muc.py         # vá thật
 Hiện danh mục đã **đủ cả 24 kỳ × 4 môn = 96 đề**, không đề nào thiếu câu, và
 cả 96 đề đều chấm điểm được trọn vẹn.
 
+## Bản dịch tên bài
+
+Trong file Excel gốc, cột tiêu đề vốn đã có sẵn bản dịch tiếng Việt do người
+dùng tự viết, nối sau tên tiếng Nhật bằng dấu `–` (hoặc trong ngoặc đơn ở mấy
+dòng 電熱):
+
+```
+コンデンサに蓄えられる電荷を求める計算問題 – Bài tập tính toán suy ra lượng điện tích…
+```
+
+Bản chuyển Excel đầu tiên cắt nhầm đoạn đó như rác nên mất sạch. Nay
+`convert-excel.py` tách đúng hai phần và ghi ra trường `nameVi`; còn với danh
+mục đã vá link từ trước thì dùng script riêng để ghép lại theo link, không phải
+chuyển lại từ đầu (chuyển lại sẽ mất công vá của `sua-danh-muc.py`):
+
+```bash
+python3 scripts/nap-tieng-viet.py   # Excel → nameVi cho catalog.json
+```
+
+Ghép được **1608/1609 bài**. Bài duy nhất chưa có là 電力 H22 問11 — bài do
+script thêm vào lúc vá danh mục nên vốn không có trong Excel.
+
 ## Chu kỳ ôn tập
 
 Giữ đúng chu kỳ trong file Excel gốc. Làm đúng thì lên một cấp, làm sai thì về cấp 1:
@@ -252,6 +274,8 @@ src/
   lib/             kiểu dữ liệu, chu kỳ ôn, thống kê, huy hiệu
   lib/exam.ts      luật đề thi, chấm điểm, phân tích theo chủ đề
   lib/weakness.ts  xếp hạng chủ đề yếu từ ôn tập + thi thử
+  lib/history.ts   lịch sử chấm bài ba ngày gần nhất
+  lib/vi.ts        tên chủ đề tiếng Việt, bỏ dấu, từ điển Việt–Nhật cho tìm kiếm
   state/           tầng trạng thái, tự lưu sau 600ms
   views/           5 màn hình
   data/catalog.json  danh mục 1609 bài
@@ -262,6 +286,7 @@ scripts/
   bao-cao-thieu.py báo cáo câu thiếu và đáp án thiếu, xuất con-thieu.csv
   nap-con-thieu.py con-thieu.csv → đáp án + tiêu đề + số sao
   sua-danh-muc.py  vá kỳ thi / số câu / link cho danh mục
+  nap-tieng-viet.py Excel → bản dịch tên bài (nameVi) cho danh mục
 docs/
   SAO-LUU-VA-DONG-BO.md  phương án sao lưu và đồng bộ Android
 ```

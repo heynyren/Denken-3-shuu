@@ -27,7 +27,13 @@ export interface CatalogItem {
   subject: SubjectKey;
   topic: string;
   no: number;
+  /** Tên bài tiếng Nhật, y như trên denken-ou.com. */
   name: string;
+  /**
+   * Bản dịch tiếng Việt của tên bài, do người dùng tự viết trong file Excel gốc.
+   * Rỗng với bài chưa được dịch.
+   */
+  nameVi: string;
   stars: number;
   category: string;
   exam: string;

@@ -253,7 +253,12 @@ export default function Browse({
       {selectedItem && (
         <div className="card">
           <div className="card-head">
-            <div className="card-title ja">{selectedItem.name}</div>
+            <div className="card-title">
+              <span className="ja">{selectedItem.name}</span>
+              {selectedItem.nameVi && (
+                <div className="review-title-vi">{selectedItem.nameVi}</div>
+              )}
+            </div>
             <button className="icon-btn" onClick={() => setSelected(null)} title="Đóng">
               ✕
             </button>

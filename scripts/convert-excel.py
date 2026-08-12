@@ -129,19 +129,42 @@ TITLE_RE = re.compile(
     r"(?P<name>.*)$"
 )
 
-# Đuôi rác mà trang nguồn gắn vào cuối tên bài
-TAIL_RE = re.compile(r"\s*(?:[–—-]\s*Bài tập.*|\|\s*電験王.*)$")
+# Đuôi rác mà trang nguồn gắn vào cuối tên bài.
+# CHÚ Ý: chỉ cắt phần "| 電験王…", KHÔNG cắt phần sau dấu gạch ngang — đó là bản
+# dịch tiếng Việt do người dùng tự viết trong Excel, xem TRANSLATION_RE.
+TAIL_RE = re.compile(r"\s*\|\s*電験王.*$")
+
+# Bản dịch tiếng Việt nằm cuối ô tên bài, người dùng viết theo hai kiểu:
+#   …に関する計算問題 – Bài tập tính toán về…      (dấu gạch ngang)
+#   …に関する計算問題 (Bài tính toán về…)          (ngoặc đơn, hay gặp ở 電熱)
+# Đòi phải có chữ tiếng Việt ở trong để không cắt nhầm dấu gạch ngang hay ngoặc
+# của chính tên tiếng Nhật (ví dụ "D-A 変換器", hay ngoặc toàn角 "（静電界）").
+TRANSLATION_RE = re.compile(
+    r"\s(?:[–—]\s*((?=[^\n]*[À-ỹ])[^\n]+)|\((?=[^)]*[À-ỹ])([^)]+)\))\s*$"
+)
 
 
 def parse_title(raw: str) -> dict:
-    """Tách '★★☆☆☆《理論》〈電磁気〉[R07下:問1]tên bài' thành các phần."""
+    """Tách '★★☆☆☆《理論》〈電磁気〉[R07下:問1]tên bài – bản dịch' thành các phần."""
     match = TITLE_RE.match(raw)
     if not match:
-        return {"name": raw, "stars": 0, "category": "", "exam": "", "question": ""}
+        return {
+            "name": raw, "nameVi": "", "stars": 0,
+            "category": "", "exam": "", "question": "",
+        }
 
     name = TAIL_RE.sub("", match.group("name") or "").strip()
+
+    # Tách bản dịch tiếng Việt ra khỏi tên bài tiếng Nhật.
+    name_vi = ""
+    found = TRANSLATION_RE.search(name)
+    if found:
+        name_vi = (found.group(1) or found.group(2)).strip()
+        name = name[: found.start()].strip()
+
     return {
         "name": name or raw,
+        "nameVi": name_vi,
         "stars": (match.group("stars") or "").count("★"),
         "category": (match.group("category") or "").strip(),
         "exam": (match.group("exam") or "").strip(),
@@ -227,6 +250,7 @@ def main() -> None:
                     "topic": row["topic"],
                     "no": row["no"],
                     "name": row["name"],
+                    "nameVi": row["nameVi"],
                     "stars": row["stars"],
                     "category": row["category"],
                     "exam": row["exam"],

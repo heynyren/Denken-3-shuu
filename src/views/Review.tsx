@@ -368,8 +368,10 @@ export default function Review({
             </div>
 
             <div className="review-title ja">{item.name}</div>
-            {topicVi(item.topic) && (
-              <div className="review-title-vi">{topicVi(item.topic)}</div>
+            {(item.nameVi || topicVi(item.topic)) && (
+              <div className="review-title-vi">
+                {item.nameVi || topicVi(item.topic)}
+              </div>
             )}
 
             <div className="small dim">{levelLabel(progress?.srsLevel ?? 0)}</div>

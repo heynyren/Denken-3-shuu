@@ -287,12 +287,20 @@ export function expandQuery(query: string): string[] {
 
 /** Kho chữ của một bài để đem đi tìm — cả tiếng Nhật lẫn tiếng Việt. */
 export function haystackOf(
-  item: { name: string; topic: string; category: string; exam: string; question: string },
+  item: {
+    name: string;
+    nameVi?: string;
+    topic: string;
+    category: string;
+    exam: string;
+    question: string;
+  },
   notes: string,
   links: string,
 ): string {
   return [
     item.name,
+    item.nameVi ?? "",
     item.topic,
     topicVi(item.topic),
     item.category,
