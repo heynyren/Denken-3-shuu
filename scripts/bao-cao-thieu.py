@@ -70,6 +70,75 @@ def question_no(item: dict) -> int | None:
     return int(match.group()) if match else None
 
 
+# Dấu hiệu tiêu đề chưa sạch: còn sót phần đánh dấu của trang nguồn, hoặc là
+# chỗ giữ tạm cho bài mới thêm vào.
+DIRTY_TITLE = re.compile(r"[\[\]《》〈〉]|chưa có tiêu đề")
+
+
+def build_csv_rows(have, missing_q, missing_a) -> list[list]:
+    """Một dòng cho mỗi câu cần điền gì đó — đáp án, hoặc tiêu đề và số sao.
+
+    Cột tieu_de/sao/chu_de điền sẵn giá trị đang có trong danh mục, để chỉ phải
+    sửa chỗ nào sai chứ không phải gõ lại từ đầu.
+    """
+    need: dict[str, dict] = {}
+
+    def add(exam, subject, number, item, what):
+        key = item["id"] if item else f"{exam}/{subject}/{number}"
+        row = need.setdefault(
+            key,
+            {
+                "can": set(),
+                "exam": exam,
+                "subject": subject,
+                "number": number,
+                "subs": sub_count(subject, number),
+                "item": item,
+            },
+        )
+        row["can"].add(what)
+
+    for exam, subject, number, _ in missing_q:
+        add(exam, subject, number, None, "thiếu bài")
+
+    for exam, subject, number, item_id, url, lack, subs in missing_a:
+        add(exam, subject, number, have[exam][subject][number], "đáp án")
+
+    # Bài có tiêu đề chưa sạch hoặc chưa có sao thì cũng đưa vào để điền nốt.
+    for exam, subjects in have.items():
+        for subject, questions in subjects.items():
+            for number, item in questions.items():
+                if DIRTY_TITLE.search(item["name"] or "") or not item["name"]:
+                    add(exam, subject, number, item, "tiêu đề")
+                elif item["stars"] == 0:
+                    add(exam, subject, number, item, "sao")
+
+    rows = []
+    for row in sorted(
+        need.values(),
+        key=lambda r: (exam_rank(r["exam"]), ORDER.index(r["subject"]), r["number"]),
+        reverse=True,
+    ):
+        item = row["item"] or {}
+        rows.append(
+            [
+                " + ".join(sorted(row["can"])),
+                row["exam"],
+                JA[row["subject"]],
+                f"問{row['number']}",
+                row["subs"],
+                item.get("url", ""),
+                "",
+                "",
+                item.get("name", ""),
+                item.get("stars", "") or "",
+                item.get("topic", ""),
+                item.get("id", ""),
+            ]
+        )
+    return rows
+
+
 def main() -> None:
     detail = "--chi-tiet" in sys.argv
     want_csv = "--csv" in sys.argv
@@ -177,28 +246,27 @@ def main() -> None:
     # ---- Xuất CSV để tiện điền ----
     if want_csv:
         target = ROOT / "scripts" / "con-thieu.csv"
+        rows = build_csv_rows(have, missing_q, missing_a)
+
         with target.open("w", encoding="utf-8-sig", newline="") as handle:
             writer = csv.writer(handle)
             writer.writerow(
-                ["loai", "ky_thi", "mon", "cau", "so_y", "id", "link",
-                 "dap_an_1", "dap_an_2"]
+                ["can", "ky_thi", "mon", "cau", "so_y", "link",
+                 "dap_an_1", "dap_an_2", "tieu_de", "sao", "chu_de", "id"]
             )
-            for exam, subject, number, subs in missing_q:
-                writer.writerow(
-                    ["thieu_cau", exam, JA[subject], f"問{number}", subs, "", "", "", ""]
-                )
-            for exam, subject, number, item_id, url, lack, subs in missing_a:
-                writer.writerow(
-                    ["thieu_dap_an", exam, JA[subject], f"問{number}", subs,
-                     item_id, url, "", ""]
-                )
+            writer.writerows(rows)
+
+        need_answer = sum(1 for r in rows if "đáp án" in r[0])
+        need_title = sum(1 for r in rows if "tiêu đề" in r[0])
         print()
-        print(f"→ Đã xuất {target} ({len(missing_q) + len(missing_a)} dòng)")
+        print(f"→ Đã xuất {target} ({len(rows)} dòng)")
+        print(f"     {need_answer} dòng thiếu đáp án · {need_title} dòng thiếu tiêu đề/sao")
         print("  Cột so_y cho biết câu đó cần mấy đáp án:")
         print("      so_y = 1  ->  chỉ điền dap_an_1")
         print("      so_y = 2  ->  điền cả dap_an_1 (ý a) và dap_an_2 (ý b)")
+        print("  tieu_de / sao / chu_de đã điền sẵn giá trị đang có — sửa chỗ nào sai thôi.")
         print("  Điền xong chạy:")
-        print("      python3 scripts/build-answers.py scripts/con-thieu.csv")
+        print("      python3 scripts/nap-con-thieu.py scripts/con-thieu.csv")
 
     if not detail and missing_a:
         print()

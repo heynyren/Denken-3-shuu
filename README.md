@@ -2,12 +2,12 @@
 
 App máy tính (Windows) để ôn thi 電験三種, dựng từ file Excel "Bài tập điện hạng 3 — Tổng hợp".
 
-Danh mục **1608 bài** trên denken-ou.com, chia bốn môn:
+Danh mục **1609 bài** trên denken-ou.com, chia bốn môn:
 
 | Môn | Số bài | Chủ đề |
 |---|---:|---:|
 | 理論 Lý thuyết | 437 | 10 |
-| 電力 Điện lực | 412 | 11 |
+| 電力 Điện lực | 413 | 12 |
 | 機械 Máy điện | 432 | 14 |
 | 法規 Pháp quy | 327 | 11 |
 
@@ -16,7 +16,7 @@ Danh mục **1608 bài** trên denken-ou.com, chia bốn môn:
 - **Hôm nay** — vòng tròn KPI ngày, chuỗi ngày liên tiếp 🔥, đếm ngược tới ngày thi, tiến độ bốn môn, biểu đồ 12 tuần, lịch ôn 14 ngày tới, lịch nhiệt 17 tuần, 15 huy hiệu.
 - **Ôn tập** — ba hàng đợi: đến hạn hôm nay / đang làm sai / chưa làm. Lọc theo môn, chủ đề và độ khó ★1–5. Chấm đúng/sai bằng phím `1`/`2`. **Chấm xong app không tự nhảy bài** — bạn ở lại ghi chú bao lâu tuỳ ý, chuyển bài bằng `←` `→`, quay lại bài cũ lúc nào cũng được, bấm nhầm thì chấm lại ngay tại chỗ.
 - **Đồng hồ làm bài** — bấm `Space` là mở bài trên denken-ou.com và bắt đầu đếm ngược: A問題 5 phút, B問題 10 phút. Hết giờ thì chuông reo tới khi bạn tắt.
-- **Danh sách bài** — cả 1608 bài, lọc theo môn / chủ đề / trạng thái / độ khó, tìm trong tên bài lẫn trong ghi chú.
+- **Danh sách bài** — cả 1609 bài, lọc theo môn / chủ đề / trạng thái / độ khó, tìm trong tên bài lẫn trong ghi chú.
 - **Ghi chú** — mỗi bài nhiều ghi chú, mỗi ghi chú đính kèm được ảnh/PDF/Word. Ảnh hiện ngay trong app; chụp màn hình rồi `Ctrl+V` thẳng vào ô ghi chú.
 - **Link tham khảo** — mỗi bài nhiều link, mỗi link có nút mở ngay bên cạnh.
 - **Thi thử** — làm nguyên một kỳ thi thật, 24 kỳ từ H18 tới R07下. Chọn nhiều môn thì thi **lần lượt**: mỗi môn một đồng hồ riêng — 90 phút (理論/電力/機械), 65 phút (法規) — nộp xong môn này mới mở môn kia, thời gian **không cộng dồn**. 理論/機械 chỉ được chọn một trong 問17 hoặc 問18. Chấm điểm thang 100, mốc đạt 60, kèm **bảng phân tích**: đúng bao nhiêu phần trăm ở từng chủ đề ra trong đề đó, rồi tới từng câu — bạn chọn gì, đáp án đúng là gì. Mở lại lượt thi cũ trong lịch sử vẫn xem được đúng bảng đó.
@@ -155,6 +155,29 @@ python3 scripts/bao-cao-thieu.py --csv      # xuất CSV để điền
 python3 scripts/build-answers.py scripts/con-thieu.csv   # nạp vào answers.json
 ```
 
+## Vá danh mục khi thiếu link
+
+Link denken-ou.com có cấu trúc chặt — `{môn}{kỳ}-{số câu}`, ví dụ
+`denryokur4-2-9` = 電力 令和4年度下期 問9 — nên suy được cả hai chiều. Nhờ đó
+`scripts/sua-danh-muc.py` tự vá được ba loại hỏng của danh mục:
+
+| Hỏng gì | Vá thế nào |
+|---|---|
+| Tiêu đề trong Excel bị cụt nên mất kỳ thi / số câu, bài rơi khỏi mọi đề thi | Đọc ngược kỳ thi và số câu từ link |
+| Một khối bị lệch một ô ở cột link nên vài bài mang link của bài khác | Dựng lại link từ kỳ thi và số câu |
+| Thiếu hẳn bài | Thêm dòng mới, link suy từ cấu trúc |
+
+Nó **không bao giờ đổi `id`** — tiến độ ôn tập khoá theo id, đổi id là mất lịch
+sử bài đó. Sửa link thì id vẫn giữ nguyên; id chỉ là khoá, không ai đọc ngược
+nội dung từ nó.
+
+```bash
+python3 scripts/sua-danh-muc.py --thu   # xem trước
+python3 scripts/sua-danh-muc.py         # vá thật
+```
+
+Hiện danh mục đã **đủ cả 24 kỳ × 4 môn = 96 đề**, không đề nào thiếu câu.
+
 ## Chu kỳ ôn tập
 
 Giữ đúng chu kỳ trong file Excel gốc. Làm đúng thì lên một cấp, làm sai thì về cấp 1:
@@ -180,12 +203,14 @@ src/
   lib/weakness.ts  xếp hạng chủ đề yếu từ ôn tập + thi thử
   state/           tầng trạng thái, tự lưu sau 600ms
   views/           5 màn hình
-  data/catalog.json  danh mục 1608 bài
+  data/catalog.json  danh mục 1609 bài
 scripts/
   convert-excel.py Excel → catalog.json + seed.json
   build-answers.py CSV/Excel → answers.json (đáp án thi thử)
   dap-an-pdf.py    bảng đáp án chính thức (PDF) → answers.json
-  bao-cao-thieu.py báo cáo câu thiếu và đáp án thiếu
+  bao-cao-thieu.py báo cáo câu thiếu và đáp án thiếu, xuất con-thieu.csv
+  nap-con-thieu.py con-thieu.csv → đáp án + tiêu đề + số sao
+  sua-danh-muc.py  vá kỳ thi / số câu / link cho danh mục
 docs/
   SAO-LUU-VA-DONG-BO.md  phương án sao lưu và đồng bộ Android
 ```

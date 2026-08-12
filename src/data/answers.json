@@ -62,6 +62,9 @@
   "denryoku:denryokuh22-10": [
    1
   ],
+  "denryoku:denryokuh22-11": [
+   4
+  ],
   "denryoku:denryokuh22-12": [
    4
   ],
@@ -157,6 +160,9 @@
   ],
   "denryoku:denryokuh23-7": [
    1
+  ],
+  "denryoku:denryokuh23-8": [
+   5
   ],
   "denryoku:denryokuh23-9": [
    1
@@ -749,6 +755,9 @@
   "denryoku:denryokur4-1-7": [
    1
   ],
+  "denryoku:denryokur4-1-8": [
+   5
+  ],
   "denryoku:denryokur4-1-9": [
    3
   ],
@@ -802,6 +811,9 @@
   ],
   "denryoku:denryokur4-2-8": [
    2
+  ],
+  "denryoku:denryokur4-2-9": [
+   1
   ],
   "denryoku:denryokur5-1-1": [
    4
@@ -1024,6 +1036,9 @@
    4
   ],
   "denryoku:denryokur7-1-1": [
+   2
+  ],
+  "denryoku:denryokur7-1-10": [
    2
   ],
   "denryoku:denryokur7-1-11": [
@@ -1748,6 +1763,9 @@
   "houki:houkir4-2-1": [
    2
   ],
+  "houki:houkir4-2-10": [
+   3
+  ],
   "houki:houkir4-2-11": [
    4,
    1
@@ -1759,6 +1777,9 @@
   "houki:houkir4-2-13": [
    1,
    1
+  ],
+  "houki:houkir4-2-2": [
+   4
   ],
   "houki:houkir4-2-3": [
    5
@@ -1783,6 +1804,9 @@
   ],
   "houki:houkir4-2-9": [
    3
+  ],
+  "houki:houkir5-1-1": [
+   4
   ],
   "houki:houkir5-1-10": [
    3
@@ -1839,6 +1863,12 @@
   ],
   "houki:houkir5-2-13": [
    5,
+   4
+  ],
+  "houki:houkir5-2-2": [
+   3
+  ],
+  "houki:houkir5-2-3": [
    4
   ],
   "houki:houkir5-2-4": [
@@ -1901,6 +1931,9 @@
   "houki:houkir6-1-9": [
    4
   ],
+  "houki:houkir6-2-1": [
+   5
+  ],
   "houki:houkir6-2-10": [
    5
   ],
@@ -1917,6 +1950,9 @@
    3
   ],
   "houki:houkir6-2-2": [
+   3
+  ],
+  "houki:houkir6-2-3": [
    3
   ],
   "houki:houkir6-2-4": [
@@ -1998,6 +2034,9 @@
   ],
   "houki:houkir7-2-13": [
    4,
+   3
+  ],
+  "houki:houkir7-2-2": [
    3
   ],
   "houki:houkir7-2-3": [
@@ -2909,6 +2948,10 @@
   "kikai:kikair5-1-14": [
    3
   ],
+  "kikai:kikair5-1-15": [
+   4,
+   2
+  ],
   "kikai:kikair5-1-16": [
    1,
    4
@@ -2937,6 +2980,12 @@
    4
   ],
   "kikai:kikair5-1-7": [
+   4
+  ],
+  "kikai:kikair5-1-8": [
+   3
+  ],
+  "kikai:kikair5-1-9": [
    4
   ],
   "kikai:kikair5-2-1": [
@@ -3048,6 +3097,12 @@
   ],
   "kikai:kikair6-1-7": [
    5
+  ],
+  "kikai:kikair6-1-8": [
+   4
+  ],
+  "kikai:kikair6-1-9": [
+   2
   ],
   "kikai:kikair6-2-1": [
    5
