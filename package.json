@@ -12,11 +12,12 @@
     "dev:electron": "npm run build:electron -- --sourcemap && wait-on tcp:5173 && cross-env NODE_ENV=development electron .",
     "build:electron": "esbuild electron/main.ts electron/preload.ts --bundle --platform=node --target=node20 --format=cjs --external:electron --outdir=dist/electron",
     "build:renderer": "vite build",
-    "build": "npm run typecheck && npm run build:electron && npm run build:renderer",
+    "build": "npm run typecheck && npm run test:sync && npm run build:electron && npm run build:renderer",
     "typecheck": "tsc --noEmit",
     "convert": "python3 scripts/convert-excel.py scripts/source.xlsx",
     "pack:win": "npm run build && electron-builder --win --publish never",
-    "pack:dir": "npm run build && electron-builder --dir --publish never"
+    "pack:dir": "npm run build && electron-builder --dir --publish never",
+    "test:sync": "esbuild scripts/kiem-thu-gop.ts --bundle --platform=node --format=cjs --outfile=dist/kiem-thu-gop.cjs --log-level=error && node dist/kiem-thu-gop.cjs"
   },
   "dependencies": {
     "archiver": "^5.3.2",

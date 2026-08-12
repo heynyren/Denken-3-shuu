@@ -166,3 +166,51 @@ Hai việc này không cần tài khoản, không cần máy chủ, không phụ
 5. Đẩy ảnh lên Drive, lưu `driveId`.
 
 **Không nên làm:** dùng Properties Service (500 KB là không đủ), hoặc gộp kiểu ghi đè cả file (mất dữ liệu khi dùng hai máy).
+
+---
+
+## 6. Chốt phương án: Capacitor + Drive API trực tiếp
+
+Mục 4 ở trên đề xuất Apps Script. Sau khi cân nhắc lại, chọn khác:
+
+| | Chọn | Vì sao |
+|---|---|---|
+| App Android | **Capacitor** bọc chính giao diện React hiện có | `src/lib/` (1576 dòng: chu kỳ ôn, thống kê, engine thi thử, huy hiệu) không dính một dòng Electron nào. Toàn bộ ràng buộc gói trong **một interface 17 method**, gọi từ 22 chỗ. Chỉ cần viết lại lớp đó. Một kho mã cho cả hai bên nên tính năng không bao giờ lệch nhau. |
+| Đồng bộ | **Drive API trực tiếp** từ cả hai app | Xác thực OAuth chuẩn, không phải "ai có link và chuỗi bí mật thì đọc ghi được tất". Không có tầng Apps Script ở giữa nên không dính hạn ngạch 6 phút/lần chạy. |
+
+### 6.1 Gộp ba chiều, không phải hai
+
+Đây là phần dễ làm mất dữ liệu nhất, nên viết tách hẳn thành hàm thuần trong
+`src/lib/sync.ts` — không mạng, không file, chỉ nhận ba bản dữ liệu và trả về
+một bản. Nhờ vậy kiểm thử được từng luật (`npm run test:sync`).
+
+```
+base    bản chung của lần đồng bộ trước (máy này tự nhớ)
+local   máy này bây giờ
+remote  bản đang nằm trên Drive
+```
+
+Thiếu `base` thì mọi khác biệt trông giống hệt nhau và chỉ còn cách đoán.
+
+### 6.2 Luật gộp từng phần
+
+| Phần | Luật | Vì sao |
+|---|---|---|
+| `progress` | Mỗi bài một đơn vị, bên có `updatedAt` mới hơn lấy **trọn** bản ghi | Trạng thái, cấp độ ôn và ngày ôn lại phải khớp nhau. Ghép trạng thái máy này với ngày ôn lại máy kia là ra bản ghi không tồn tại ở đâu cả. |
+| `dailyLog` | `remote + (local − base)` | Cộng thẳng hai tổng thì lần sau ra gấp đôi, lần sau nữa gấp bốn. Cũng **không** dựng lại từ `history` được vì history chỉ giữ 50 lần gần nhất mỗi bài. |
+| `badges` | Hợp nhất, giữ ngày đạt **sớm nhất** | Huy hiệu chỉ có thêm, không bao giờ mất. |
+| `examResults` | Hợp nhất theo `id`; có trong `base` mà một bên bỏ đi thì tôn trọng việc xoá | Không thì lượt vừa xoá sẽ mọc lại sau mỗi lần đồng bộ. |
+| `settings` | Bên nào vừa sửa thì theo bên đó; sửa cả hai thì máy đang bấm nút thắng | `mirrorDir` là đường dẫn riêng của từng máy, không bao giờ mang sang. |
+
+### 6.3 Lần đồng bộ đầu tiên
+
+Chưa có `base` nên không biết đâu là phần mới. Lúc đó `dailyLog` lấy **bên lớn
+hơn** chứ không cộng: thà thiếu còn hơn thừa, vì con số thổi phồng sẽ làm sai
+chuỗi ngày liên tiếp lẫn mọi biểu đồ, mà thổi phồng rồi thì không gỡ lại được.
+
+### 6.4 Còn lại phải nói thẳng
+
+- Sửa **cùng một bài** trên hai máy khi cả hai đang ngoại tuyến: bên có
+  `updatedAt` mới hơn thắng, bên kia mất. App có đếm và báo số bài rơi vào cảnh
+  này sau mỗi lần đồng bộ, chứ không lặng lẽ bỏ đi.
+- Đây là đồng bộ **theo nhịp**, không phải thời gian thực.
