@@ -10,6 +10,7 @@ import type { Overview } from "../lib/stats";
 import type { AppData, CatalogItem, SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
 import { platform } from "../platform";
+import { topicVi } from "../lib/vi";
 
 type Mode = "due" | "wrong" | "fresh" | "topic";
 
@@ -367,6 +368,9 @@ export default function Review({
             </div>
 
             <div className="review-title ja">{item.name}</div>
+            {topicVi(item.topic) && (
+              <div className="review-title-vi">{topicVi(item.topic)}</div>
+            )}
 
             <div className="small dim">{levelLabel(progress?.srsLevel ?? 0)}</div>
 

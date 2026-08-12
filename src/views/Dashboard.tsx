@@ -2,7 +2,9 @@ import { useMemo } from "react";
 
 import { BADGES } from "../lib/badges";
 import { subjectName, subjectViName } from "../lib/catalog";
+import { recentActivity } from "../lib/history";
 import { dailySeries, upcomingLoad, weeklySeries } from "../lib/stats";
+import { topicVi } from "../lib/vi";
 import { todayISO } from "../lib/srs";
 import { MIN_ATTEMPTS, weakTopics } from "../lib/weakness";
 import type { Overview } from "../lib/stats";
@@ -60,6 +62,7 @@ export default function Dashboard({
   const weeks = useMemo(() => weeklySeries(data, 12), [data]);
   const upcoming = useMemo(() => upcomingLoad(data, 14), [data]);
   const weak = useMemo(() => weakTopics(data, 5), [data]);
+  const activity = useMemo(() => recentActivity(data, 3), [data]);
   const weakSubjects = view.bySubject.filter(
     (subject) => weak[subject.key].length > 0,
   );
@@ -266,6 +269,56 @@ export default function Dashboard({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Đã làm gần đây — ba ngày, xem lại câu nào đúng câu nào sai */}
+      <div className="card">
+        <div className="card-head">
+          <div className="card-title">
+            🕘 Đã làm gần đây
+            <div className="card-sub">
+              Ba ngày gần nhất. Bài làm sai xếp lên trước — đó là thứ cần nhìn lại.
+            </div>
+          </div>
+        </div>
+
+        {activity.length === 0 ? (
+          <div className="empty small">
+            Chưa chấm bài nào trong ba ngày qua. Làm vài bài là hiện ngay ở đây.
+          </div>
+        ) : (
+          activity.map((day) => (
+            <div key={day.date}>
+              <div className="day-head">
+                <span className="day-name">{day.label}</span>
+                <span className="small dim">{day.date}</span>
+                <span className="small muted">
+                  ✅ {day.correct} · ❌ {day.wrong}
+                </span>
+              </div>
+              {day.entries.map((entry) => (
+                <div
+                  className={`log-row ${entry.result}`}
+                  key={entry.item.id}
+                  role="button"
+                  tabIndex={0}
+                  title="Ôn lại cả chủ đề này"
+                  onClick={() => onOpenTopic(entry.item.subject, entry.item.topic)}
+                >
+                  <span className="log-mark">
+                    {entry.result === "correct" ? "✅" : "❌"}
+                  </span>
+                  <span className="log-name ja">{entry.item.name}</span>
+                  <span className="log-where">
+                    {topicVi(entry.item.topic) || entry.item.topic} ·{" "}
+                    {entry.item.exam} {entry.item.question}
+                    {entry.times > 1 && ` · chấm ${entry.times} lần`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))
+        )}
       </div>
 
       {/* Đang yếu ở đâu — gộp cả ôn tập lẫn thi thử */}

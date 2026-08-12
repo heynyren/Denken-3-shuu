@@ -6,6 +6,7 @@ import { items, subjectName, subjects, topicsBySubject } from "../lib/catalog";
 import { isDue, overdueDays, todayISO } from "../lib/srs";
 import type { CatalogItem, ItemStatus, SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
+import { haystackOf, matchesQuery } from "../lib/vi";
 
 /** Chiều cao cố định mỗi dòng — cần cho phép tính cuộn ảo. */
 const ROW_HEIGHT = 62;
@@ -54,7 +55,7 @@ export default function Browse({
   const topics = subject === "all" ? [] : topicsBySubject[subject];
 
   const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
+    const needle = query.trim();
 
     return items.filter((item) => {
       if (subject !== "all" && item.subject !== subject) return false;
@@ -73,9 +74,8 @@ export default function Browse({
         const labels = (progress?.links ?? [])
           .map((link) => `${link.label} ${link.url}`)
           .join(" ");
-        const haystack =
-          `${item.name} ${item.topic} ${item.category} ${item.exam} ${notes} ${labels}`.toLowerCase();
-        if (!haystack.includes(needle)) return false;
+        // Tìm được bằng cả tiếng Nhật lẫn tiếng Việt, có dấu hay không đều được.
+        if (!matchesQuery(haystackOf(item, notes, labels), needle)) return false;
       }
       return true;
     });

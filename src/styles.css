@@ -2168,3 +2168,54 @@ select {
     text-overflow: ellipsis;
   }
 }
+
+/* Chủ đề bằng tiếng Việt dưới tên bài tiếng Nhật, chỉ ở chế độ Ôn tập.
+   Màn thi thử cố ý không có: thi thì nên quen với chữ Nhật như đề thật. */
+.review-title-vi {
+  margin-top: 4px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+/* Lịch sử ba ngày gần nhất */
+.day-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 8px;
+}
+.day-head:first-child {
+  margin-top: 0;
+}
+.day-name {
+  font-weight: 700;
+}
+.log-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  margin-bottom: 5px;
+  font-size: 13px;
+}
+.log-row.wrong {
+  background: var(--red-soft);
+}
+.log-mark {
+  width: 20px;
+  flex-shrink: 0;
+}
+.log-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.log-where {
+  color: var(--text-3);
+  font-size: 12px;
+  white-space: nowrap;
+}
