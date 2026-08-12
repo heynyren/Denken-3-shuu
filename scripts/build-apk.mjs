@@ -27,9 +27,26 @@ const task = release ? "assembleRelease" : "assembleDebug";
 
 console.log(`Đóng gói ${task}: ${version} (versionCode ${versionCode})`);
 
+const args = [task, `-PversionName=${version}`, `-PversionCode=${versionCode}`];
+
+// Khoá ký cố định, nếu có. Không có thì Gradle rơi về khoá gỡ lỗi tự sinh —
+// cài được nhưng đăng nhập Google sẽ hỏng, xem docs/DONG-BO-GOOGLE-DRIVE.md.
+const keystore = process.env.DENKEN_KEYSTORE;
+if (keystore) {
+  args.push(
+    `-PDENKEN_KEYSTORE=${path.resolve(keystore)}`,
+    `-PDENKEN_STORE_PASSWORD=${process.env.DENKEN_STORE_PASSWORD ?? ""}`,
+    `-PDENKEN_KEY_ALIAS=${process.env.DENKEN_KEY_ALIAS ?? "denken"}`,
+    `-PDENKEN_KEY_PASSWORD=${process.env.DENKEN_KEY_PASSWORD ?? ""}`,
+  );
+  console.log("Ký bằng khoá cố định:", path.basename(keystore));
+} else {
+  console.log("Chưa có khoá cố định — ký bằng khoá gỡ lỗi (đăng nhập Google sẽ không dùng được).");
+}
+
 const result = spawnSync(
   process.platform === "win32" ? "gradlew.bat" : "./gradlew",
-  [task, `-PversionName=${version}`, `-PversionCode=${versionCode}`],
+  args,
   { cwd: path.join(root, "android"), stdio: "inherit" },
 );
 

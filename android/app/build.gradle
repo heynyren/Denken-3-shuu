@@ -18,10 +18,40 @@ android {
             ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    // Ký bằng khoá cố định của dự án.
+    //
+    // Bắt buộc phải cố định, không chỉ vì chuyện cập nhật app: client OAuth
+    // Android của Google khoá theo vân tay SHA-1 của khoá ký. APK gỡ lỗi được
+    // ký bằng khoá máy tự sinh — mỗi máy, mỗi lần chạy CI lại một khoá khác —
+    // nên SHA-1 đổi liên tục và đăng nhập Google sẽ hỏng ngay sau đó.
+    //
+    // Không có khoá thì vẫn build được (rơi về ký gỡ lỗi), chỉ là không đăng
+    // nhập Google được. Xem docs/DONG-BO-GOOGLE-DRIVE.md.
+    signingConfigs {
+        release {
+            if (project.hasProperty('DENKEN_KEYSTORE')) {
+                storeFile file(project.property('DENKEN_KEYSTORE'))
+                storePassword project.property('DENKEN_STORE_PASSWORD')
+                keyAlias project.property('DENKEN_KEY_ALIAS')
+                keyPassword project.property('DENKEN_KEY_PASSWORD')
+            }
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            if (project.hasProperty('DENKEN_KEYSTORE')) {
+                signingConfig signingConfigs.release
+            }
+        }
+        debug {
+            // Có khoá cố định thì dùng luôn cho bản gỡ lỗi, để SHA-1 của bản
+            // tải từ CI và bản build ở máy là một.
+            if (project.hasProperty('DENKEN_KEYSTORE')) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }

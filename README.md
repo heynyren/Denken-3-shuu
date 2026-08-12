@@ -103,8 +103,10 @@ Máy phát triển không cài được Android SDK thì cứ đẩy lên GitHub
 được đóng gói trên máy Windows. Tải APK ở tab Actions, hoặc đẩy tag `v*` để APK
 được đính kèm vào bản phát hành cạnh file `.exe`.
 
-> APK từ CI ký bằng khoá gỡ lỗi nên Android sẽ hỏi xác nhận khi cài. Muốn bản ký
-> tử tế thì thêm keystore vào secrets của repo và đổi sang `assembleRelease`.
+> APK ký bằng khoá gỡ lỗi thì Android vẫn cài được, nhưng **đăng nhập Google sẽ
+> hỏng**: client OAuth Android khoá theo vân tay SHA-1 của khoá ký, mà khoá gỡ
+> lỗi thì CI sinh mới mỗi lần chạy. Cách tạo khoá cố định và cất vào secrets:
+> [docs/DONG-BO-GOOGLE-DRIVE.md](docs/DONG-BO-GOOGLE-DRIVE.md).
 
 ## Cài đặt và cập nhật
 
