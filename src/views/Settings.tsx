@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import type { Overview } from "../lib/stats";
 import type { Store } from "../state/useStore";
+import { platform } from "../platform";
 
 export default function Settings({
   store,
@@ -123,36 +124,41 @@ export default function Settings({
         )}
 
         <div className="btn-row" style={{ marginTop: 16 }}>
-          <button
-            className="btn primary"
-            onClick={() =>
-              run(
-                () => window.denken.exportXlsx(),
-                (path) => `Đã xuất file Excel: ${path}`,
-              )
-            }
-          >
-            📊 Xuất ra Excel
-          </button>
+          {platform.can.excelExport && (
+            <button
+              className="btn primary"
+              onClick={() =>
+                run(
+                  () => platform.exportXlsx(),
+                  (path) => `Đã xuất file Excel: ${path}`,
+                )
+              }
+            >
+              📊 Xuất ra Excel
+            </button>
+          )}
           <button
             className="btn"
             onClick={() =>
               run(
-                () => window.denken.exportJson(),
+                () => platform.exportJson(),
                 (path) => `Đã xuất bản sao lưu: ${path}`,
               )
             }
           >
             💾 Xuất bản sao lưu (JSON)
           </button>
-          <button
-            className="btn"
-            onClick={() => void window.denken.revealDataFolder()}
-          >
-            📂 Mở thư mục dữ liệu
-          </button>
+          {platform.can.revealFolder && (
+            <button
+              className="btn"
+              onClick={() => void platform.revealDataFolder()}
+            >
+              📂 Mở thư mục dữ liệu
+            </button>
+          )}
         </div>
 
+        {platform.can.excelImport && (
         <div
           className="row wrap"
           style={{
@@ -175,7 +181,7 @@ export default function Settings({
             className="btn sm"
             onClick={async () => {
               await store.flush();
-              const result = await window.denken.importXlsx();
+              const result = await platform.importXlsx();
               if (result.cancelled) return;
               if (result.ok && result.data) {
                 store.replaceAll(result.data);
@@ -198,6 +204,7 @@ export default function Settings({
             📥 Nhập từ file Excel
           </button>
         </div>
+        )}
 
         <div className="row wrap" style={{ gap: 10, marginTop: 12 }}>
           <div style={{ flex: 1, minWidth: 260 }}>
@@ -212,7 +219,7 @@ export default function Settings({
             className="btn danger sm"
             onClick={async () => {
               await store.flush();
-              const result = await window.denken.importJson();
+              const result = await platform.importJson();
               if (result.cancelled) return;
               if (result.ok && result.data) {
                 store.replaceAll(result.data);
@@ -247,12 +254,14 @@ export default function Settings({
         </div>
 
         <div className="callout warn" style={{ marginBottom: 14 }}>
-          <strong>Bản sao lưu hằng ngày nằm cùng ổ đĩa với bản gốc.</strong> Nó chống
-          được xoá nhầm và ghi hỏng, nhưng ổ cứng hỏng thì mất cả hai. Chọn một thư
-          mục trong Google Drive hoặc OneDrive ở dưới, app sẽ tự chép sang đó sau mỗi
-          lần ghi.
+          <strong>Bản sao lưu hằng ngày nằm cùng máy với bản gốc.</strong> Nó chống
+          được xoá nhầm và ghi hỏng, nhưng mất máy thì mất cả hai.{" "}
+          {platform.can.mirrorFolder
+            ? "Chọn một thư mục trong Google Drive hoặc OneDrive ở dưới, app sẽ tự chép sang đó sau mỗi lần ghi."
+            : "Hãy xuất bản sao lưu và cất ra ngoài máy."}
         </div>
 
+        {platform.can.mirrorFolder && (
         <div className="field" style={{ marginBottom: 12 }}>
           <span className="field-label">📁 Thư mục nhân bản</span>
           <div className="row wrap" style={{ gap: 8 }}>
@@ -268,11 +277,11 @@ export default function Settings({
             <button
               className="btn"
               onClick={async () => {
-                const result = await window.denken.pickMirrorDir();
+                const result = await platform.pickMirrorDir();
                 if (result.ok && result.dir) {
                   store.updateSettings({ mirrorDir: result.dir });
                   await store.flush();
-                  const done = await window.denken.mirrorNow();
+                  const done = await platform.mirrorNow();
                   setMessage(
                     done.ok
                       ? { kind: "", text: `Đã nhân bản sang ${result.dir}` }
@@ -297,14 +306,16 @@ export default function Settings({
             nên mỗi lần ghi chỉ tốn vài trăm KB của data.json.
           </div>
         </div>
+        )}
 
         <div className="btn-row">
+          {platform.can.mirrorFolder && (
           <button
             className="btn sm"
             disabled={!data.settings.mirrorDir}
             onClick={async () => {
               await store.flush();
-              const result = await window.denken.mirrorNow();
+              const result = await platform.mirrorNow();
               setMessage(
                 result.ok
                   ? {
@@ -317,17 +328,20 @@ export default function Settings({
           >
             🔄 Nhân bản ngay
           </button>
+          )}
+          {platform.can.mirrorFolder && (
           <button
             className="btn sm"
             onClick={() =>
               run(
-                () => window.denken.exportZip(),
+                () => platform.exportZip(),
                 (path) => `Đã xuất gói đầy đủ: ${path}`,
               )
             }
           >
             🗜️ Xuất toàn bộ (.zip)
           </button>
+          )}
           <span className="field-hint" style={{ flex: 1, minWidth: 220 }}>
             Gói .zip có cả ảnh đính kèm; file JSON thì không — khôi phục từ JSON sẽ
             mất ảnh.

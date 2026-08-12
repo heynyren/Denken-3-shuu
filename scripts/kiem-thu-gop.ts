@@ -1,6 +1,7 @@
 /* Kiểm thử luật gộp dữ liệu hai máy. */
 import { mergeData } from "../src/lib/sync";
 import type { AppData, ItemProgress } from "../src/lib/types";
+import { safeName } from "../src/platform/android";
 
 let pass = 0;
 let fail = 0;
@@ -211,6 +212,14 @@ const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
   check(Object.keys(data.progress).length === 50, "máy mới kéo về đủ 50 bài");
   check(data.dailyLog["2026-08-01"].reviewed === 50, "máy mới kéo về đủ nhật ký ngày");
   check(Object.keys(data.badges).length === 1, "máy mới kéo về đủ huy hiệu");
+}
+
+/* ---- 11. Android: chặn đường dẫn vượt thư mục, y như bản Windows ---- */
+{
+  for (const bad of ["../data.json", "..\\data.json", "sub/x.png", "/etc/passwd", ".."]) {
+    check(safeName(bad) === null, `chặn tên file nguy hiểm: ${JSON.stringify(bad)}`);
+  }
+  check(safeName("abc123.png") === "abc123.png", "tên file trơn thì cho qua");
 }
 
 console.log(`\n${pass} đạt · ${fail} hỏng`);

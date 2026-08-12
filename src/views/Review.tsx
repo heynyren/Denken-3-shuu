@@ -9,6 +9,7 @@ import { dueQueue, freshQueue, topicQueue, wrongQueue } from "../lib/stats";
 import type { Overview } from "../lib/stats";
 import type { AppData, CatalogItem, SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
+import { platform } from "../platform";
 
 type Mode = "due" | "wrong" | "fresh" | "topic";
 
@@ -128,7 +129,7 @@ export default function Review({
   /** Mở bài trên denken-ou.com và bắt đầu tính giờ cùng lúc. */
   const openAndTime = () => {
     if (!item) return;
-    void window.denken.openExternal(item.url);
+    void platform.openExternal(item.url);
     clock.start();
   };
 

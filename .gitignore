@@ -8,3 +8,16 @@ release/
 # File Excel gốc chứa ghi chú và link tham khảo cá nhân — không đẩy lên repo công khai.
 scripts/source.xlsx
 __pycache__/
+
+# Android — chỉ giữ mã nguồn, không giữ thứ do máy sinh ra
+android/app/build/
+android/build/
+android/.gradle/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/app/capacitor.build.gradle
+android/capacitor.settings.gradle
+android/local.properties
+*.keystore
+*.jks

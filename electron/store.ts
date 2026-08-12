@@ -23,6 +23,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 
 import seed from "../src/data/seed.json";
+import { DEFAULT_SETTINGS, SCHEMA_VERSION } from "../src/lib/defaults";
 import type {
   AppData,
   Attachment,
@@ -32,23 +33,11 @@ import type {
   ItemProgress,
   LinkEntry,
   NoteEntry,
-  Settings,
 } from "../src/lib/types";
 
-// v2 bỏ phần từ vựng/Quizlet.
-// v3 đổi một ghi chú/một link thành danh sách nhiều ghi chú và nhiều link,
-//    mỗi ghi chú kèm được file. Dữ liệu cũ được chuyển đổi tự động khi nạp.
-// v4 thêm lịch sử thi thử.
-// v5 mỗi lượt thi lưu thêm bài làm từng câu (scores[].answers) để dựng bảng
-//    phân tích. Lượt thi cũ không có trường này và vẫn đọc được bình thường.
-export const SCHEMA_VERSION = 5;
-
-const DEFAULT_SETTINGS: Settings = {
-  dailyGoal: 30,
-  examDate: "2027-03-21",
-  backupsToKeep: 30,
-  mirrorDir: "",
-};
+// Phiên bản schema và bộ cài đặt mặc định nằm ở src/lib/defaults.ts để Android
+// dùng chung — hai bản chép tay sẽ lệch nhau, mà lệch schema là hỏng di trú.
+export { SCHEMA_VERSION };
 
 export const paths = {
   get dir() {

@@ -72,6 +72,40 @@ Hai bên nối nhau bằng `id` sinh từ link denken-ou.com, nên thêm bài m�
 
 > `src/data/seed.json` trong repo cố ý để **trống**: ghi chú và link tham khảo là dữ liệu cá nhân, không nên nằm trong repo công khai. Nạp dữ liệu của bạn bằng nút **Nhập từ file Excel** trong Cài đặt.
 
+## Bản Android
+
+Cùng một kho mã, cùng một giao diện. `src/lib/` (chu kỳ ôn, thống kê, engine thi
+thử, huy hiệu) không dính một dòng nào của Electron hay Capacitor — toàn bộ ràng
+buộc với nền tảng gói trong **một interface 17 method** ở `src/platform/`:
+
+```
+src/platform/types.ts    interface Platform + bảng "nền tảng này làm được gì"
+src/platform/desktop.ts  Windows — chuyển tiếp sang window.denken của Electron
+src/platform/android.ts  Android — Capacitor Filesystem, Browser, Share
+src/platform/index.ts    chọn nền tảng lúc chạy
+```
+
+Giao diện đọc `platform.can.*` để **ẩn hẳn** nút nền tảng không làm được, thay vì
+cho bấm rồi báo lỗi. Bản Android hiện chưa có: nhập/xuất Excel, gói `.zip`, nhân
+bản thư mục, mở thư mục dữ liệu — nhập trên máy tính rồi đồng bộ sang là đủ.
+
+Ba lớp bảo vệ dữ liệu giữ nguyên trên Android: ghi nguyên tử (`.tmp` rồi đổi
+tên), sao lưu hằng ngày 30 bản, tự cứu hộ từ bản sao lưu khi `data.json` hỏng.
+Chặn đường dẫn vượt thư mục cho file đính kèm cũng giữ nguyên, và có kiểm thử.
+
+```bash
+npm run android:sync    # build giao diện rồi chép sang dự án Android
+npm run android:apk     # đóng gói APK (máy phải có Android SDK)
+```
+
+Máy phát triển không cài được Android SDK thì cứ đẩy lên GitHub — workflow
+`build-android.yml` đóng gói APK trên runner của GitHub, y như cách bản Windows
+được đóng gói trên máy Windows. Tải APK ở tab Actions, hoặc đẩy tag `v*` để APK
+được đính kèm vào bản phát hành cạnh file `.exe`.
+
+> APK từ CI ký bằng khoá gỡ lỗi nên Android sẽ hỏi xác nhận khi cài. Muốn bản ký
+> tử tế thì thêm keystore vào secrets của repo và đổi sang `assembleRelease`.
+
 ## Cài đặt và cập nhật
 
 Chạy thẳng file `Denken-3-shuu-Setup-*.exe`. **Không cần gỡ bản cũ trước** —

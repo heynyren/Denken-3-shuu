@@ -1,0 +1,67 @@
+name: Build Android APK
+
+# Máy này không cài được Android SDK (dl.google.com bị chặn), nên APK được đóng
+# gói ở đây — runner của GitHub có sẵn SDK. Cùng cách làm với bản Windows.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+
+      - run: npm ci
+
+      # Kiểm kiểu và luật gộp dữ liệu chạy trước, khỏi tốn 10 phút build một bản
+      # đã hỏng sẵn từ trong mã nguồn.
+      - run: npm run typecheck
+      - run: npm run test:sync
+
+      - name: Đóng gói APK
+        run: npm run android:apk
+
+      - name: Đặt tên file theo phiên bản
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          mkdir -p out
+          cp android/app/build/outputs/apk/debug/app-debug.apk \
+             "out/Denken-3-shuu-$VERSION.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Denken-3-shuu-APK
+          path: out/*.apk
+          if-no-files-found: error
+
+      # Đẩy tag v* thì đính APK vào bản phát hành, cạnh file .exe của Windows.
+      - name: Đính vào bản phát hành
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.apk

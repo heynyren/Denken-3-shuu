@@ -8,6 +8,7 @@ import { MIN_ATTEMPTS, weakTopics } from "../lib/weakness";
 import type { Overview } from "../lib/stats";
 import type { SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
+import { platform } from "../platform";
 import {
   Bar,
   BarChart,
@@ -91,6 +92,7 @@ export default function Dashboard({
               Học bài đầu tiên →
             </button>
             {/* Lối nhập Excel để nhỏ: chỉ người chuyển từ file theo dõi cũ mới cần. */}
+            {platform.can.excelImport && (
             <span className="small dim">
               Đã có file Excel theo dõi từ trước?{" "}
               <span
@@ -98,13 +100,14 @@ export default function Dashboard({
                 role="button"
                 tabIndex={0}
                 onClick={async () => {
-                  const result = await window.denken.importXlsx();
+                  const result = await platform.importXlsx();
                   if (result.ok && result.data) store.replaceAll(result.data);
                 }}
               >
                 Nhập vào đây
               </span>
             </span>
+            )}
           </div>
         </div>
       )}

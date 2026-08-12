@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { fromISO } from "../lib/srs";
 import type { ItemStatus } from "../lib/types";
+import { platform } from "../platform";
 
 /* ------------------------------------------------------------------ */
 /* Nhãn trạng thái                                                     */
@@ -281,7 +282,7 @@ export function BarChart({
 /** Mọi link đều mở bằng trình duyệt mặc định, không mở trong app. */
 export function openLink(url: string): void {
   if (!url) return;
-  void window.denken.openExternal(url);
+  void platform.openExternal(url);
 }
 
 export function ExternalLink({

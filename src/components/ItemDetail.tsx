@@ -11,6 +11,7 @@ import { levelLabel, overdueDays, todayISO } from "../lib/srs";
 import type { Attachment, CatalogItem, ItemProgress, NoteEntry } from "../lib/types";
 import type { Store } from "../state/useStore";
 import { Stars, StatusPill, openLink } from "./ui";
+import { platform } from "../platform";
 
 const TYPING_PAUSE_MS = 400;
 
@@ -81,7 +82,7 @@ function AttachmentChip({
   useEffect(() => {
     if (attachment.kind !== "image") return;
     let alive = true;
-    void window.denken.attachDataUrl(attachment.file).then((result) => {
+    void platform.attachDataUrl(attachment.file).then((result) => {
       if (!alive) return;
       if (result.ok && result.dataUrl) setSrc(result.dataUrl);
       else setFailed(true);
@@ -98,7 +99,7 @@ function AttachmentChip({
           <img
             src={src}
             alt={attachment.name}
-            onClick={() => void window.denken.attachOpen(attachment.file)}
+            onClick={() => void platform.attachOpen(attachment.file)}
           />
         ) : (
           <div className="attach-image-loading">{failed ? "⚠️ mất file" : "…"}</div>
@@ -118,9 +119,9 @@ function AttachmentChip({
         role="button"
         tabIndex={0}
         title={`Mở ${attachment.name}`}
-        onClick={() => void window.denken.attachOpen(attachment.file)}
+        onClick={() => void platform.attachOpen(attachment.file)}
         onKeyDown={(event) => {
-          if (event.key === "Enter") void window.denken.attachOpen(attachment.file);
+          if (event.key === "Enter") void platform.attachOpen(attachment.file);
         }}
       >
         <span className="attach-file-icon">{KIND_ICON[attachment.kind]}</span>
@@ -167,7 +168,7 @@ function NoteCard({
 
   const pick = async () => {
     setBusy(true);
-    const result = await window.denken.attachPick();
+    const result = await platform.attachPick();
     setBusy(false);
     if (result.cancelled) return;
     if (result.attachments?.length) {
@@ -190,7 +191,7 @@ function NoteCard({
       if (!file) continue;
       const ext = (file.type.split("/")[1] ?? "png").replace("jpeg", "jpg");
       const name = file.name || `anh-dan-${Date.now()}.${ext}`;
-      const result = await window.denken.attachSave(name, await file.arrayBuffer());
+      const result = await platform.attachSave(name, await file.arrayBuffer());
       if (result.ok && result.attachment) {
         store.addAttachments(itemId, note.id, [result.attachment]);
       } else {

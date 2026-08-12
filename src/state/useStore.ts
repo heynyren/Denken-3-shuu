@@ -12,6 +12,7 @@ import { newlyEarned } from "../lib/badges";
 import { itemById } from "../lib/catalog";
 import { applyReview, emptyProgress, todayISO } from "../lib/srs";
 import { computeOverview } from "../lib/stats";
+import { platform } from "../platform";
 import type {
   AppData,
   Attachment,
@@ -98,7 +99,7 @@ export function useStore(): Store {
     pending.current = null;
     setSaveState("saving");
     try {
-      const result = await window.denken.save(snapshot);
+      const result = await platform.save(snapshot);
       setSaveState(result.ok ? "saved" : "error");
       if (!result.ok) setError(result.error ?? "Không ghi được dữ liệu.");
     } catch (cause) {
@@ -153,8 +154,8 @@ export function useStore(): Store {
     setLoading(true);
     try {
       const [loaded, storeInfo] = await Promise.all([
-        window.denken.load(),
-        window.denken.info(),
+        platform.load(),
+        platform.info(),
       ]);
       setData(loaded);
       setInfo(storeInfo);

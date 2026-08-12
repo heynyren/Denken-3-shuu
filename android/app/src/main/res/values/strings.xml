@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">電験三種 Sổ ôn thi</string>
+    <string name="title_activity_main">電験三種 Sổ ôn thi</string>
+    <string name="package_name">com.heynyren.denken3shuu</string>
+    <string name="custom_url_scheme">com.heynyren.denken3shuu</string>
+</resources>
