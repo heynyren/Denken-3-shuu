@@ -728,6 +728,9 @@ select {
   border-bottom: 1px solid var(--divider);
   cursor: pointer;
   transition: background 0.1s;
+  /* Chiều cao dòng do danh sách ảo ấn định (ROW_HEIGHT). Nội dung nào cao hơn
+     phải bị cắt, chứ để tràn là đè lên dòng kế tiếp. */
+  overflow: hidden;
 }
 .item-row:last-child {
   border-bottom: 0;
@@ -1924,4 +1927,244 @@ select {
 }
 .chip.star-chip.on .star-off {
   color: rgba(247, 185, 40, 0.35);
+}
+
+/* ==========================================================================
+   Điện thoại
+   --------------------------------------------------------------------------
+   Bố cục gốc dựng cho màn hình máy tính: thanh bên 268px cố định bên trái. Trên
+   máy điện thoại rộng 412px, thanh bên đó nuốt hai phần ba màn hình và phần nội
+   dung còn lại một dải hẹp, chữ xuống dòng từng từ một.
+
+   Nên dưới 860px, thanh bên **đổi vai**: từ cột trái thành thanh tab dưới đáy —
+   đúng chỗ ngón tay cái với tới. Những thứ trong thanh bên mà không phải tab
+   (tiến độ bốn môn, tổng tiến độ, nút giới thiệu) bị ẩn: chúng đã có mặt ở
+   trang Hôm nay rồi, còn nút giới thiệu chuyển sang màn Cài đặt.
+   ========================================================================== */
+
+.only-mobile {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .app {
+    /* Đầu trang · nội dung · thanh tab. Thanh tab là một hàng của lưới chứ
+       không phải phần tử nổi, nên không bao giờ đè lên nội dung. */
+    grid-template-rows: var(--header-h) 1fr auto;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "main"
+      "sidebar";
+  }
+
+  .only-mobile {
+    display: block;
+  }
+
+  /* --- Đầu trang --- */
+  .header {
+    gap: 8px;
+    padding: 0 12px;
+  }
+  .brand img {
+    width: 30px;
+    height: 30px;
+  }
+  /* Chỉ còn logo: tên app đã nằm ngay trên biểu tượng ứng dụng rồi. */
+  .brand-text {
+    display: none;
+  }
+  .header-stat {
+    padding: 4px 9px;
+    font-size: 12px;
+    gap: 5px;
+  }
+  .header-stat .label {
+    display: none;
+  }
+
+  /* --- Thanh tab dưới đáy --- */
+  .sidebar {
+    flex-direction: row;
+    border-right: 0;
+    border-top: 1px solid var(--divider);
+    background: var(--surface);
+    padding: 4px 4px 0;
+    overflow: visible;
+    /* Chừa chỗ cho thanh điều hướng của Android/iOS. */
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+  }
+  .nav-extra {
+    display: none;
+  }
+  .nav-tabs {
+    display: flex;
+    width: 100%;
+    gap: 2px;
+  }
+  .nav-item {
+    flex: 1;
+    flex-direction: column;
+    gap: 3px;
+    padding: 7px 2px;
+    border-radius: var(--radius);
+    /* 48px là mức tối thiểu cho một mục tiêu chạm dùng được. */
+    min-height: 48px;
+    justify-content: center;
+    text-align: center;
+  }
+  .nav-item .nav-icon {
+    width: 22px;
+    height: 22px;
+    font-size: 17px;
+  }
+  .nav-label {
+    font-size: 10.5px;
+    line-height: 1.15;
+  }
+  .nav-badge {
+    position: absolute;
+    transform: translate(14px, -14px);
+  }
+  .nav-item {
+    position: relative;
+  }
+
+  /* --- Nội dung --- */
+  .main {
+    padding: 12px 12px 20px;
+  }
+  .container {
+    gap: 12px;
+  }
+  .card,
+  .stat,
+  .review-card {
+    padding: 14px;
+    border-radius: var(--radius-lg);
+  }
+
+  /* Mọi lưới về một cột: hai cột trên màn 412px là mỗi ô 190px, không đủ cho
+     một con số kèm nhãn. */
+  .grid.cols-2,
+  .grid.cols-3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* Riêng bốn ô số liệu vẫn để hai cột — chúng chỉ có một con số và một dòng. */
+  .grid.cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* --- Mục tiêu chạm --- */
+  .btn {
+    min-height: 42px;
+  }
+  .btn.sm,
+  .btn.xs {
+    min-height: 36px;
+  }
+  .chip {
+    min-height: 34px;
+  }
+  .icon-btn {
+    min-width: 36px;
+    min-height: 36px;
+  }
+
+  /* --- Vài chỗ hay vỡ --- */
+  .ring-wrap {
+    flex-wrap: wrap;
+  }
+  .review-topic {
+    row-gap: 6px;
+  }
+  .review-title {
+    font-size: 17px;
+    line-height: 1.5;
+  }
+  .review-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .exam-bar {
+    flex-wrap: wrap;
+    row-gap: 10px;
+  }
+  .exam-bar .btn {
+    flex: 1;
+  }
+  .exam-subjects {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .weak-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .topic-row,
+  .weak-row,
+  .exam-review-q,
+  .exam-history-row {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+  .exam-review-topic {
+    max-width: 100%;
+  }
+  /* Bảng đáp án từng câu: mỗi ý một dòng đủ rộng để bấm. */
+  .exam-choices {
+    flex-wrap: wrap;
+  }
+  .exam-choice {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .heatmap {
+    overflow-x: auto;
+  }
+}
+
+/* Màn hẹp thật sự (dưới 420px) */
+@media (max-width: 420px) {
+  .grid.cols-4 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .header-stat:nth-of-type(2) {
+    display: none; /* bỏ ô "x/y hôm nay" — trang Hôm nay đã có vòng KPI */
+  }
+  .nav-label {
+    font-size: 10px;
+  }
+  .main {
+    padding: 10px 10px 16px;
+  }
+}
+
+/* Dòng danh sách bài trên màn hẹp: mọi thứ gói vào một dòng, cắt bằng dấu ba
+   chấm. Cho xuống dòng là vượt chiều cao cố định của danh sách ảo và đè lên
+   dòng bên dưới. */
+@media (max-width: 860px) {
+  .item-row {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+  .item-meta {
+    flex-wrap: nowrap;
+    min-width: 0;
+    overflow: hidden;
+    gap: 6px;
+  }
+  .item-meta > span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 0;
+  }
+  /* Tên chủ đề là phần dài nhất, cho nó co lại trước. */
+  .item-meta > span:first-child {
+    flex-shrink: 1;
+  }
+  .item-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 }

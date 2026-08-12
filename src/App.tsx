@@ -99,7 +99,10 @@ export default function App() {
       </header>
 
       <nav className="sidebar">
-        {TABS.map((entry) => (
+        {/* Năm tab chính. Trên điện thoại, đúng nhóm này biến thành thanh tab
+            dưới đáy màn hình; phần còn lại của thanh bên bị ẩn đi. */}
+        <div className="nav-tabs">
+          {TABS.map((entry) => (
           <button
             key={entry.key}
             className={`nav-item${tab === entry.key ? " active" : ""}`}
@@ -110,9 +113,11 @@ export default function App() {
             {entry.key === "review" && view.dueToday > 0 && (
               <span className="nav-badge">{view.dueToday}</span>
             )}
-          </button>
-        ))}
+            </button>
+          ))}
+        </div>
 
+        <div className="nav-extra">
         <div className="sidebar-divider" />
         <div className="sidebar-section">Bốn môn</div>
         {view.bySubject.map((subject) => (
@@ -153,6 +158,7 @@ export default function App() {
           <VietnamFlag size={18} />
           <span>Về tác giả — Nyren Phạm</span>
         </button>
+        </div>
       </nav>
 
       <main className="main">
@@ -181,7 +187,9 @@ export default function App() {
           />
         )}
         {tab === "exam" && <Exam store={store} onOpenTopic={goTopic} />}
-        {tab === "settings" && <Settings store={store} view={view} />}
+        {tab === "settings" && (
+          <Settings store={store} view={view} onAbout={() => setShowAbout(true)} />
+        )}
       </main>
 
       {showAbout && <About onClose={() => setShowAbout(false)} />}

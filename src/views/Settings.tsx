@@ -7,9 +7,12 @@ import { platform } from "../platform";
 export default function Settings({
   store,
   view,
+  onAbout,
 }: {
   store: Store;
   view: Overview;
+  /** Thanh bên bị ẩn trên điện thoại, nên phần giới thiệu vào đây. */
+  onAbout(): void;
 }) {
   const data = store.data!;
   const info = store.info;
@@ -411,6 +414,12 @@ export default function Settings({
           ))}
         </div>
       </div>
+    <div className="card center only-mobile">
+        <button className="btn" onClick={onAbout}>
+          🇻🇳 Về tác giả — Nyren Phạm
+        </button>
+      </div>
+
     </div>
   );
 }

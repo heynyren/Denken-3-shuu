@@ -85,6 +85,12 @@ src/platform/android.ts  Android — Capacitor Filesystem, Browser, Share
 src/platform/index.ts    chọn nền tảng lúc chạy
 ```
 
+Bố cục tự đổi theo bề ngang màn hình: dưới 860px thì **thanh bên đổi vai thành
+thanh tab dưới đáy** — đúng chỗ ngón cái với tới — và những thứ không phải tab
+(tiến độ bốn môn, tổng tiến độ) bị ẩn vì đã có sẵn ở trang Hôm nay. Mọi mục tiêu
+chạm tối thiểu 44px, lưới nhiều cột gộp về một cột, có chừa chỗ cho thanh điều
+hướng của hệ điều hành.
+
 Giao diện đọc `platform.can.*` để **ẩn hẳn** nút nền tảng không làm được, thay vì
 cho bấm rồi báo lỗi. Bản Android hiện chưa có: nhập/xuất Excel, gói `.zip`, nhân
 bản thư mục, mở thư mục dữ liệu — nhập trên máy tính rồi đồng bộ sang là đủ.
