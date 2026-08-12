@@ -1,5 +1,4460 @@
 {
- "version": 1,
- "note": "Bảng đáp án cho chức năng thi thử. Khoá là id bài (giống catalog.json), giá trị là số lựa chọn đúng từ 1 đến 5. Câu nào chưa có ở đây thì bài thi bỏ qua không chấm, và điểm được quy về thang 100 trên phần chấm được. Điền bằng scripts/build-answers.py — xem scripts/bao-cao-thieu.py để biết còn thiếu câu nào.",
- "answers": {}
+ "generatedAt": "",
+ "source": "Bảng đáp án chính thức của 電気技術者試験センター",
+ "answers": {
+  "denryoku:denryokuh21-1": [
+   2
+  ],
+  "denryoku:denryokuh21-10": [
+   5
+  ],
+  "denryoku:denryokuh21-11": [
+   4
+  ],
+  "denryoku:denryokuh21-12": [
+   3
+  ],
+  "denryoku:denryokuh21-13": [
+   2
+  ],
+  "denryoku:denryokuh21-14": [
+   5
+  ],
+  "denryoku:denryokuh21-15": [
+   3,
+   4
+  ],
+  "denryoku:denryokuh21-16": [
+   2,
+   5
+  ],
+  "denryoku:denryokuh21-17": [
+   4,
+   2
+  ],
+  "denryoku:denryokuh21-2": [
+   4
+  ],
+  "denryoku:denryokuh21-3": [
+   2
+  ],
+  "denryoku:denryokuh21-4": [
+   2
+  ],
+  "denryoku:denryokuh21-5": [
+   5
+  ],
+  "denryoku:denryokuh21-6": [
+   4
+  ],
+  "denryoku:denryokuh21-7": [
+   3
+  ],
+  "denryoku:denryokuh21-8": [
+   2
+  ],
+  "denryoku:denryokuh21-9": [
+   4
+  ],
+  "denryoku:denryokuh22-1": [
+   5
+  ],
+  "denryoku:denryokuh22-10": [
+   1
+  ],
+  "denryoku:denryokuh22-12": [
+   4
+  ],
+  "denryoku:denryokuh22-13": [
+   3
+  ],
+  "denryoku:denryokuh22-14": [
+   2
+  ],
+  "denryoku:denryokuh22-15": [
+   3,
+   4
+  ],
+  "denryoku:denryokuh22-16": [
+   5,
+   3
+  ],
+  "denryoku:denryokuh22-17": [
+   2,
+   4
+  ],
+  "denryoku:denryokuh22-2": [
+   4
+  ],
+  "denryoku:denryokuh22-3": [
+   2
+  ],
+  "denryoku:denryokuh22-4": [
+   3
+  ],
+  "denryoku:denryokuh22-5": [
+   2
+  ],
+  "denryoku:denryokuh22-6": [
+   3
+  ],
+  "denryoku:denryokuh22-7": [
+   1
+  ],
+  "denryoku:denryokuh22-8": [
+   3
+  ],
+  "denryoku:denryokuh22-9": [
+   5
+  ],
+  "denryoku:denryokuh23-1": [
+   2
+  ],
+  "denryoku:denryokuh23-10": [
+   1
+  ],
+  "denryoku:denryokuh23-11": [
+   2
+  ],
+  "denryoku:denryokuh23-11~2": [
+   2
+  ],
+  "denryoku:denryokuh23-12": [
+   5
+  ],
+  "denryoku:denryokuh23-13": [
+   5
+  ],
+  "denryoku:denryokuh23-14": [
+   3
+  ],
+  "denryoku:denryokuh23-15": [
+   5,
+   4
+  ],
+  "denryoku:denryokuh23-16": [
+   5,
+   2
+  ],
+  "denryoku:denryokuh23-17": [
+   3,
+   4
+  ],
+  "denryoku:denryokuh23-2": [
+   4
+  ],
+  "denryoku:denryokuh23-3": [
+   4
+  ],
+  "denryoku:denryokuh23-4": [
+   1
+  ],
+  "denryoku:denryokuh23-5": [
+   1
+  ],
+  "denryoku:denryokuh23-6": [
+   4
+  ],
+  "denryoku:denryokuh23-7": [
+   1
+  ],
+  "denryoku:denryokuh23-9": [
+   1
+  ],
+  "denryoku:denryokuh24-1": [
+   3
+  ],
+  "denryoku:denryokuh24-10": [
+   4
+  ],
+  "denryoku:denryokuh24-11": [
+   3
+  ],
+  "denryoku:denryokuh24-12": [
+   4
+  ],
+  "denryoku:denryokuh24-13": [
+   3
+  ],
+  "denryoku:denryokuh24-14": [
+   4
+  ],
+  "denryoku:denryokuh24-15": [
+   3,
+   2
+  ],
+  "denryoku:denryokuh24-16": [
+   5,
+   1
+  ],
+  "denryoku:denryokuh24-17": [
+   2,
+   3
+  ],
+  "denryoku:denryokuh24-2": [
+   3
+  ],
+  "denryoku:denryokuh24-3": [
+   1
+  ],
+  "denryoku:denryokuh24-4": [
+   4
+  ],
+  "denryoku:denryokuh24-5": [
+   2
+  ],
+  "denryoku:denryokuh24-6": [
+   3
+  ],
+  "denryoku:denryokuh24-7": [
+   5
+  ],
+  "denryoku:denryokuh24-8": [
+   1
+  ],
+  "denryoku:denryokuh24-9": [
+   3
+  ],
+  "denryoku:denryokuh25-1": [
+   4
+  ],
+  "denryoku:denryokuh25-10": [
+   1
+  ],
+  "denryoku:denryokuh25-11": [
+   5
+  ],
+  "denryoku:denryokuh25-12": [
+   3
+  ],
+  "denryoku:denryokuh25-13": [
+   3
+  ],
+  "denryoku:denryokuh25-14": [
+   4
+  ],
+  "denryoku:denryokuh25-15": [
+   1,
+   2
+  ],
+  "denryoku:denryokuh25-16": [
+   3,
+   3
+  ],
+  "denryoku:denryokuh25-17": [
+   2,
+   4
+  ],
+  "denryoku:denryokuh25-2": [
+   4
+  ],
+  "denryoku:denryokuh25-3": [
+   3
+  ],
+  "denryoku:denryokuh25-4": [
+   4
+  ],
+  "denryoku:denryokuh25-5": [
+   2
+  ],
+  "denryoku:denryokuh25-6": [
+   2
+  ],
+  "denryoku:denryokuh25-7": [
+   3
+  ],
+  "denryoku:denryokuh25-8": [
+   5
+  ],
+  "denryoku:denryokuh25-9": [
+   1
+  ],
+  "denryoku:denryokuh26-1": [
+   1
+  ],
+  "denryoku:denryokuh26-10": [
+   4
+  ],
+  "denryoku:denryokuh26-11": [
+   2
+  ],
+  "denryoku:denryokuh26-12": [
+   5
+  ],
+  "denryoku:denryokuh26-13": [
+   5
+  ],
+  "denryoku:denryokuh26-14": [
+   2
+  ],
+  "denryoku:denryokuh26-15": [
+   4,
+   4
+  ],
+  "denryoku:denryokuh26-16": [
+   2,
+   3
+  ],
+  "denryoku:denryokuh26-17": [
+   4,
+   3
+  ],
+  "denryoku:denryokuh26-2": [
+   1
+  ],
+  "denryoku:denryokuh26-3": [
+   5
+  ],
+  "denryoku:denryokuh26-4": [
+   1
+  ],
+  "denryoku:denryokuh26-5": [
+   5
+  ],
+  "denryoku:denryokuh26-6": [
+   3
+  ],
+  "denryoku:denryokuh26-7": [
+   2
+  ],
+  "denryoku:denryokuh26-8": [
+   5
+  ],
+  "denryoku:denryokuh26-9": [
+   3
+  ],
+  "denryoku:denryokuh27-1": [
+   5
+  ],
+  "denryoku:denryokuh27-10": [
+   3
+  ],
+  "denryoku:denryokuh27-11": [
+   1
+  ],
+  "denryoku:denryokuh27-12": [
+   5
+  ],
+  "denryoku:denryokuh27-13": [
+   2
+  ],
+  "denryoku:denryokuh27-14": [
+   2
+  ],
+  "denryoku:denryokuh27-15": [
+   2,
+   5
+  ],
+  "denryoku:denryokuh27-16": [
+   2,
+   3
+  ],
+  "denryoku:denryokuh27-17": [
+   2,
+   4
+  ],
+  "denryoku:denryokuh27-2": [
+   4
+  ],
+  "denryoku:denryokuh27-3": [
+   4
+  ],
+  "denryoku:denryokuh27-4": [
+   1
+  ],
+  "denryoku:denryokuh27-5": [
+   1
+  ],
+  "denryoku:denryokuh27-6": [
+   5
+  ],
+  "denryoku:denryokuh27-7": [
+   1
+  ],
+  "denryoku:denryokuh27-8": [
+   5
+  ],
+  "denryoku:denryokuh27-9": [
+   3
+  ],
+  "denryoku:denryokuh28-1": [
+   5
+  ],
+  "denryoku:denryokuh28-10": [
+   5
+  ],
+  "denryoku:denryokuh28-11": [
+   4
+  ],
+  "denryoku:denryokuh28-12": [
+   3
+  ],
+  "denryoku:denryokuh28-13": [
+   1
+  ],
+  "denryoku:denryokuh28-14": [
+   4
+  ],
+  "denryoku:denryokuh28-15": [
+   3,
+   5
+  ],
+  "denryoku:denryokuh28-16": [
+   1,
+   2
+  ],
+  "denryoku:denryokuh28-17": [
+   1,
+   1
+  ],
+  "denryoku:denryokuh28-2": [
+   1
+  ],
+  "denryoku:denryokuh28-2~2": [
+   1
+  ],
+  "denryoku:denryokuh28-3": [
+   2
+  ],
+  "denryoku:denryokuh28-4": [
+   1
+  ],
+  "denryoku:denryokuh28-5": [
+   4
+  ],
+  "denryoku:denryokuh28-6": [
+   2
+  ],
+  "denryoku:denryokuh28-7": [
+   5
+  ],
+  "denryoku:denryokuh28-8": [
+   1
+  ],
+  "denryoku:denryokuh28-9": [
+   3
+  ],
+  "denryoku:denryokuh29-1": [
+   4
+  ],
+  "denryoku:denryokuh29-10": [
+   4
+  ],
+  "denryoku:denryokuh29-11": [
+   1
+  ],
+  "denryoku:denryokuh29-12": [
+   3
+  ],
+  "denryoku:denryokuh29-13": [
+   3
+  ],
+  "denryoku:denryokuh29-14": [
+   1
+  ],
+  "denryoku:denryokuh29-15": [
+   5,
+   3
+  ],
+  "denryoku:denryokuh29-16": [
+   5,
+   1
+  ],
+  "denryoku:denryokuh29-17": [
+   4,
+   2
+  ],
+  "denryoku:denryokuh29-2": [
+   5
+  ],
+  "denryoku:denryokuh29-3": [
+   5
+  ],
+  "denryoku:denryokuh29-4": [
+   5
+  ],
+  "denryoku:denryokuh29-6": [
+   2
+  ],
+  "denryoku:denryokuh29-7": [
+   3
+  ],
+  "denryoku:denryokuh29-8": [
+   2
+  ],
+  "denryoku:denryokuh29-9": [
+   1
+  ],
+  "denryoku:denryokuh30-1": [
+   3
+  ],
+  "denryoku:denryokuh30-10": [
+   5
+  ],
+  "denryoku:denryokuh30-11": [
+   1
+  ],
+  "denryoku:denryokuh30-12": [
+   2
+  ],
+  "denryoku:denryokuh30-13": [
+   5
+  ],
+  "denryoku:denryokuh30-14": [
+   4
+  ],
+  "denryoku:denryokuh30-15": [
+   2,
+   5
+  ],
+  "denryoku:denryokuh30-16": [
+   2,
+   3
+  ],
+  "denryoku:denryokuh30-17": [
+   3,
+   3
+  ],
+  "denryoku:denryokuh30-2": [
+   4
+  ],
+  "denryoku:denryokuh30-3": [
+   5
+  ],
+  "denryoku:denryokuh30-4": [
+   2
+  ],
+  "denryoku:denryokuh30-5": [
+   3
+  ],
+  "denryoku:denryokuh30-6": [
+   5
+  ],
+  "denryoku:denryokuh30-7": [
+   4
+  ],
+  "denryoku:denryokuh30-8": [
+   3
+  ],
+  "denryoku:denryokuh30-9": [
+   4
+  ],
+  "denryoku:denryokur1-1": [
+   3
+  ],
+  "denryoku:denryokur1-10": [
+   2
+  ],
+  "denryoku:denryokur1-11": [
+   4
+  ],
+  "denryoku:denryokur1-12": [
+   2
+  ],
+  "denryoku:denryokur1-13": [
+   5
+  ],
+  "denryoku:denryokur1-14": [
+   1
+  ],
+  "denryoku:denryokur1-15": [
+   3,
+   4
+  ],
+  "denryoku:denryokur1-16": [
+   2,
+   4
+  ],
+  "denryoku:denryokur1-17": [
+   4,
+   1
+  ],
+  "denryoku:denryokur1-2": [
+   1
+  ],
+  "denryoku:denryokur1-3": [
+   2
+  ],
+  "denryoku:denryokur1-4": [
+   4
+  ],
+  "denryoku:denryokur1-5": [
+   1
+  ],
+  "denryoku:denryokur1-6": [
+   2
+  ],
+  "denryoku:denryokur1-7": [
+   3
+  ],
+  "denryoku:denryokur1-8": [
+   3
+  ],
+  "denryoku:denryokur1-9": [
+   3
+  ],
+  "denryoku:denryokur2-1": [
+   3
+  ],
+  "denryoku:denryokur2-10": [
+   1
+  ],
+  "denryoku:denryokur2-11": [
+   5
+  ],
+  "denryoku:denryokur2-12": [
+   5
+  ],
+  "denryoku:denryokur2-13": [
+   5
+  ],
+  "denryoku:denryokur2-14": [
+   1
+  ],
+  "denryoku:denryokur2-15": [
+   4,
+   4
+  ],
+  "denryoku:denryokur2-16": [
+   3,
+   4
+  ],
+  "denryoku:denryokur2-17": [
+   4,
+   2
+  ],
+  "denryoku:denryokur2-2": [
+   3
+  ],
+  "denryoku:denryokur2-3": [
+   1
+  ],
+  "denryoku:denryokur2-4": [
+   2
+  ],
+  "denryoku:denryokur2-5": [
+   4
+  ],
+  "denryoku:denryokur2-6": [
+   1
+  ],
+  "denryoku:denryokur2-7": [
+   5
+  ],
+  "denryoku:denryokur2-8": [
+   4
+  ],
+  "denryoku:denryokur2-9": [
+   2
+  ],
+  "denryoku:denryokur3-1": [
+   5
+  ],
+  "denryoku:denryokur3-10": [
+   1
+  ],
+  "denryoku:denryokur3-11": [
+   2
+  ],
+  "denryoku:denryokur3-12": [
+   5
+  ],
+  "denryoku:denryokur3-13": [
+   2
+  ],
+  "denryoku:denryokur3-14": [
+   4
+  ],
+  "denryoku:denryokur3-15": [
+   2,
+   4
+  ],
+  "denryoku:denryokur3-16": [
+   4,
+   2
+  ],
+  "denryoku:denryokur3-17": [
+   2,
+   3
+  ],
+  "denryoku:denryokur3-2": [
+   3
+  ],
+  "denryoku:denryokur3-3": [
+   5
+  ],
+  "denryoku:denryokur3-4": [
+   4
+  ],
+  "denryoku:denryokur3-5": [
+   2
+  ],
+  "denryoku:denryokur3-6": [
+   5
+  ],
+  "denryoku:denryokur3-7": [
+   5
+  ],
+  "denryoku:denryokur3-8": [
+   4
+  ],
+  "denryoku:denryokur3-9": [
+   4
+  ],
+  "denryoku:denryokur4-1-1": [
+   3
+  ],
+  "denryoku:denryokur4-1-10": [
+   2
+  ],
+  "denryoku:denryokur4-1-11": [
+   5
+  ],
+  "denryoku:denryokur4-1-12": [
+   4
+  ],
+  "denryoku:denryokur4-1-13": [
+   4
+  ],
+  "denryoku:denryokur4-1-14": [
+   4
+  ],
+  "denryoku:denryokur4-1-15": [
+   5,
+   3
+  ],
+  "denryoku:denryokur4-1-16": [
+   5,
+   3
+  ],
+  "denryoku:denryokur4-1-17": [
+   4,
+   2
+  ],
+  "denryoku:denryokur4-1-2": [
+   3
+  ],
+  "denryoku:denryokur4-1-3": [
+   4
+  ],
+  "denryoku:denryokur4-1-4": [
+   4
+  ],
+  "denryoku:denryokur4-1-5": [
+   2
+  ],
+  "denryoku:denryokur4-1-6": [
+   3
+  ],
+  "denryoku:denryokur4-1-7": [
+   1
+  ],
+  "denryoku:denryokur4-1-9": [
+   3
+  ],
+  "denryoku:denryokur4-2-1": [
+   3
+  ],
+  "denryoku:denryokur4-2-10": [
+   3
+  ],
+  "denryoku:denryokur4-2-11": [
+   5
+  ],
+  "denryoku:denryokur4-2-12": [
+   3
+  ],
+  "denryoku:denryokur4-2-13": [
+   3
+  ],
+  "denryoku:denryokur4-2-14": [
+   2
+  ],
+  "denryoku:denryokur4-2-15": [
+   4,
+   3
+  ],
+  "denryoku:denryokur4-2-16": [
+   3,
+   2
+  ],
+  "denryoku:denryokur4-2-17": [
+   3,
+   4
+  ],
+  "denryoku:denryokur4-2-2": [
+   5
+  ],
+  "denryoku:denryokur4-2-3": [
+   5
+  ],
+  "denryoku:denryokur4-2-4": [
+   1
+  ],
+  "denryoku:denryokur4-2-5": [
+   5
+  ],
+  "denryoku:denryokur4-2-6": [
+   3
+  ],
+  "denryoku:denryokur4-2-7": [
+   2
+  ],
+  "denryoku:denryokur4-2-8": [
+   2
+  ],
+  "denryoku:denryokur5-1-1": [
+   4
+  ],
+  "denryoku:denryokur5-1-10": [
+   2
+  ],
+  "denryoku:denryokur5-1-11": [
+   2
+  ],
+  "denryoku:denryokur5-1-12": [
+   2
+  ],
+  "denryoku:denryokur5-1-13": [
+   2
+  ],
+  "denryoku:denryokur5-1-14": [
+   2
+  ],
+  "denryoku:denryokur5-1-15": [
+   3,
+   4
+  ],
+  "denryoku:denryokur5-1-16": [
+   4,
+   2
+  ],
+  "denryoku:denryokur5-1-17": [
+   5,
+   2
+  ],
+  "denryoku:denryokur5-1-2": [
+   3
+  ],
+  "denryoku:denryokur5-1-3": [
+   5
+  ],
+  "denryoku:denryokur5-1-4": [
+   3
+  ],
+  "denryoku:denryokur5-1-5": [
+   2
+  ],
+  "denryoku:denryokur5-1-6": [
+   4
+  ],
+  "denryoku:denryokur5-1-7": [
+   5
+  ],
+  "denryoku:denryokur5-1-8": [
+   3
+  ],
+  "denryoku:denryokur5-1-9": [
+   2
+  ],
+  "denryoku:denryokur5-2-1": [
+   3
+  ],
+  "denryoku:denryokur5-2-10": [
+   3
+  ],
+  "denryoku:denryokur5-2-11": [
+   3
+  ],
+  "denryoku:denryokur5-2-12": [
+   2
+  ],
+  "denryoku:denryokur5-2-13": [
+   4
+  ],
+  "denryoku:denryokur5-2-14": [
+   5
+  ],
+  "denryoku:denryokur5-2-15": [
+   3,
+   3
+  ],
+  "denryoku:denryokur5-2-15~2": [
+   3,
+   3
+  ],
+  "denryoku:denryokur5-2-16": [
+   2,
+   4
+  ],
+  "denryoku:denryokur5-2-17": [
+   2,
+   4
+  ],
+  "denryoku:denryokur5-2-2": [
+   4
+  ],
+  "denryoku:denryokur5-2-3": [
+   3
+  ],
+  "denryoku:denryokur5-2-4": [
+   3
+  ],
+  "denryoku:denryokur5-2-5": [
+   5
+  ],
+  "denryoku:denryokur5-2-6": [
+   3
+  ],
+  "denryoku:denryokur5-2-7": [
+   3
+  ],
+  "denryoku:denryokur5-2-8": [
+   2
+  ],
+  "denryoku:denryokur5-2-9": [
+   1
+  ],
+  "denryoku:denryokur6-1-1": [
+   3
+  ],
+  "denryoku:denryokur6-1-10": [
+   4
+  ],
+  "denryoku:denryokur6-1-11": [
+   2
+  ],
+  "denryoku:denryokur6-1-12": [
+   4
+  ],
+  "denryoku:denryokur6-1-13": [
+   4
+  ],
+  "denryoku:denryokur6-1-14": [
+   1
+  ],
+  "denryoku:denryokur6-1-15": [
+   4,
+   5
+  ],
+  "denryoku:denryokur6-1-16": [
+   5,
+   3
+  ],
+  "denryoku:denryokur6-1-17": [
+   4,
+   2
+  ],
+  "denryoku:denryokur6-1-2": [
+   4
+  ],
+  "denryoku:denryokur6-1-3": [
+   4
+  ],
+  "denryoku:denryokur6-1-4": [
+   4
+  ],
+  "denryoku:denryokur6-1-5": [
+   1
+  ],
+  "denryoku:denryokur6-1-6": [
+   2
+  ],
+  "denryoku:denryokur6-1-7": [
+   4
+  ],
+  "denryoku:denryokur6-1-8": [
+   3
+  ],
+  "denryoku:denryokur6-1-9": [
+   1
+  ],
+  "denryoku:denryokur6-2-1": [
+   3
+  ],
+  "denryoku:denryokur6-2-10": [
+   3
+  ],
+  "denryoku:denryokur6-2-11": [
+   3
+  ],
+  "denryoku:denryokur6-2-12": [
+   2
+  ],
+  "denryoku:denryokur6-2-13": [
+   3
+  ],
+  "denryoku:denryokur6-2-14": [
+   4
+  ],
+  "denryoku:denryokur6-2-15": [
+   4,
+   3
+  ],
+  "denryoku:denryokur6-2-16": [
+   3,
+   4
+  ],
+  "denryoku:denryokur6-2-17": [
+   2,
+   4
+  ],
+  "denryoku:denryokur6-2-2": [
+   4
+  ],
+  "denryoku:denryokur6-2-3": [
+   5
+  ],
+  "denryoku:denryokur6-2-4": [
+   1
+  ],
+  "denryoku:denryokur6-2-5": [
+   3
+  ],
+  "denryoku:denryokur6-2-6": [
+   1
+  ],
+  "denryoku:denryokur6-2-7": [
+   4
+  ],
+  "denryoku:denryokur6-2-8": [
+   4
+  ],
+  "denryoku:denryokur6-2-9": [
+   4
+  ],
+  "denryoku:denryokur7-1-1": [
+   2
+  ],
+  "denryoku:denryokur7-1-11": [
+   3
+  ],
+  "denryoku:denryokur7-1-12": [
+   4
+  ],
+  "denryoku:denryokur7-1-13": [
+   2
+  ],
+  "denryoku:denryokur7-1-14": [
+   2
+  ],
+  "denryoku:denryokur7-1-15": [
+   5,
+   5
+  ],
+  "denryoku:denryokur7-1-16": [
+   3,
+   3
+  ],
+  "denryoku:denryokur7-1-17": [
+   4,
+   4
+  ],
+  "denryoku:denryokur7-1-2": [
+   5
+  ],
+  "denryoku:denryokur7-1-3": [
+   5
+  ],
+  "denryoku:denryokur7-1-4": [
+   1
+  ],
+  "denryoku:denryokur7-1-5": [
+   5
+  ],
+  "denryoku:denryokur7-1-6": [
+   3
+  ],
+  "denryoku:denryokur7-1-7": [
+   3
+  ],
+  "denryoku:denryokur7-1-8": [
+   2
+  ],
+  "denryoku:denryokur7-1-9": [
+   3
+  ],
+  "denryoku:denryokur7-2-1": [
+   3
+  ],
+  "denryoku:denryokur7-2-10": [
+   5
+  ],
+  "denryoku:denryokur7-2-11": [
+   4
+  ],
+  "denryoku:denryokur7-2-12": [
+   3
+  ],
+  "denryoku:denryokur7-2-13": [
+   3
+  ],
+  "denryoku:denryokur7-2-14": [
+   3
+  ],
+  "denryoku:denryokur7-2-15": [
+   4,
+   3
+  ],
+  "denryoku:denryokur7-2-16": [
+   4,
+   2
+  ],
+  "denryoku:denryokur7-2-17": [
+   3,
+   1
+  ],
+  "denryoku:denryokur7-2-2": [
+   1
+  ],
+  "denryoku:denryokur7-2-3": [
+   4
+  ],
+  "denryoku:denryokur7-2-4": [
+   1
+  ],
+  "denryoku:denryokur7-2-5": [
+   5
+  ],
+  "denryoku:denryokur7-2-6": [
+   1
+  ],
+  "denryoku:denryokur7-2-7": [
+   3
+  ],
+  "denryoku:denryokur7-2-8": [
+   4
+  ],
+  "denryoku:denryokur7-2-9": [
+   3
+  ],
+  "denryoku:no-link-354": [
+   3
+  ],
+  "houki:denryokur4-2-11": [
+   4,
+   1
+  ],
+  "houki:houkih21-1": [
+   3
+  ],
+  "houki:houkih21-10": [
+   5
+  ],
+  "houki:houkih21-11": [
+   5,
+   1
+  ],
+  "houki:houkih21-12": [
+   3,
+   2
+  ],
+  "houki:houkih21-13": [
+   2,
+   4
+  ],
+  "houki:houkih21-2": [
+   4
+  ],
+  "houki:houkih21-3": [
+   1
+  ],
+  "houki:houkih21-4": [
+   5
+  ],
+  "houki:houkih21-4~2": [
+   5
+  ],
+  "houki:houkih21-5": [
+   3
+  ],
+  "houki:houkih21-6": [
+   2
+  ],
+  "houki:houkih21-7": [
+   4
+  ],
+  "houki:houkih21-8": [
+   1
+  ],
+  "houki:houkih21-9": [
+   4
+  ],
+  "houki:houkih22-1": [
+   3
+  ],
+  "houki:houkih22-10": [
+   4
+  ],
+  "houki:houkih22-11": [
+   4,
+   2
+  ],
+  "houki:houkih22-12": [
+   4,
+   5
+  ],
+  "houki:houkih22-13": [
+   5,
+   2
+  ],
+  "houki:houkih22-2": [
+   1
+  ],
+  "houki:houkih22-3": [
+   4
+  ],
+  "houki:houkih22-4": [
+   5
+  ],
+  "houki:houkih22-5": [
+   3
+  ],
+  "houki:houkih22-6": [
+   3
+  ],
+  "houki:houkih22-7": [
+   2
+  ],
+  "houki:houkih22-8": [
+   5
+  ],
+  "houki:houkih22-9": [
+   1
+  ],
+  "houki:houkih23-1": [
+   2
+  ],
+  "houki:houkih23-10": [
+   5
+  ],
+  "houki:houkih23-11": [
+   3,
+   2
+  ],
+  "houki:houkih23-12": [
+   4,
+   3
+  ],
+  "houki:houkih23-13": [
+   3,
+   4
+  ],
+  "houki:houkih23-13~2": [
+   3,
+   4
+  ],
+  "houki:houkih23-2": [
+   2
+  ],
+  "houki:houkih23-3": [
+   4
+  ],
+  "houki:houkih23-4": [
+   5
+  ],
+  "houki:houkih23-4~2": [
+   5
+  ],
+  "houki:houkih23-5": [
+   2
+  ],
+  "houki:houkih23-6": [
+   1
+  ],
+  "houki:houkih23-7": [
+   3
+  ],
+  "houki:houkih23-8": [
+   2
+  ],
+  "houki:houkih23-9": [
+   1
+  ],
+  "houki:houkih24-1": [
+   5
+  ],
+  "houki:houkih24-10": [
+   4
+  ],
+  "houki:houkih24-11": [
+   4,
+   1
+  ],
+  "houki:houkih24-12": [
+   2,
+   4
+  ],
+  "houki:houkih24-13": [
+   4,
+   4
+  ],
+  "houki:houkih24-2": [
+   4
+  ],
+  "houki:houkih24-3": [
+   2
+  ],
+  "houki:houkih24-4": [
+   4
+  ],
+  "houki:houkih24-5": [
+   4
+  ],
+  "houki:houkih24-6": [
+   2
+  ],
+  "houki:houkih24-7": [
+   1
+  ],
+  "houki:houkih24-8": [
+   2
+  ],
+  "houki:houkih24-9": [
+   5
+  ],
+  "houki:houkih25-1": [
+   4
+  ],
+  "houki:houkih25-10": [
+   1
+  ],
+  "houki:houkih25-11": [
+   1,
+   2
+  ],
+  "houki:houkih25-12": [
+   2,
+   3
+  ],
+  "houki:houkih25-13": [
+   5,
+   4
+  ],
+  "houki:houkih25-2": [
+   4
+  ],
+  "houki:houkih25-3": [
+   5
+  ],
+  "houki:houkih25-4": [
+   2
+  ],
+  "houki:houkih25-5": [
+   3
+  ],
+  "houki:houkih25-6": [
+   3
+  ],
+  "houki:houkih25-7": [
+   5
+  ],
+  "houki:houkih25-8": [
+   2
+  ],
+  "houki:houkih25-9": [
+   2
+  ],
+  "houki:houkih26-1": [
+   5
+  ],
+  "houki:houkih26-10": [
+   1
+  ],
+  "houki:houkih26-11": [
+   4,
+   3
+  ],
+  "houki:houkih26-12": [
+   3,
+   4
+  ],
+  "houki:houkih26-13": [
+   2,
+   1
+  ],
+  "houki:houkih26-2": [
+   5
+  ],
+  "houki:houkih26-3": [
+   3
+  ],
+  "houki:houkih26-4": [
+   3
+  ],
+  "houki:houkih26-5": [
+   4
+  ],
+  "houki:houkih26-6": [
+   2
+  ],
+  "houki:houkih26-7": [
+   3
+  ],
+  "houki:houkih26-8": [
+   1
+  ],
+  "houki:houkih26-9": [
+   2
+  ],
+  "houki:houkih27-1": [
+   5
+  ],
+  "houki:houkih27-10": [
+   4
+  ],
+  "houki:houkih27-11": [
+   4,
+   2
+  ],
+  "houki:houkih27-12": [
+   2,
+   3
+  ],
+  "houki:houkih27-13": [
+   4,
+   2
+  ],
+  "houki:houkih27-2": [
+   4
+  ],
+  "houki:houkih27-3": [
+   4
+  ],
+  "houki:houkih27-4": [
+   2
+  ],
+  "houki:houkih27-5": [
+   5
+  ],
+  "houki:houkih27-6": [
+   1
+  ],
+  "houki:houkih27-7": [
+   2
+  ],
+  "houki:houkih27-8": [
+   3
+  ],
+  "houki:houkih27-9": [
+   3
+  ],
+  "houki:houkih28-1": [
+   2
+  ],
+  "houki:houkih28-10": [
+   4
+  ],
+  "houki:houkih28-11": [
+   3,
+   2
+  ],
+  "houki:houkih28-12": [
+   3,
+   4
+  ],
+  "houki:houkih28-13": [
+   4,
+   2
+  ],
+  "houki:houkih28-2": [
+   3
+  ],
+  "houki:houkih28-3": [
+   3
+  ],
+  "houki:houkih28-4": [
+   3
+  ],
+  "houki:houkih28-4~2": [
+   3
+  ],
+  "houki:houkih28-5": [
+   1
+  ],
+  "houki:houkih28-6": [
+   2
+  ],
+  "houki:houkih28-7": [
+   5
+  ],
+  "houki:houkih28-8": [
+   1
+  ],
+  "houki:houkih28-9": [
+   4
+  ],
+  "houki:houkih28-9~2": [
+   4
+  ],
+  "houki:houkih29-1": [
+   4
+  ],
+  "houki:houkih29-10": [
+   4
+  ],
+  "houki:houkih29-11": [
+   5,
+   4
+  ],
+  "houki:houkih29-12": [
+   5,
+   4
+  ],
+  "houki:houkih29-13": [
+   2,
+   5
+  ],
+  "houki:houkih29-2": [
+   4
+  ],
+  "houki:houkih29-3": [
+   5
+  ],
+  "houki:houkih29-4": [
+   1
+  ],
+  "houki:houkih29-5": [
+   4
+  ],
+  "houki:houkih29-6": [
+   5
+  ],
+  "houki:houkih29-7": [
+   4
+  ],
+  "houki:houkih29-8": [
+   3
+  ],
+  "houki:houkih29-9": [
+   3
+  ],
+  "houki:houkih30-1": [
+   2
+  ],
+  "houki:houkih30-10": [
+   3
+  ],
+  "houki:houkih30-11": [
+   3,
+   2
+  ],
+  "houki:houkih30-12": [
+   2,
+   1
+  ],
+  "houki:houkih30-13": [
+   2,
+   3
+  ],
+  "houki:houkih30-2": [
+   3
+  ],
+  "houki:houkih30-3": [
+   2
+  ],
+  "houki:houkih30-4": [
+   2
+  ],
+  "houki:houkih30-5": [
+   1
+  ],
+  "houki:houkih30-6": [
+   1
+  ],
+  "houki:houkih30-7": [
+   5
+  ],
+  "houki:houkih30-8": [
+   1
+  ],
+  "houki:houkih30-9": [
+   5
+  ],
+  "houki:houkir1-1": [
+   1
+  ],
+  "houki:houkir1-10": [
+   3
+  ],
+  "houki:houkir1-11": [
+   3,
+   2
+  ],
+  "houki:houkir1-12": [
+   5,
+   3
+  ],
+  "houki:houkir1-13": [
+   4,
+   1
+  ],
+  "houki:houkir1-2": [
+   3
+  ],
+  "houki:houkir1-3": [
+   2
+  ],
+  "houki:houkir1-4": [
+   3
+  ],
+  "houki:houkir1-5": [
+   4
+  ],
+  "houki:houkir1-6": [
+   4
+  ],
+  "houki:houkir1-7": [
+   3
+  ],
+  "houki:houkir1-8": [
+   5
+  ],
+  "houki:houkir1-9": [
+   2
+  ],
+  "houki:houkir2-1": [
+   4
+  ],
+  "houki:houkir2-10": [
+   5
+  ],
+  "houki:houkir2-11": [
+   5,
+   4
+  ],
+  "houki:houkir2-12": [
+   4,
+   1
+  ],
+  "houki:houkir2-13": [
+   5,
+   4
+  ],
+  "houki:houkir2-2": [
+   4
+  ],
+  "houki:houkir2-3": [
+   5
+  ],
+  "houki:houkir2-3~2": [
+   5
+  ],
+  "houki:houkir2-4": [
+   1
+  ],
+  "houki:houkir2-5": [
+   2
+  ],
+  "houki:houkir2-6": [
+   1
+  ],
+  "houki:houkir2-7": [
+   3
+  ],
+  "houki:houkir2-7~2": [
+   3
+  ],
+  "houki:houkir2-8": [
+   1
+  ],
+  "houki:houkir2-9": [
+   5
+  ],
+  "houki:houkir3-1": [
+   4
+  ],
+  "houki:houkir3-10": [
+   1
+  ],
+  "houki:houkir3-11": [
+   4,
+   3
+  ],
+  "houki:houkir3-12": [
+   4,
+   4
+  ],
+  "houki:houkir3-13": [
+   2,
+   4
+  ],
+  "houki:houkir3-2": [
+   1
+  ],
+  "houki:houkir3-3": [
+   4
+  ],
+  "houki:houkir3-4": [
+   2
+  ],
+  "houki:houkir3-5": [
+   3
+  ],
+  "houki:houkir3-6": [
+   2
+  ],
+  "houki:houkir3-7": [
+   5
+  ],
+  "houki:houkir3-8": [
+   2
+  ],
+  "houki:houkir3-9": [
+   1
+  ],
+  "houki:houkir4-1-1": [
+   4
+  ],
+  "houki:houkir4-1-10": [
+   2
+  ],
+  "houki:houkir4-1-11": [
+   3,
+   3
+  ],
+  "houki:houkir4-1-12": [
+   3,
+   2
+  ],
+  "houki:houkir4-1-13": [
+   3,
+   2
+  ],
+  "houki:houkir4-1-2": [
+   1
+  ],
+  "houki:houkir4-1-3": [
+   3
+  ],
+  "houki:houkir4-1-4": [
+   3
+  ],
+  "houki:houkir4-1-5": [
+   2
+  ],
+  "houki:houkir4-1-6": [
+   5
+  ],
+  "houki:houkir4-1-7": [
+   5
+  ],
+  "houki:houkir4-1-8": [
+   5
+  ],
+  "houki:houkir4-1-9": [
+   5
+  ],
+  "houki:houkir4-2-1": [
+   2
+  ],
+  "houki:houkir4-2-11": [
+   4,
+   1
+  ],
+  "houki:houkir4-2-12": [
+   5,
+   3
+  ],
+  "houki:houkir4-2-13": [
+   1,
+   1
+  ],
+  "houki:houkir4-2-3": [
+   5
+  ],
+  "houki:houkir4-2-4": [
+   2
+  ],
+  "houki:houkir4-2-4~2": [
+   2
+  ],
+  "houki:houkir4-2-5": [
+   4
+  ],
+  "houki:houkir4-2-6": [
+   1
+  ],
+  "houki:houkir4-2-7": [
+   1
+  ],
+  "houki:houkir4-2-8": [
+   4
+  ],
+  "houki:houkir4-2-9": [
+   3
+  ],
+  "houki:houkir5-1-10": [
+   3
+  ],
+  "houki:houkir5-1-11": [
+   3,
+   4
+  ],
+  "houki:houkir5-1-12": [
+   4,
+   1
+  ],
+  "houki:houkir5-1-13": [
+   3,
+   2
+  ],
+  "houki:houkir5-1-2": [
+   4
+  ],
+  "houki:houkir5-1-3": [
+   5
+  ],
+  "houki:houkir5-1-4": [
+   1
+  ],
+  "houki:houkir5-1-5": [
+   3
+  ],
+  "houki:houkir5-1-6": [
+   1
+  ],
+  "houki:houkir5-1-7": [
+   1
+  ],
+  "houki:houkir5-1-8": [
+   5
+  ],
+  "houki:houkir5-1-9": [
+   2
+  ],
+  "houki:houkir5-2-1": [
+   4
+  ],
+  "houki:houkir5-2-10": [
+   4
+  ],
+  "houki:houkir5-2-11": [
+   4,
+   2
+  ],
+  "houki:houkir5-2-12": [
+   5,
+   3
+  ],
+  "houki:houkir5-2-13": [
+   5,
+   4
+  ],
+  "houki:houkir5-2-4": [
+   2
+  ],
+  "houki:houkir5-2-5": [
+   2
+  ],
+  "houki:houkir5-2-6": [
+   1
+  ],
+  "houki:houkir5-2-7": [
+   2
+  ],
+  "houki:houkir5-2-8": [
+   4
+  ],
+  "houki:houkir5-2-9": [
+   1
+  ],
+  "houki:houkir6-1-1": [
+   2
+  ],
+  "houki:houkir6-1-10": [
+   1
+  ],
+  "houki:houkir6-1-11": [
+   3,
+   2
+  ],
+  "houki:houkir6-1-12": [
+   5,
+   3
+  ],
+  "houki:houkir6-1-13": [
+   4,
+   5
+  ],
+  "houki:houkir6-1-2": [
+   4
+  ],
+  "houki:houkir6-1-3": [
+   3
+  ],
+  "houki:houkir6-1-4": [
+   3
+  ],
+  "houki:houkir6-1-5": [
+   3
+  ],
+  "houki:houkir6-1-6": [
+   4
+  ],
+  "houki:houkir6-1-7": [
+   5
+  ],
+  "houki:houkir6-1-8": [
+   3
+  ],
+  "houki:houkir6-1-9": [
+   4
+  ],
+  "houki:houkir6-2-10": [
+   5
+  ],
+  "houki:houkir6-2-11": [
+   3,
+   1
+  ],
+  "houki:houkir6-2-12": [
+   4,
+   1
+  ],
+  "houki:houkir6-2-13": [
+   4,
+   3
+  ],
+  "houki:houkir6-2-2": [
+   3
+  ],
+  "houki:houkir6-2-4": [
+   4
+  ],
+  "houki:houkir6-2-5": [
+   5
+  ],
+  "houki:houkir6-2-6": [
+   4
+  ],
+  "houki:houkir6-2-7": [
+   3
+  ],
+  "houki:houkir6-2-8": [
+   4
+  ],
+  "houki:houkir6-2-8~2": [
+   4
+  ],
+  "houki:houkir6-2-9": [
+   3
+  ],
+  "houki:houkir7-1-1": [
+   5
+  ],
+  "houki:houkir7-1-10": [
+   5
+  ],
+  "houki:houkir7-1-11": [
+   3,
+   5
+  ],
+  "houki:houkir7-1-12": [
+   2,
+   2
+  ],
+  "houki:houkir7-1-13": [
+   2,
+   3
+  ],
+  "houki:houkir7-1-2": [
+   4
+  ],
+  "houki:houkir7-1-3": [
+   1
+  ],
+  "houki:houkir7-1-4": [
+   3
+  ],
+  "houki:houkir7-1-5": [
+   4
+  ],
+  "houki:houkir7-1-6": [
+   2
+  ],
+  "houki:houkir7-1-7": [
+   5
+  ],
+  "houki:houkir7-1-8": [
+   4
+  ],
+  "houki:houkir7-1-9": [
+   1
+  ],
+  "houki:houkir7-2-1": [
+   5
+  ],
+  "houki:houkir7-2-10": [
+   5
+  ],
+  "houki:houkir7-2-11": [
+   4,
+   4
+  ],
+  "houki:houkir7-2-12": [
+   2,
+   3
+  ],
+  "houki:houkir7-2-13": [
+   4,
+   3
+  ],
+  "houki:houkir7-2-3": [
+   4
+  ],
+  "houki:houkir7-2-4": [
+   4
+  ],
+  "houki:houkir7-2-5": [
+   4
+  ],
+  "houki:houkir7-2-5~2": [
+   4
+  ],
+  "houki:houkir7-2-6": [
+   2
+  ],
+  "houki:houkir7-2-7": [
+   5
+  ],
+  "houki:houkir7-2-8": [
+   1
+  ],
+  "houki:houkir7-2-9": [
+   2
+  ],
+  "kikai:kikaih21-1": [
+   2
+  ],
+  "kikai:kikaih21-10": [
+   1
+  ],
+  "kikai:kikaih21-11": [
+   3
+  ],
+  "kikai:kikaih21-12": [
+   2
+  ],
+  "kikai:kikaih21-13": [
+   4
+  ],
+  "kikai:kikaih21-14": [
+   2
+  ],
+  "kikai:kikaih21-15": [
+   3,
+   3
+  ],
+  "kikai:kikaih21-16": [
+   4,
+   2
+  ],
+  "kikai:kikaih21-17": [
+   3,
+   4
+  ],
+  "kikai:kikaih21-18": [
+   4,
+   5
+  ],
+  "kikai:kikaih21-2": [
+   2
+  ],
+  "kikai:kikaih21-3": [
+   4
+  ],
+  "kikai:kikaih21-4": [
+   5
+  ],
+  "kikai:kikaih21-5": [
+   4
+  ],
+  "kikai:kikaih21-6": [
+   1
+  ],
+  "kikai:kikaih21-7": [
+   1
+  ],
+  "kikai:kikaih21-8": [
+   5
+  ],
+  "kikai:kikaih21-9": [
+   2
+  ],
+  "kikai:kikaih22-1": [
+   4
+  ],
+  "kikai:kikaih22-10": [
+   5
+  ],
+  "kikai:kikaih22-11": [
+   3
+  ],
+  "kikai:kikaih22-12": [
+   3
+  ],
+  "kikai:kikaih22-13": [
+   2
+  ],
+  "kikai:kikaih22-14": [
+   2
+  ],
+  "kikai:kikaih22-15": [
+   3,
+   3
+  ],
+  "kikai:kikaih22-16": [
+   2,
+   1
+  ],
+  "kikai:kikaih22-17": [
+   2,
+   1
+  ],
+  "kikai:kikaih22-18": [
+   2,
+   3
+  ],
+  "kikai:kikaih22-2": [
+   1
+  ],
+  "kikai:kikaih22-3": [
+   2
+  ],
+  "kikai:kikaih22-4": [
+   1
+  ],
+  "kikai:kikaih22-5": [
+   5
+  ],
+  "kikai:kikaih22-6": [
+   4
+  ],
+  "kikai:kikaih22-7": [
+   1
+  ],
+  "kikai:kikaih22-8": [
+   3
+  ],
+  "kikai:kikaih22-9": [
+   4
+  ],
+  "kikai:kikaih23-1": [
+   4
+  ],
+  "kikai:kikaih23-10": [
+   3
+  ],
+  "kikai:kikaih23-11": [
+   4
+  ],
+  "kikai:kikaih23-12": [
+   5
+  ],
+  "kikai:kikaih23-13": [
+   1
+  ],
+  "kikai:kikaih23-14": [
+   1
+  ],
+  "kikai:kikaih23-15": [
+   2,
+   1
+  ],
+  "kikai:kikaih23-16": [
+   5,
+   3
+  ],
+  "kikai:kikaih23-17": [
+   1,
+   2
+  ],
+  "kikai:kikaih23-18": [
+   5,
+   3
+  ],
+  "kikai:kikaih23-2": [
+   1
+  ],
+  "kikai:kikaih23-3": [
+   3
+  ],
+  "kikai:kikaih23-4": [
+   4
+  ],
+  "kikai:kikaih23-5": [
+   3
+  ],
+  "kikai:kikaih23-5~2": [
+   3
+  ],
+  "kikai:kikaih23-6": [
+   1
+  ],
+  "kikai:kikaih23-7": [
+   2
+  ],
+  "kikai:kikaih23-8": [
+   3
+  ],
+  "kikai:kikaih23-9": [
+   3
+  ],
+  "kikai:kikaih24-1": [
+   1
+  ],
+  "kikai:kikaih24-10": [
+   5
+  ],
+  "kikai:kikaih24-11": [
+   1
+  ],
+  "kikai:kikaih24-12": [
+   3
+  ],
+  "kikai:kikaih24-14": [
+   1
+  ],
+  "kikai:kikaih24-15": [
+   1,
+   4
+  ],
+  "kikai:kikaih24-16": [
+   4,
+   2
+  ],
+  "kikai:kikaih24-17": [
+   4,
+   2
+  ],
+  "kikai:kikaih24-18": [
+   3,
+   4
+  ],
+  "kikai:kikaih24-2": [
+   2
+  ],
+  "kikai:kikaih24-3": [
+   4
+  ],
+  "kikai:kikaih24-4": [
+   2
+  ],
+  "kikai:kikaih24-5": [
+   1
+  ],
+  "kikai:kikaih24-6": [
+   5
+  ],
+  "kikai:kikaih24-7": [
+   5
+  ],
+  "kikai:kikaih24-8": [
+   3
+  ],
+  "kikai:kikaih24-9": [
+   1
+  ],
+  "kikai:kikaih25-1": [
+   3
+  ],
+  "kikai:kikaih25-10": [
+   5
+  ],
+  "kikai:kikaih25-11": [
+   4
+  ],
+  "kikai:kikaih25-12": [
+   2
+  ],
+  "kikai:kikaih25-13": [
+   5
+  ],
+  "kikai:kikaih25-14": [
+   3
+  ],
+  "kikai:kikaih25-15": [
+   2,
+   4
+  ],
+  "kikai:kikaih25-16": [
+   3,
+   4
+  ],
+  "kikai:kikaih25-17": [
+   2,
+   3
+  ],
+  "kikai:kikaih25-18": [
+   5,
+   4
+  ],
+  "kikai:kikaih25-2": [
+   3
+  ],
+  "kikai:kikaih25-3": [
+   3
+  ],
+  "kikai:kikaih25-4": [
+   4
+  ],
+  "kikai:kikaih25-5": [
+   1
+  ],
+  "kikai:kikaih25-6": [
+   2
+  ],
+  "kikai:kikaih25-7": [
+   2
+  ],
+  "kikai:kikaih25-8": [
+   4
+  ],
+  "kikai:kikaih25-9": [
+   1
+  ],
+  "kikai:kikaih26-1": [
+   4
+  ],
+  "kikai:kikaih26-10": [
+   2
+  ],
+  "kikai:kikaih26-11": [
+   2
+  ],
+  "kikai:kikaih26-12": [
+   1
+  ],
+  "kikai:kikaih26-13": [
+   3
+  ],
+  "kikai:kikaih26-14": [
+   3
+  ],
+  "kikai:kikaih26-15": [
+   3,
+   3
+  ],
+  "kikai:kikaih26-16": [
+   4,
+   2
+  ],
+  "kikai:kikaih26-17": [
+   2,
+   3
+  ],
+  "kikai:kikaih26-18": [
+   5,
+   1
+  ],
+  "kikai:kikaih26-2": [
+   4
+  ],
+  "kikai:kikaih26-3": [
+   1
+  ],
+  "kikai:kikaih26-4": [
+   3
+  ],
+  "kikai:kikaih26-5": [
+   1
+  ],
+  "kikai:kikaih26-6": [
+   2
+  ],
+  "kikai:kikaih26-7": [
+   1
+  ],
+  "kikai:kikaih26-9": [
+   1
+  ],
+  "kikai:kikaih27-1": [
+   4
+  ],
+  "kikai:kikaih27-10": [
+   4
+  ],
+  "kikai:kikaih27-11": [
+   1
+  ],
+  "kikai:kikaih27-12": [
+   5
+  ],
+  "kikai:kikaih27-13": [
+   1
+  ],
+  "kikai:kikaih27-14": [
+   3
+  ],
+  "kikai:kikaih27-15": [
+   4,
+   2
+  ],
+  "kikai:kikaih27-16": [
+   4,
+   3
+  ],
+  "kikai:kikaih27-17": [
+   1,
+   1
+  ],
+  "kikai:kikaih27-18": [
+   3,
+   4
+  ],
+  "kikai:kikaih27-2": [
+   2
+  ],
+  "kikai:kikaih27-3": [
+   5
+  ],
+  "kikai:kikaih27-4": [
+   4
+  ],
+  "kikai:kikaih27-5": [
+   5
+  ],
+  "kikai:kikaih27-6": [
+   1
+  ],
+  "kikai:kikaih27-7": [
+   3
+  ],
+  "kikai:kikaih27-8": [
+   2
+  ],
+  "kikai:kikaih27-9": [
+   1
+  ],
+  "kikai:kikaih28-1": [
+   4
+  ],
+  "kikai:kikaih28-10": [
+   1
+  ],
+  "kikai:kikaih28-11": [
+   3
+  ],
+  "kikai:kikaih28-12": [
+   4
+  ],
+  "kikai:kikaih28-13": [
+   2
+  ],
+  "kikai:kikaih28-14": [
+   4
+  ],
+  "kikai:kikaih28-15": [
+   3,
+   5
+  ],
+  "kikai:kikaih28-16": [
+   5,
+   2
+  ],
+  "kikai:kikaih28-17": [
+   2,
+   2
+  ],
+  "kikai:kikaih28-18": [
+   4,
+   3
+  ],
+  "kikai:kikaih28-2": [
+   3
+  ],
+  "kikai:kikaih28-3": [
+   5
+  ],
+  "kikai:kikaih28-4": [
+   3
+  ],
+  "kikai:kikaih28-5": [
+   2
+  ],
+  "kikai:kikaih28-6": [
+   1
+  ],
+  "kikai:kikaih28-7": [
+   3
+  ],
+  "kikai:kikaih28-8": [
+   3
+  ],
+  "kikai:kikaih28-9": [
+   1
+  ],
+  "kikai:kikaih29-1": [
+   4
+  ],
+  "kikai:kikaih29-10": [
+   2
+  ],
+  "kikai:kikaih29-11": [
+   5
+  ],
+  "kikai:kikaih29-12": [
+   4
+  ],
+  "kikai:kikaih29-13": [
+   4
+  ],
+  "kikai:kikaih29-14": [
+   5
+  ],
+  "kikai:kikaih29-15": [
+   3,
+   3
+  ],
+  "kikai:kikaih29-16": [
+   1,
+   4
+  ],
+  "kikai:kikaih29-17": [
+   2,
+   2
+  ],
+  "kikai:kikaih29-18": [
+   5,
+   1
+  ],
+  "kikai:kikaih29-2": [
+   2
+  ],
+  "kikai:kikaih29-3": [
+   1
+  ],
+  "kikai:kikaih29-4": [
+   4
+  ],
+  "kikai:kikaih29-5": [
+   3
+  ],
+  "kikai:kikaih29-6": [
+   3
+  ],
+  "kikai:kikaih29-7": [
+   1
+  ],
+  "kikai:kikaih29-8": [
+   4
+  ],
+  "kikai:kikaih29-9": [
+   1
+  ],
+  "kikai:kikaih30-1": [
+   4
+  ],
+  "kikai:kikaih30-10": [
+   4
+  ],
+  "kikai:kikaih30-11": [
+   5
+  ],
+  "kikai:kikaih30-12": [
+   1
+  ],
+  "kikai:kikaih30-13": [
+   4
+  ],
+  "kikai:kikaih30-14": [
+   1
+  ],
+  "kikai:kikaih30-15": [
+   4,
+   3
+  ],
+  "kikai:kikaih30-16": [
+   1,
+   2
+  ],
+  "kikai:kikaih30-17": [
+   2,
+   3
+  ],
+  "kikai:kikaih30-18": [
+   3,
+   4
+  ],
+  "kikai:kikaih30-2": [
+   2
+  ],
+  "kikai:kikaih30-3": [
+   4
+  ],
+  "kikai:kikaih30-4": [
+   3
+  ],
+  "kikai:kikaih30-5": [
+   5
+  ],
+  "kikai:kikaih30-6": [
+   2
+  ],
+  "kikai:kikaih30-7": [
+   5
+  ],
+  "kikai:kikaih30-8": [
+   3
+  ],
+  "kikai:kikaih30-9": [
+   1
+  ],
+  "kikai:kikair1-1": [
+   4
+  ],
+  "kikai:kikair1-10": [
+   3
+  ],
+  "kikai:kikair1-11": [
+   3
+  ],
+  "kikai:kikair1-12": [
+   5
+  ],
+  "kikai:kikair1-13": [
+   4
+  ],
+  "kikai:kikair1-14": [
+   2
+  ],
+  "kikai:kikair1-15": [
+   2,
+   1
+  ],
+  "kikai:kikair1-16": [
+   1,
+   2
+  ],
+  "kikai:kikair1-17": [
+   2,
+   3
+  ],
+  "kikai:kikair1-18": [
+   2,
+   1
+  ],
+  "kikai:kikair1-2": [
+   2
+  ],
+  "kikai:kikair1-3": [
+   3
+  ],
+  "kikai:kikair1-4": [
+   5
+  ],
+  "kikai:kikair1-5": [
+   4
+  ],
+  "kikai:kikair1-6": [
+   5
+  ],
+  "kikai:kikair1-7": [
+   1
+  ],
+  "kikai:kikair1-8": [
+   3
+  ],
+  "kikai:kikair1-9": [
+   2
+  ],
+  "kikai:kikair2-1": [
+   1
+  ],
+  "kikai:kikair2-10": [
+   2
+  ],
+  "kikai:kikair2-11": [
+   3
+  ],
+  "kikai:kikair2-12": [
+   3
+  ],
+  "kikai:kikair2-13": [
+   2
+  ],
+  "kikai:kikair2-14": [
+   5
+  ],
+  "kikai:kikair2-15": [
+   4,
+   1
+  ],
+  "kikai:kikair2-16": [
+   4,
+   1
+  ],
+  "kikai:kikair2-17": [
+   5,
+   4
+  ],
+  "kikai:kikair2-18": [
+   5,
+   3
+  ],
+  "kikai:kikair2-2": [
+   3
+  ],
+  "kikai:kikair2-3": [
+   4
+  ],
+  "kikai:kikair2-4": [
+   3
+  ],
+  "kikai:kikair2-5": [
+   4
+  ],
+  "kikai:kikair2-6": [
+   5
+  ],
+  "kikai:kikair2-7": [
+   4
+  ],
+  "kikai:kikair2-8": [
+   2
+  ],
+  "kikai:kikair2-9": [
+   2
+  ],
+  "kikai:kikair3-1": [
+   1
+  ],
+  "kikai:kikair3-10": [
+   4
+  ],
+  "kikai:kikair3-11": [
+   3
+  ],
+  "kikai:kikair3-12": [
+   4
+  ],
+  "kikai:kikair3-13": [
+   2
+  ],
+  "kikai:kikair3-14": [
+   5
+  ],
+  "kikai:kikair3-15": [
+   2,
+   3
+  ],
+  "kikai:kikair3-16": [
+   1,
+   3
+  ],
+  "kikai:kikair3-17": [
+   3,
+   3
+  ],
+  "kikai:kikair3-18": [
+   2,
+   5
+  ],
+  "kikai:kikair3-2": [
+   2
+  ],
+  "kikai:kikair3-3": [
+   2
+  ],
+  "kikai:kikair3-4": [
+   1
+  ],
+  "kikai:kikair3-5": [
+   5
+  ],
+  "kikai:kikair3-6": [
+   4
+  ],
+  "kikai:kikair3-7": [
+   1
+  ],
+  "kikai:kikair3-8": [
+   5
+  ],
+  "kikai:kikair3-9": [
+   3
+  ],
+  "kikai:kikair4-1-1": [
+   4
+  ],
+  "kikai:kikair4-1-10": [
+   4
+  ],
+  "kikai:kikair4-1-11": [
+   3
+  ],
+  "kikai:kikair4-1-12": [
+   4
+  ],
+  "kikai:kikair4-1-13": [
+   4
+  ],
+  "kikai:kikair4-1-14": [
+   2
+  ],
+  "kikai:kikair4-1-15": [
+   2,
+   3
+  ],
+  "kikai:kikair4-1-16": [
+   4,
+   3
+  ],
+  "kikai:kikair4-1-17": [
+   5,
+   5
+  ],
+  "kikai:kikair4-1-18": [
+   5,
+   2
+  ],
+  "kikai:kikair4-1-2": [
+   1
+  ],
+  "kikai:kikair4-1-3": [
+   5
+  ],
+  "kikai:kikair4-1-4": [
+   2
+  ],
+  "kikai:kikair4-1-5": [
+   3
+  ],
+  "kikai:kikair4-1-6": [
+   4
+  ],
+  "kikai:kikair4-1-7": [
+   5
+  ],
+  "kikai:kikair4-1-8": [
+   3
+  ],
+  "kikai:kikair4-1-9": [
+   3
+  ],
+  "kikai:kikair4-2-1": [
+   3
+  ],
+  "kikai:kikair4-2-10": [
+   3
+  ],
+  "kikai:kikair4-2-11": [
+   4
+  ],
+  "kikai:kikair4-2-12": [
+   5
+  ],
+  "kikai:kikair4-2-13": [
+   3
+  ],
+  "kikai:kikair4-2-14": [
+   4
+  ],
+  "kikai:kikair4-2-15": [
+   2,
+   4
+  ],
+  "kikai:kikair4-2-16": [
+   2,
+   2
+  ],
+  "kikai:kikair4-2-17": [
+   2,
+   3
+  ],
+  "kikai:kikair4-2-18": [
+   4,
+   2
+  ],
+  "kikai:kikair4-2-2": [
+   1
+  ],
+  "kikai:kikair4-2-3": [
+   4
+  ],
+  "kikai:kikair4-2-4": [
+   4
+  ],
+  "kikai:kikair4-2-5": [
+   3
+  ],
+  "kikai:kikair4-2-6": [
+   4
+  ],
+  "kikai:kikair4-2-7": [
+   1
+  ],
+  "kikai:kikair4-2-8": [
+   4
+  ],
+  "kikai:kikair4-2-9": [
+   5
+  ],
+  "kikai:kikair5-1-1": [
+   1
+  ],
+  "kikai:kikair5-1-10": [
+   1
+  ],
+  "kikai:kikair5-1-11": [
+   2
+  ],
+  "kikai:kikair5-1-12": [
+   3
+  ],
+  "kikai:kikair5-1-13": [
+   1
+  ],
+  "kikai:kikair5-1-14": [
+   3
+  ],
+  "kikai:kikair5-1-16": [
+   1,
+   4
+  ],
+  "kikai:kikair5-1-17": [
+   2,
+   4
+  ],
+  "kikai:kikair5-1-18": [
+   3,
+   4
+  ],
+  "kikai:kikair5-1-2": [
+   4
+  ],
+  "kikai:kikair5-1-3": [
+   5
+  ],
+  "kikai:kikair5-1-4": [
+   2
+  ],
+  "kikai:kikair5-1-5": [
+   3
+  ],
+  "kikai:kikair5-1-6": [
+   4
+  ],
+  "kikai:kikair5-1-7": [
+   4
+  ],
+  "kikai:kikair5-2-1": [
+   2
+  ],
+  "kikai:kikair5-2-10": [
+   2
+  ],
+  "kikai:kikair5-2-11": [
+   5
+  ],
+  "kikai:kikair5-2-12": [
+   4
+  ],
+  "kikai:kikair5-2-13": [
+   4
+  ],
+  "kikai:kikair5-2-14": [
+   5
+  ],
+  "kikai:kikair5-2-15": [
+   2,
+   1
+  ],
+  "kikai:kikair5-2-16": [
+   1,
+   2
+  ],
+  "kikai:kikair5-2-17": [
+   2,
+   3
+  ],
+  "kikai:kikair5-2-18": [
+   5,
+   3
+  ],
+  "kikai:kikair5-2-2": [
+   2
+  ],
+  "kikai:kikair5-2-3": [
+   5
+  ],
+  "kikai:kikair5-2-4": [
+   5
+  ],
+  "kikai:kikair5-2-5": [
+   3
+  ],
+  "kikai:kikair5-2-6": [
+   3
+  ],
+  "kikai:kikair5-2-7": [
+   1
+  ],
+  "kikai:kikair5-2-8": [
+   5
+  ],
+  "kikai:kikair5-2-9": [
+   3
+  ],
+  "kikai:kikair6-1-1": [
+   5
+  ],
+  "kikai:kikair6-1-10": [
+   3
+  ],
+  "kikai:kikair6-1-11": [
+   3
+  ],
+  "kikai:kikair6-1-12": [
+   1
+  ],
+  "kikai:kikair6-1-13": [
+   2
+  ],
+  "kikai:kikair6-1-14": [
+   5
+  ],
+  "kikai:kikair6-1-15": [
+   2,
+   3
+  ],
+  "kikai:kikair6-1-16": [
+   5,
+   2
+  ],
+  "kikai:kikair6-1-17": [
+   2,
+   1
+  ],
+  "kikai:kikair6-1-18": [
+   2,
+   4
+  ],
+  "kikai:kikair6-1-2": [
+   2
+  ],
+  "kikai:kikair6-1-3": [
+   3
+  ],
+  "kikai:kikair6-1-4": [
+   3
+  ],
+  "kikai:kikair6-1-5": [
+   2
+  ],
+  "kikai:kikair6-1-6": [
+   3
+  ],
+  "kikai:kikair6-1-7": [
+   5
+  ],
+  "kikai:kikair6-2-1": [
+   5
+  ],
+  "kikai:kikair6-2-10": [
+   1
+  ],
+  "kikai:kikair6-2-11": [
+   2
+  ],
+  "kikai:kikair6-2-12": [
+   4
+  ],
+  "kikai:kikair6-2-13": [
+   2
+  ],
+  "kikai:kikair6-2-14": [
+   3
+  ],
+  "kikai:kikair6-2-15": [
+   2,
+   3
+  ],
+  "kikai:kikair6-2-16": [
+   5,
+   2
+  ],
+  "kikai:kikair6-2-17": [
+   2,
+   3
+  ],
+  "kikai:kikair6-2-18": [
+   3,
+   2
+  ],
+  "kikai:kikair6-2-2": [
+   1
+  ],
+  "kikai:kikair6-2-3": [
+   1
+  ],
+  "kikai:kikair6-2-4": [
+   3
+  ],
+  "kikai:kikair6-2-5": [
+   2
+  ],
+  "kikai:kikair6-2-6": [
+   1
+  ],
+  "kikai:kikair6-2-7": [
+   4
+  ],
+  "kikai:kikair6-2-8": [
+   3
+  ],
+  "kikai:kikair6-2-9": [
+   4
+  ],
+  "kikai:kikair7-1-1": [
+   5
+  ],
+  "kikai:kikair7-1-10": [
+   2
+  ],
+  "kikai:kikair7-1-11": [
+   2
+  ],
+  "kikai:kikair7-1-12": [
+   4
+  ],
+  "kikai:kikair7-1-13": [
+   3
+  ],
+  "kikai:kikair7-1-14": [
+   3
+  ],
+  "kikai:kikair7-1-15": [
+   4,
+   2
+  ],
+  "kikai:kikair7-1-16": [
+   2,
+   4
+  ],
+  "kikai:kikair7-1-17": [
+   2,
+   2
+  ],
+  "kikai:kikair7-1-18": [
+   2,
+   3
+  ],
+  "kikai:kikair7-1-2": [
+   2
+  ],
+  "kikai:kikair7-1-3": [
+   4
+  ],
+  "kikai:kikair7-1-4": [
+   3
+  ],
+  "kikai:kikair7-1-5": [
+   3
+  ],
+  "kikai:kikair7-1-6": [
+   2
+  ],
+  "kikai:kikair7-1-7": [
+   3
+  ],
+  "kikai:kikair7-1-8": [
+   3
+  ],
+  "kikai:kikair7-1-9": [
+   3
+  ],
+  "kikai:kikair7-2-1": [
+   5
+  ],
+  "kikai:kikair7-2-10": [
+   3
+  ],
+  "kikai:kikair7-2-11": [
+   5
+  ],
+  "kikai:kikair7-2-12": [
+   2
+  ],
+  "kikai:kikair7-2-13": [
+   3
+  ],
+  "kikai:kikair7-2-14": [
+   3
+  ],
+  "kikai:kikair7-2-15": [
+   5,
+   2
+  ],
+  "kikai:kikair7-2-16": [
+   5,
+   4
+  ],
+  "kikai:kikair7-2-17": [
+   4,
+   4
+  ],
+  "kikai:kikair7-2-18": [
+   2,
+   2
+  ],
+  "kikai:kikair7-2-2": [
+   4
+  ],
+  "kikai:kikair7-2-3": [
+   4
+  ],
+  "kikai:kikair7-2-4": [
+   5
+  ],
+  "kikai:kikair7-2-5": [
+   3
+  ],
+  "kikai:kikair7-2-6": [
+   4
+  ],
+  "kikai:kikair7-2-7": [
+   3
+  ],
+  "kikai:kikair7-2-8": [
+   2
+  ],
+  "kikai:kikair7-2-9": [
+   3
+  ],
+  "riron:kikaih24-13": [
+   5
+  ],
+  "riron:rironh21-1": [
+   4
+  ],
+  "riron:rironh21-10": [
+   5
+  ],
+  "riron:rironh21-11": [
+   3
+  ],
+  "riron:rironh21-12": [
+   5
+  ],
+  "riron:rironh21-13": [
+   4
+  ],
+  "riron:rironh21-14": [
+   3
+  ],
+  "riron:rironh21-15": [
+   1,
+   1
+  ],
+  "riron:rironh21-16": [
+   3,
+   2
+  ],
+  "riron:rironh21-17": [
+   5,
+   2
+  ],
+  "riron:rironh21-18": [
+   5,
+   4
+  ],
+  "riron:rironh21-2": [
+   3
+  ],
+  "riron:rironh21-3": [
+   2
+  ],
+  "riron:rironh21-4": [
+   2
+  ],
+  "riron:rironh21-5": [
+   4
+  ],
+  "riron:rironh21-5~2": [
+   4
+  ],
+  "riron:rironh21-6": [
+   4
+  ],
+  "riron:rironh21-7": [
+   2
+  ],
+  "riron:rironh21-8": [
+   2
+  ],
+  "riron:rironh21-9": [
+   1
+  ],
+  "riron:rironh22-1": [
+   2
+  ],
+  "riron:rironh22-10": [
+   5
+  ],
+  "riron:rironh22-11": [
+   5
+  ],
+  "riron:rironh22-12": [
+   1
+  ],
+  "riron:rironh22-13": [
+   4
+  ],
+  "riron:rironh22-14": [
+   5
+  ],
+  "riron:rironh22-15": [
+   2,
+   4
+  ],
+  "riron:rironh22-16": [
+   3,
+   4
+  ],
+  "riron:rironh22-17": [
+   1,
+   3
+  ],
+  "riron:rironh22-18": [
+   3,
+   2
+  ],
+  "riron:rironh22-2": [
+   1
+  ],
+  "riron:rironh22-3": [
+   4
+  ],
+  "riron:rironh22-4": [
+   2
+  ],
+  "riron:rironh22-5": [
+   5
+  ],
+  "riron:rironh22-6": [
+   4
+  ],
+  "riron:rironh22-7": [
+   3
+  ],
+  "riron:rironh22-8": [
+   4
+  ],
+  "riron:rironh22-9": [
+   4
+  ],
+  "riron:rironh23-1": [
+   3
+  ],
+  "riron:rironh23-10": [
+   3
+  ],
+  "riron:rironh23-11": [
+   1
+  ],
+  "riron:rironh23-12": [
+   5
+  ],
+  "riron:rironh23-13": [
+   1
+  ],
+  "riron:rironh23-14": [
+   3
+  ],
+  "riron:rironh23-14~2": [
+   3
+  ],
+  "riron:rironh23-15": [
+   2,
+   2
+  ],
+  "riron:rironh23-16": [
+   1,
+   4
+  ],
+  "riron:rironh23-17": [
+   5,
+   1
+  ],
+  "riron:rironh23-18": [
+   4,
+   4
+  ],
+  "riron:rironh23-2": [
+   2
+  ],
+  "riron:rironh23-3": [
+   5
+  ],
+  "riron:rironh23-4": [
+   2
+  ],
+  "riron:rironh23-5": [
+   2
+  ],
+  "riron:rironh23-6": [
+   4
+  ],
+  "riron:rironh23-7": [
+   4
+  ],
+  "riron:rironh23-8": [
+   3
+  ],
+  "riron:rironh23-9": [
+   2
+  ],
+  "riron:rironh24-1": [
+   3
+  ],
+  "riron:rironh24-10": [
+   1
+  ],
+  "riron:rironh24-11": [
+   3
+  ],
+  "riron:rironh24-12": [
+   2
+  ],
+  "riron:rironh24-13": [
+   5
+  ],
+  "riron:rironh24-13~2": [
+   5
+  ],
+  "riron:rironh24-14": [
+   2
+  ],
+  "riron:rironh24-15": [
+   5,
+   4
+  ],
+  "riron:rironh24-16": [
+   4,
+   5
+  ],
+  "riron:rironh24-17": [
+   3,
+   2
+  ],
+  "riron:rironh24-18": [
+   4,
+   1
+  ],
+  "riron:rironh24-2": [
+   4
+  ],
+  "riron:rironh24-3": [
+   5
+  ],
+  "riron:rironh24-4": [
+   1
+  ],
+  "riron:rironh24-5": [
+   2
+  ],
+  "riron:rironh24-6": [
+   4
+  ],
+  "riron:rironh24-7": [
+   3
+  ],
+  "riron:rironh24-8": [
+   4
+  ],
+  "riron:rironh24-9": [
+   3
+  ],
+  "riron:rironh25-1": [
+   1
+  ],
+  "riron:rironh25-10": [
+   4
+  ],
+  "riron:rironh25-11": [
+   5
+  ],
+  "riron:rironh25-12": [
+   4
+  ],
+  "riron:rironh25-13": [
+   5
+  ],
+  "riron:rironh25-14": [
+   5
+  ],
+  "riron:rironh25-15": [
+   4,
+   1
+  ],
+  "riron:rironh25-16": [
+   3,
+   4
+  ],
+  "riron:rironh25-17": [
+   1,
+   3
+  ],
+  "riron:rironh25-18": [
+   5,
+   2
+  ],
+  "riron:rironh25-2": [
+   3
+  ],
+  "riron:rironh25-3": [
+   3
+  ],
+  "riron:rironh25-4": [
+   2
+  ],
+  "riron:rironh25-5": [
+   5
+  ],
+  "riron:rironh25-6": [
+   1
+  ],
+  "riron:rironh25-7": [
+   3
+  ],
+  "riron:rironh25-8": [
+   2
+  ],
+  "riron:rironh25-9": [
+   5
+  ],
+  "riron:rironh26-1": [
+   4
+  ],
+  "riron:rironh26-10": [
+   5
+  ],
+  "riron:rironh26-11": [
+   4
+  ],
+  "riron:rironh26-12": [
+   4
+  ],
+  "riron:rironh26-13": [
+   4
+  ],
+  "riron:rironh26-14": [
+   2
+  ],
+  "riron:rironh26-15": [
+   4,
+   3
+  ],
+  "riron:rironh26-16": [
+   1,
+   1
+  ],
+  "riron:rironh26-17": [
+   1,
+   2
+  ],
+  "riron:rironh26-18": [
+   4,
+   2
+  ],
+  "riron:rironh26-2": [
+   5
+  ],
+  "riron:rironh26-3": [
+   5
+  ],
+  "riron:rironh26-4": [
+   1
+  ],
+  "riron:rironh26-5": [
+   3
+  ],
+  "riron:rironh26-6": [
+   3
+  ],
+  "riron:rironh26-7": [
+   5
+  ],
+  "riron:rironh26-8": [
+   5
+  ],
+  "riron:rironh26-9": [
+   5
+  ],
+  "riron:rironh27-1": [
+   2
+  ],
+  "riron:rironh27-10": [
+   2
+  ],
+  "riron:rironh27-11": [
+   4
+  ],
+  "riron:rironh27-12": [
+   5
+  ],
+  "riron:rironh27-13": [
+   1
+  ],
+  "riron:rironh27-14": [
+   2
+  ],
+  "riron:rironh27-15": [
+   4,
+   5
+  ],
+  "riron:rironh27-16": [
+   5,
+   3
+  ],
+  "riron:rironh27-17": [
+   2,
+   2
+  ],
+  "riron:rironh27-18": [
+   1,
+   5
+  ],
+  "riron:rironh27-2": [
+   2
+  ],
+  "riron:rironh27-3": [
+   1
+  ],
+  "riron:rironh27-4": [
+   5
+  ],
+  "riron:rironh27-5": [
+   5
+  ],
+  "riron:rironh27-6": [
+   2
+  ],
+  "riron:rironh27-7": [
+   4
+  ],
+  "riron:rironh27-8": [
+   1
+  ],
+  "riron:rironh27-9": [
+   1
+  ],
+  "riron:rironh28-1": [
+   4
+  ],
+  "riron:rironh28-10": [
+   5
+  ],
+  "riron:rironh28-11": [
+   2
+  ],
+  "riron:rironh28-12": [
+   2
+  ],
+  "riron:rironh28-13": [
+   3
+  ],
+  "riron:rironh28-14": [
+   2
+  ],
+  "riron:rironh28-15": [
+   1,
+   3
+  ],
+  "riron:rironh28-16": [
+   2,
+   3
+  ],
+  "riron:rironh28-17": [
+   3,
+   2
+  ],
+  "riron:rironh28-18": [
+   2,
+   2
+  ],
+  "riron:rironh28-2": [
+   4
+  ],
+  "riron:rironh28-3": [
+   2
+  ],
+  "riron:rironh28-4": [
+   2
+  ],
+  "riron:rironh28-5": [
+   2
+  ],
+  "riron:rironh28-6": [
+   1
+  ],
+  "riron:rironh28-7": [
+   3
+  ],
+  "riron:rironh28-8": [
+   5
+  ],
+  "riron:rironh28-8~2": [
+   5
+  ],
+  "riron:rironh28-9": [
+   5
+  ],
+  "riron:rironh29-1": [
+   2
+  ],
+  "riron:rironh29-10": [
+   1
+  ],
+  "riron:rironh29-11": [
+   2
+  ],
+  "riron:rironh29-12": [
+   5
+  ],
+  "riron:rironh29-13": [
+   3
+  ],
+  "riron:rironh29-14": [
+   5
+  ],
+  "riron:rironh29-15": [
+   3,
+   4
+  ],
+  "riron:rironh29-16": [
+   3,
+   4
+  ],
+  "riron:rironh29-17": [
+   2,
+   2
+  ],
+  "riron:rironh29-18": [
+   4,
+   2
+  ],
+  "riron:rironh29-2": [
+   2
+  ],
+  "riron:rironh29-3": [
+   2
+  ],
+  "riron:rironh29-4": [
+   5
+  ],
+  "riron:rironh29-5": [
+   3
+  ],
+  "riron:rironh29-6": [
+   5
+  ],
+  "riron:rironh29-7": [
+   1
+  ],
+  "riron:rironh29-8": [
+   5
+  ],
+  "riron:rironh29-9": [
+   3
+  ],
+  "riron:rironh30-1": [
+   1
+  ],
+  "riron:rironh30-10": [
+   1
+  ],
+  "riron:rironh30-11": [
+   3
+  ],
+  "riron:rironh30-12": [
+   5
+  ],
+  "riron:rironh30-13": [
+   3
+  ],
+  "riron:rironh30-14": [
+   5
+  ],
+  "riron:rironh30-15": [
+   4,
+   4
+  ],
+  "riron:rironh30-16": [
+   3,
+   2
+  ],
+  "riron:rironh30-17": [
+   3,
+   3
+  ],
+  "riron:rironh30-18": [
+   5,
+   2
+  ],
+  "riron:rironh30-2": [
+   1
+  ],
+  "riron:rironh30-3": [
+   4
+  ],
+  "riron:rironh30-4": [
+   4
+  ],
+  "riron:rironh30-5": [
+   1
+  ],
+  "riron:rironh30-6": [
+   2
+  ],
+  "riron:rironh30-7": [
+   1
+  ],
+  "riron:rironh30-8": [
+   1
+  ],
+  "riron:rironh30-9": [
+   3
+  ],
+  "riron:rironr1-1": [
+   2
+  ],
+  "riron:rironr1-10": [
+   2
+  ],
+  "riron:rironr1-11": [
+   1
+  ],
+  "riron:rironr1-12": [
+   1
+  ],
+  "riron:rironr1-13": [
+   5
+  ],
+  "riron:rironr1-14": [
+   2
+  ],
+  "riron:rironr1-15": [
+   5,
+   3
+  ],
+  "riron:rironr1-16": [
+   3,
+   4
+  ],
+  "riron:rironr1-17": [
+   5,
+   2
+  ],
+  "riron:rironr1-18": [
+   1,
+   4
+  ],
+  "riron:rironr1-2": [
+   3
+  ],
+  "riron:rironr1-3": [
+   2
+  ],
+  "riron:rironr1-4": [
+   5
+  ],
+  "riron:rironr1-5": [
+   5
+  ],
+  "riron:rironr1-6": [
+   5
+  ],
+  "riron:rironr1-7": [
+   4
+  ],
+  "riron:rironr1-8": [
+   3
+  ],
+  "riron:rironr1-9": [
+   3
+  ],
+  "riron:rironr2-1": [
+   3
+  ],
+  "riron:rironr2-10": [
+   2
+  ],
+  "riron:rironr2-11": [
+   1
+  ],
+  "riron:rironr2-12": [
+   5
+  ],
+  "riron:rironr2-13": [
+   5
+  ],
+  "riron:rironr2-14": [
+   1
+  ],
+  "riron:rironr2-15": [
+   2,
+   3
+  ],
+  "riron:rironr2-16": [
+   4,
+   2
+  ],
+  "riron:rironr2-17": [
+   5,
+   2
+  ],
+  "riron:rironr2-18": [
+   3,
+   3
+  ],
+  "riron:rironr2-2": [
+   2
+  ],
+  "riron:rironr2-3": [
+   3
+  ],
+  "riron:rironr2-4": [
+   4
+  ],
+  "riron:rironr2-5": [
+   4
+  ],
+  "riron:rironr2-6": [
+   2
+  ],
+  "riron:rironr2-7": [
+   1
+  ],
+  "riron:rironr2-8": [
+   4
+  ],
+  "riron:rironr2-9": [
+   2
+  ],
+  "riron:rironr3-1": [
+   1
+  ],
+  "riron:rironr3-10": [
+   4
+  ],
+  "riron:rironr3-11": [
+   2
+  ],
+  "riron:rironr3-12": [
+   3
+  ],
+  "riron:rironr3-13": [
+   1
+  ],
+  "riron:rironr3-14": [
+   5
+  ],
+  "riron:rironr3-15": [
+   2,
+   1
+  ],
+  "riron:rironr3-16": [
+   4,
+   5
+  ],
+  "riron:rironr3-17": [
+   4,
+   2
+  ],
+  "riron:rironr3-18": [
+   4,
+   4
+  ],
+  "riron:rironr3-2": [
+   3
+  ],
+  "riron:rironr3-3": [
+   4
+  ],
+  "riron:rironr3-4": [
+   4
+  ],
+  "riron:rironr3-5": [
+   1
+  ],
+  "riron:rironr3-6": [
+   2
+  ],
+  "riron:rironr3-7": [
+   4
+  ],
+  "riron:rironr3-8": [
+   5
+  ],
+  "riron:rironr3-9": [
+   1
+  ],
+  "riron:rironr4-1-1": [
+   3
+  ],
+  "riron:rironr4-1-10": [
+   3
+  ],
+  "riron:rironr4-1-11": [
+   5
+  ],
+  "riron:rironr4-1-12": [
+   2
+  ],
+  "riron:rironr4-1-13": [
+   5
+  ],
+  "riron:rironr4-1-14": [
+   1
+  ],
+  "riron:rironr4-1-15": [
+   4,
+   2
+  ],
+  "riron:rironr4-1-16": [
+   2,
+   1
+  ],
+  "riron:rironr4-1-17": [
+   4,
+   2
+  ],
+  "riron:rironr4-1-18": [
+   3,
+   4
+  ],
+  "riron:rironr4-1-2": [
+   3
+  ],
+  "riron:rironr4-1-3": [
+   2
+  ],
+  "riron:rironr4-1-4": [
+   3
+  ],
+  "riron:rironr4-1-5": [
+   2
+  ],
+  "riron:rironr4-1-6": [
+   3
+  ],
+  "riron:rironr4-1-7": [
+   1
+  ],
+  "riron:rironr4-1-8": [
+   2
+  ],
+  "riron:rironr4-1-9": [
+   4
+  ],
+  "riron:rironr4-2-1": [
+   4
+  ],
+  "riron:rironr4-2-10": [
+   5
+  ],
+  "riron:rironr4-2-11": [
+   5
+  ],
+  "riron:rironr4-2-12": [
+   5
+  ],
+  "riron:rironr4-2-13": [
+   1
+  ],
+  "riron:rironr4-2-14": [
+   5
+  ],
+  "riron:rironr4-2-15": [
+   4,
+   4
+  ],
+  "riron:rironr4-2-16": [
+   5,
+   3
+  ],
+  "riron:rironr4-2-17": [
+   4,
+   4
+  ],
+  "riron:rironr4-2-18": [
+   4,
+   4
+  ],
+  "riron:rironr4-2-2": [
+   1
+  ],
+  "riron:rironr4-2-3": [
+   4
+  ],
+  "riron:rironr4-2-4": [
+   3
+  ],
+  "riron:rironr4-2-5": [
+   3
+  ],
+  "riron:rironr4-2-6": [
+   3
+  ],
+  "riron:rironr4-2-7": [
+   2
+  ],
+  "riron:rironr4-2-8": [
+   1
+  ],
+  "riron:rironr4-2-9": [
+   2
+  ],
+  "riron:rironr5-1-1": [
+   4
+  ],
+  "riron:rironr5-1-10": [
+   4
+  ],
+  "riron:rironr5-1-11": [
+   5
+  ],
+  "riron:rironr5-1-12": [
+   5
+  ],
+  "riron:rironr5-1-13": [
+   5
+  ],
+  "riron:rironr5-1-14": [
+   3
+  ],
+  "riron:rironr5-1-15": [
+   2,
+   4
+  ],
+  "riron:rironr5-1-16": [
+   5,
+   2
+  ],
+  "riron:rironr5-1-17": [
+   4,
+   2
+  ],
+  "riron:rironr5-1-18": [
+   2,
+   2
+  ],
+  "riron:rironr5-1-2": [
+   5
+  ],
+  "riron:rironr5-1-3": [
+   2
+  ],
+  "riron:rironr5-1-4": [
+   3
+  ],
+  "riron:rironr5-1-5": [
+   1
+  ],
+  "riron:rironr5-1-6": [
+   5
+  ],
+  "riron:rironr5-1-7": [
+   3
+  ],
+  "riron:rironr5-1-8": [
+   3
+  ],
+  "riron:rironr5-1-9": [
+   3
+  ],
+  "riron:rironr5-2-1": [
+   1
+  ],
+  "riron:rironr5-2-10": [
+   5
+  ],
+  "riron:rironr5-2-11": [
+   1
+  ],
+  "riron:rironr5-2-12": [
+   5
+  ],
+  "riron:rironr5-2-13": [
+   3
+  ],
+  "riron:rironr5-2-14": [
+   5
+  ],
+  "riron:rironr5-2-15": [
+   3,
+   4
+  ],
+  "riron:rironr5-2-16": [
+   4,
+   5
+  ],
+  "riron:rironr5-2-17": [
+   5,
+   3
+  ],
+  "riron:rironr5-2-18": [
+   4,
+   1
+  ],
+  "riron:rironr5-2-2": [
+   1
+  ],
+  "riron:rironr5-2-3": [
+   4
+  ],
+  "riron:rironr5-2-4": [
+   2
+  ],
+  "riron:rironr5-2-5": [
+   5
+  ],
+  "riron:rironr5-2-6": [
+   4
+  ],
+  "riron:rironr5-2-7": [
+   5
+  ],
+  "riron:rironr5-2-8": [
+   2
+  ],
+  "riron:rironr5-2-9": [
+   2
+  ],
+  "riron:rironr6-1-1": [
+   5
+  ],
+  "riron:rironr6-1-10": [
+   3
+  ],
+  "riron:rironr6-1-11": [
+   4
+  ],
+  "riron:rironr6-1-12": [
+   2
+  ],
+  "riron:rironr6-1-13": [
+   3
+  ],
+  "riron:rironr6-1-14": [
+   3
+  ],
+  "riron:rironr6-1-15": [
+   4,
+   3
+  ],
+  "riron:rironr6-1-16": [
+   4,
+   5
+  ],
+  "riron:rironr6-1-17": [
+   5,
+   3
+  ],
+  "riron:rironr6-1-18": [
+   2,
+   5
+  ],
+  "riron:rironr6-1-2": [
+   4
+  ],
+  "riron:rironr6-1-3": [
+   2
+  ],
+  "riron:rironr6-1-4": [
+   2
+  ],
+  "riron:rironr6-1-5": [
+   1
+  ],
+  "riron:rironr6-1-6": [
+   1
+  ],
+  "riron:rironr6-1-7": [
+   3
+  ],
+  "riron:rironr6-1-8": [
+   3
+  ],
+  "riron:rironr6-1-9": [
+   2
+  ],
+  "riron:rironr6-2-1": [
+   1
+  ],
+  "riron:rironr6-2-10": [
+   4
+  ],
+  "riron:rironr6-2-11": [
+   5
+  ],
+  "riron:rironr6-2-12": [
+   4
+  ],
+  "riron:rironr6-2-13": [
+   2
+  ],
+  "riron:rironr6-2-14": [
+   2
+  ],
+  "riron:rironr6-2-15": [
+   2,
+   2
+  ],
+  "riron:rironr6-2-16": [
+   3,
+   4
+  ],
+  "riron:rironr6-2-17": [
+   3,
+   2
+  ],
+  "riron:rironr6-2-18": [
+   2,
+   1
+  ],
+  "riron:rironr6-2-2": [
+   1
+  ],
+  "riron:rironr6-2-3": [
+   2
+  ],
+  "riron:rironr6-2-4": [
+   2
+  ],
+  "riron:rironr6-2-5": [
+   5
+  ],
+  "riron:rironr6-2-6": [
+   4
+  ],
+  "riron:rironr6-2-7": [
+   4
+  ],
+  "riron:rironr6-2-8": [
+   3
+  ],
+  "riron:rironr6-2-9": [
+   3
+  ],
+  "riron:rironr7-1-1": [
+   2
+  ],
+  "riron:rironr7-1-10": [
+   3
+  ],
+  "riron:rironr7-1-11": [
+   4
+  ],
+  "riron:rironr7-1-12": [
+   5
+  ],
+  "riron:rironr7-1-13": [
+   2
+  ],
+  "riron:rironr7-1-14": [
+   4
+  ],
+  "riron:rironr7-1-15": [
+   2,
+   2
+  ],
+  "riron:rironr7-1-16": [
+   1,
+   4
+  ],
+  "riron:rironr7-1-17": [
+   3,
+   5
+  ],
+  "riron:rironr7-1-18": [
+   3,
+   1
+  ],
+  "riron:rironr7-1-2": [
+   5
+  ],
+  "riron:rironr7-1-3": [
+   3
+  ],
+  "riron:rironr7-1-4": [
+   5
+  ],
+  "riron:rironr7-1-5": [
+   5
+  ],
+  "riron:rironr7-1-6": [
+   2
+  ],
+  "riron:rironr7-1-7": [
+   1
+  ],
+  "riron:rironr7-1-8": [
+   5
+  ],
+  "riron:rironr7-1-9": [
+   3
+  ],
+  "riron:rironr7-2-1": [
+   4
+  ],
+  "riron:rironr7-2-10": [
+   4
+  ],
+  "riron:rironr7-2-11": [
+   2
+  ],
+  "riron:rironr7-2-12": [
+   1
+  ],
+  "riron:rironr7-2-13": [
+   3
+  ],
+  "riron:rironr7-2-14": [
+   4
+  ],
+  "riron:rironr7-2-15": [
+   3,
+   3
+  ],
+  "riron:rironr7-2-16": [
+   3,
+   4
+  ],
+  "riron:rironr7-2-17": [
+   5,
+   4
+  ],
+  "riron:rironr7-2-18": [
+   5,
+   2
+  ],
+  "riron:rironr7-2-2": [
+   3
+  ],
+  "riron:rironr7-2-3": [
+   3
+  ],
+  "riron:rironr7-2-4": [
+   5
+  ],
+  "riron:rironr7-2-5": [
+   1
+  ],
+  "riron:rironr7-2-6": [
+   2
+  ],
+  "riron:rironr7-2-7": [
+   2
+  ],
+  "riron:rironr7-2-8": [
+   5
+  ],
+  "riron:rironr7-2-9": [
+   5
+  ]
+ }
 }

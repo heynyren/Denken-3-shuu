@@ -115,9 +115,25 @@ npm run pack:win
 Chức năng thi thử cần biết đáp án đúng của từng câu. Đáp án là dữ liệu chung cho
 mọi người dùng nên nằm ở `src/data/answers.json`, đi kèm code.
 
+**Đã có sẵn 21/24 kỳ**, lấy từ bảng đáp án chính thức (PDF) của
+一般財団法人 電気技術者試験センター: từ 平成21年度 (H21) tới 令和7年度下期 (R07下).
+Còn thiếu **H18, H19, H20** — ai có ba tờ đáp án đó thì nạp thêm bằng:
+
+```bash
+python3 scripts/dap-an-pdf.py --thu duong/dan/*.pdf   # xem trước, chưa ghi
+python3 scripts/dap-an-pdf.py duong/dan/*.pdf         # nạp vào answers.json
+```
+
+Script đọc theo **toạ độ** chứ không theo thứ tự chữ trong file, vì bốn môn xếp
+cạnh nhau nên đọc xuôi là ghép nhầm đáp án môn này sang môn kia. Nó chịu được cả
+hai bố cục (bố cục cũ, và bố cục từ 令和7年度 có thêm cột 配点), và tự kiểm tra
+hình dạng tờ đáp án — đọc ra thiếu câu, thừa câu hay sai số ý thì dừng lại chứ
+không ghi bừa vào bảng đáp án.
+
 Câu nào chưa có đáp án thì bài thi vẫn cho làm và vẫn bấm giờ, chỉ là không chấm
 câu đó; điểm được quy về thang 100 trên phần chấm được, **không** coi câu thiếu
-đáp án là sai.
+đáp án là sai. Câu bị đánh dấu ※ (đề có sai sót, mọi đáp án đều được chấp nhận —
+như 機械 問8 của H26) cũng để trống, nên không ai bị trừ điểm vì câu đó.
 
 **A問題 một ý, B問題 hai ý.** Đề thật hỏi (a) và (b) riêng, mỗi ý một đáp án và
 chấm điểm riêng — đúng một ý vẫn được nửa số điểm của câu đó. Vì vậy đáp án của
@@ -128,14 +144,9 @@ mỗi câu là một mảng 1 hoặc 2 phần tử:
 "riron:rironr3-15": [3, 5]    // B問題 — ý (a) là 3, ý (b) là 5
 ```
 
-Trong file CSV, cột `so_y` cho biết câu đó cần mấy đáp án:
-
-| so_y | điền gì |
-|---|---|
-| `1` | chỉ `dap_an_1` |
-| `2` | cả `dap_an_1` (ý a) và `dap_an_2` (ý b) |
-
-Chấp nhận `3`, `(3)` hoặc `③`.
+Muốn nhập tay thì vẫn dùng được đường CSV/Excel cũ. Cột `so_y` cho biết câu đó
+cần mấy đáp án: `1` chỉ điền `dap_an_1`, `2` điền cả `dap_an_1` (ý a) và
+`dap_an_2` (ý b). Chấp nhận `3`, `(3)` hoặc `③`.
 
 ```bash
 python3 scripts/bao-cao-thieu.py            # còn thiếu gì, kỳ nào (đếm theo ý)
@@ -143,9 +154,6 @@ python3 scripts/bao-cao-thieu.py --chi-tiet # liệt kê từng câu kèm link
 python3 scripts/bao-cao-thieu.py --csv      # xuất CSV để điền
 python3 scripts/build-answers.py scripts/con-thieu.csv   # nạp vào answers.json
 ```
-
-Cũng có thể thêm hai cột "Đáp án (a)" và "Đáp án (b)" vào file Excel rồi chạy
-`python3 scripts/build-answers.py scripts/source.xlsx`.
 
 ## Chu kỳ ôn tập
 
@@ -176,6 +184,7 @@ src/
 scripts/
   convert-excel.py Excel → catalog.json + seed.json
   build-answers.py CSV/Excel → answers.json (đáp án thi thử)
+  dap-an-pdf.py    bảng đáp án chính thức (PDF) → answers.json
   bao-cao-thieu.py báo cáo câu thiếu và đáp án thiếu
 docs/
   SAO-LUU-VA-DONG-BO.md  phương án sao lưu và đồng bộ Android
