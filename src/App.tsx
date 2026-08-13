@@ -75,8 +75,14 @@ export default function App() {
    */
   const lichSu = useRef<Tab[]>(["dashboard"]);
 
+  /** Chiều đi của lần chuyển tab gần nhất: +1 sang phải, -1 sang trái. */
+  const [huong, setHuong] = useState(1);
+
   const setTab = useCallback((next: Tab) => {
     setTabState((hienTai) => {
+      const tu = TABS.findIndex((e) => e.key === hienTai);
+      const den = TABS.findIndex((e) => e.key === next);
+      if (tu >= 0 && den >= 0 && tu !== den) setHuong(den > tu ? 1 : -1);
       if (next !== hienTai) {
         // Quay lại một tab đã ở trong chồng thì cắt bớt thay vì chất thêm, để
         // đi tới đi lui vài lần không sinh ra một chồng dài vô tận.
@@ -115,6 +121,8 @@ export default function App() {
       }
       if (lichSu.current.length > 1) {
         lichSu.current = lichSu.current.slice(0, -1);
+        // Nút Quay lại luôn là đi lùi, nên nội dung trôi về bên phải.
+        setHuong(-1);
         setTabState(lichSu.current[lichSu.current.length - 1]!);
         return;
       }
@@ -249,7 +257,7 @@ export default function App() {
           bộ lọc, vị trí cuộn và bài thi đang làm dở không bị mất. Xem
           components/KeepAlive.tsx. */}
       <main className="main">
-        <KeepAlive active={tab === "dashboard"}>
+        <KeepAlive active={tab === "dashboard"} direction={huong}>
           <Dashboard
             store={store}
             view={view}
@@ -258,7 +266,7 @@ export default function App() {
             onOpenTopic={goTopic}
           />
         </KeepAlive>
-        <KeepAlive active={tab === "review"}>
+        <KeepAlive active={tab === "review"} direction={huong}>
           <Review
             store={store}
             view={view}
@@ -266,20 +274,20 @@ export default function App() {
             onFocusHandled={() => setReviewFocus(null)}
           />
         </KeepAlive>
-        <KeepAlive active={tab === "browse"}>
+        <KeepAlive active={tab === "browse"} direction={huong}>
           <Browse
             store={store}
             initialSubject={jumpSubject}
             onSubjectHandled={() => setJumpSubject("all")}
           />
         </KeepAlive>
-        <KeepAlive active={tab === "exam"}>
+        <KeepAlive active={tab === "exam"} direction={huong}>
           <Exam store={store} onOpenTopic={goTopic} />
         </KeepAlive>
-        <KeepAlive active={tab === "rules"}>
+        <KeepAlive active={tab === "rules"} direction={huong}>
           <Rules store={store} />
         </KeepAlive>
-        <KeepAlive active={tab === "settings"}>
+        <KeepAlive active={tab === "settings"} direction={huong}>
           <Settings
             store={store}
             view={view}

@@ -331,7 +331,12 @@ select {
   position: relative;
 }
 .pane {
-  height: 100%;
+  /* Chồng lên nhau: lúc chuyển tab có hai màn cùng hiện, một trôi đi một trôi tới. */
+  position: absolute;
+  inset: 0;
+  /* Nền đục. Để trong suốt thì lúc chuyển tab nhìn xuyên được sang màn kia,
+     chữ hai màn chồng lên nhau thành một mớ không đọc được. */
+  background: var(--bg);
   overflow-y: auto;
   padding: 20px 24px 60px;
   padding-left: max(24px, env(safe-area-inset-left));
@@ -345,29 +350,74 @@ select {
 }
 
 /**
- * Màn mới hiện ra thì trượt vào một đoạn ngắn.
+ * Trượt ngang khi đổi tab.
  *
- * 140ms và 8px — cố tình rất khẽ. Hiệu ứng dài hơn thì lần chuyển tab thứ mười
- * trong ngày đã thành ra phải CHỜ, mà app này người ta bấm qua bấm lại suốt.
- * Mục đích chỉ là cho mắt biết nội dung vừa thay, không phải để biểu diễn.
+ * Đi TỚI (sang tab bên phải): màn mới vào từ mép phải, màn cũ trôi sang trái.
+ * Lùi LẠI thì ngược chiều. Nhờ vậy mắt tự hiểu mình vừa đi theo hướng nào,
+ * thay vì chỉ thấy nội dung "nhảy" một cái.
+ *
+ * Trong lúc chuyển có HAI màn cùng hiện, nên chúng phải chồng lên nhau —
+ * `position: absolute`. Xem thêm components/KeepAlive.tsx.
+ *
+ * `--dx-pane-ms` phải khớp với hằng số NHIP_MS bên đó: lệch nhau thì màn cũ
+ * hoặc biến mất giữa chừng, hoặc nán lại thành một khoảng đứng hình.
+ *
+ * Đường cong `cubic-bezier(0.22, 1, 0.36, 1)` bung nhanh ở đầu rồi tì lại ở
+ * cuối — cảm giác nội dung có quán tính chứ không phải một khối trượt đều.
  */
-@keyframes dx-pane-vao {
-  from {
-    opacity: 0;
-    transform: translateX(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
+:root {
+  --dx-pane-ms: 260ms;
+  --dx-pane-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Trôi 14% bề ngang. Trôi cả 100% thì mỗi lần đổi tab là cả màn quét qua mắt,
+     chóng mặt khi bấm liên tục. */
+  --dx-pane-xa: 14%;
 }
-.pane.vao {
-  animation: dx-pane-vao 0.14s ease-out;
+
+/* Màn MỚI: đục hoàn toàn từ đầu tới cuối, chỉ trượt vào. Cho nó mờ dần thì
+   trong lúc mờ vẫn nhìn xuyên sang màn cũ, chữ hai bên chồng lên nhau. */
+@keyframes dx-vao-phai {
+  from { transform: translate3d(var(--dx-pane-xa), 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+@keyframes dx-vao-trai {
+  from { transform: translate3d(calc(-1 * var(--dx-pane-xa)), 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+
+/* Màn CŨ: trôi ngược lại và tối dần. Phần lớn nó bị màn mới che, chỉ hở một dải
+   bên rìa — dải đó tối đi tạo cảm giác chiều sâu, như tờ giấy bị đẩy xuống dưới. */
+@keyframes dx-ra-phai {
+  from { transform: translate3d(0, 0, 0); filter: brightness(1); }
+  to   { transform: translate3d(calc(-1 * var(--dx-pane-xa)), 0, 0); filter: brightness(0.55); }
+}
+@keyframes dx-ra-trai {
+  from { transform: translate3d(0, 0, 0); filter: brightness(1); }
+  to   { transform: translate3d(var(--dx-pane-xa), 0, 0); filter: brightness(0.55); }
+}
+
+.pane.vao-phai { animation: dx-vao-phai var(--dx-pane-ms) var(--dx-pane-ease); }
+.pane.vao-trai { animation: dx-vao-trai var(--dx-pane-ms) var(--dx-pane-ease); }
+
+/* Màn đang trôi đi: không cho chạm vào nữa, và nằm dưới màn mới. */
+.pane.ra-phai,
+.pane.ra-trai {
+  pointer-events: none;
+  z-index: 0;
+}
+.pane.ra-phai { animation: dx-ra-phai var(--dx-pane-ms) var(--dx-pane-ease) forwards; }
+.pane.ra-trai { animation: dx-ra-trai var(--dx-pane-ms) var(--dx-pane-ease) forwards; }
+
+.pane.vao-phai,
+.pane.vao-trai {
+  z-index: 1;
 }
 
 /* Ai đặt máy ở chế độ giảm chuyển động thì bỏ hẳn hiệu ứng. */
 @media (prefers-reduced-motion: reduce) {
-  .pane.vao {
+  .pane.vao-phai,
+  .pane.vao-trai,
+  .pane.ra-phai,
+  .pane.ra-trai {
     animation: none;
   }
 }
@@ -2113,8 +2163,12 @@ mark.hit {
 @media (max-width: 860px) {
   .app {
     /* Đầu trang · nội dung · thanh tab. Thanh tab là một hàng của lưới chứ
-       không phải phần tử nổi, nên không bao giờ đè lên nội dung. */
-    grid-template-rows: var(--header-h) 1fr auto;
+       không phải phần tử nổi, nên không bao giờ đè lên nội dung.
+
+       Hàng đầu PHẢI cộng thêm thanh trạng thái, y như bản máy tính. Quên chỗ
+       này là phần đầu cao hơn ô chứa nó, tràn xuống và cắt ngang dòng đầu tiên
+       của mọi màn. */
+    grid-template-rows: calc(var(--header-h) + env(safe-area-inset-top)) 1fr auto;
     grid-template-columns: 1fr;
     grid-template-areas:
       "header"

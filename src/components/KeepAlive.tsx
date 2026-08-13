@@ -27,7 +27,14 @@
  * hình.
  */
 
-import { createContext, useContext, useRef, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 /**
  * Màn đang bọc quanh chỗ này có đang hiện không.
@@ -46,21 +53,63 @@ export function usePaneActive(): boolean {
   return useContext(DangHien);
 }
 
+/**
+ * Thời gian trượt, phải khớp với `--dx-pane-ms` trong styles.css.
+ *
+ * 260ms: đủ chậm để mắt bắt được hướng trôi, chưa tới mức phải chờ. Dưới 200ms
+ * mắt chỉ thấy một cái giật; trên 350ms thì lần chuyển tab thứ mười trong ngày
+ * bắt đầu thấy phiền.
+ */
+const NHIP_MS = 260;
+
 export function KeepAlive({
   active,
+  direction,
   children,
 }: {
   active: boolean;
+  /** +1 = đi tới tab bên phải, -1 = lùi về bên trái. Quyết định chiều trôi. */
+  direction: number;
   children: ReactNode;
 }) {
   // Đã từng mở lần nào chưa. Mở rồi thì giữ luôn, không tháo ra nữa.
   const daMo = useRef(active);
   if (active) daMo.current = true;
+
+  /**
+   * Đang trong nhịp trôi RA khỏi màn hình.
+   *
+   * Muốn nội dung trôi ngang như các app điện thoại thì trong lúc chuyển phải
+   * thấy được CẢ HAI màn: màn cũ trôi đi, màn mới trôi tới. Ẩn màn cũ ngay lúc
+   * bấm thì chỉ còn màn mới bay vào chỗ trống — nhìn cụt, đúng kiểu "giật cục".
+   * Nên màn vừa tắt còn nán lại đúng một nhịp rồi mới thật sự ẩn.
+   */
+  const [roiDi, setRoiDi] = useState(false);
+  const truoc = useRef(active);
+
+  useEffect(() => {
+    if (truoc.current && !active) {
+      setRoiDi(true);
+      truoc.current = active;
+      const hen = window.setTimeout(() => setRoiDi(false), NHIP_MS);
+      return () => window.clearTimeout(hen);
+    }
+    truoc.current = active;
+    return undefined;
+  }, [active]);
+
   if (!daMo.current) return null;
+
+  const huong = direction >= 0 ? "phai" : "trai";
+  const lop = active ? `vao-${huong}` : roiDi ? `ra-${huong}` : "";
 
   return (
     <DangHien.Provider value={active}>
-      <div className={`pane${active ? " vao" : ""}`} hidden={!active}>
+      <div
+        className={`pane ${lop}`}
+        hidden={!active && !roiDi}
+        aria-hidden={!active}
+      >
         {children}
       </div>
     </DangHien.Provider>
