@@ -23,7 +23,7 @@ Danh mục **1609 bài** trên denken-ou.com, chia bốn môn:
 - **Thi thử** — làm nguyên một kỳ thi thật, 24 kỳ từ H18 tới R07下. Chọn nhiều môn thì thi **lần lượt**: mỗi môn một đồng hồ riêng — 90 phút (理論/電力/機械), 65 phút (法規) — nộp xong môn này mới mở môn kia, thời gian **không cộng dồn**. 理論/機械 chỉ được chọn một trong 問17 hoặc 問18. Chấm điểm thang 100, mốc đạt 60, kèm **bảng phân tích**: đúng bao nhiêu phần trăm ở từng chủ đề ra trong đề đó, rồi tới từng câu — bạn chọn gì, đáp án đúng là gì. Mở lại lượt thi cũ trong lịch sử vẫn xem được đúng bảng đó.
 - **Đang yếu ở đâu** — ngay trang Hôm nay: top 5 chủ đề có tỉ lệ sai cao nhất của mỗi môn, tính gộp cả lượt ôn tập hằng ngày lẫn từng ý trong đề thi thử. Bấm một chủ đề là mở màn Ôn tập với **toàn bộ** bài của chủ đề đó, bài đang sai và chưa làm xếp lên trước.
 - **Tiếng Việt** — chế độ Ôn tập hiện **bản dịch tên bài của chính bạn** — bản dịch viết sẵn trong file Excel gốc, 1608/1609 bài — ngay dưới tên bài tiếng Nhật; bài chưa dịch thì lùi về tên chủ đề. Ô tìm kiếm lục cả bản dịch này, nên gõ nguyên cụm như `suy ra lượng điện tích` cũng ra bài. Màn Thi thử cố ý **không** có: thi thì nên quen với chữ Nhật như đề thật.
-- **Đồng bộ máy tính ↔ điện thoại** — xuất một file ở máy này, gộp vào ở máy kia. **Gộp chứ không ghi đè**: mỗi bài lấy bản sửa sau cùng, ngày nào cũng cộng phần mới của cả hai bên, huy hiệu và lượt thi gộp lại hết.
+- **Đồng bộ tự động máy tính ↔ điện thoại** — qua một repo riêng tư của bạn trên GitHub. Tự chạy lúc mở app, lúc quay lại app và mỗi 5 phút. **Gộp chứ không ghi đè**: mỗi bài lấy bản sửa sau cùng, số bài ôn từng ngày cộng phần mới của cả hai bên, huy hiệu và lượt thi gộp lại hết. Hai máy ghi cùng lúc thì bên sau đọc lại rồi gộp lại, không bên nào mất.
 - **Huy hiệu** — giữ kín tới khi bạn chạm mốc, lúc đó mới nhảy lên chúc mừng.
 - Xuất ra Excel, JSON, hoặc gói `.zip` đầy đủ bất cứ lúc nào.
 
@@ -262,22 +262,41 @@ script thêm vào lúc vá danh mục nên vốn không có trong Excel.
 
 ## Đồng bộ máy tính ↔ điện thoại
 
+Hai đường, dùng chung một bộ luật gộp ở `src/lib/sync.ts`.
+
+### Tự động, qua GitHub ⭐
+
+**Cài đặt → Đồng bộ tự động qua GitHub.** Cần một repo riêng tư trống và một
+token — mất chừng 3 phút, hướng dẫn từng bước ở
+[docs/DONG-BO-GITHUB.md](docs/DONG-BO-GITHUB.md). Xong rồi thì không phải làm gì
+nữa: app tự chạy lúc mở app, lúc quay lại app và mỗi 5 phút.
+
+Đây là gộp **ba chiều** thật: app cất riêng bản chụp của lần đồng bộ trước
+(`sync-base.json`), nên phân biệt được "bên kia vừa thêm" với "bên này vừa xoá",
+và số bài ôn từng ngày cộng đúng phần mới thay vì lấy bên lớn hơn.
+
+Hai máy ghi cùng lúc thì GitHub từ chối bên nộp mã bản cũ; app đọc lại, gộp lại,
+ghi lại — tối đa ba lần. Token nằm ở `sync-config.json` cạnh `data.json`, **cố ý
+không** nằm trong `data.json`, nên file bạn xuất ra hay chép sang Drive không
+mang theo nó.
+
+### Bằng tay, qua một file
+
 **Cài đặt → Đồng bộ máy tính ↔ điện thoại**: xuất một file ở máy này, gộp vào ở
-máy kia, chuyển file bằng gì cũng được.
+máy kia, chuyển file bằng gì cũng được. Dùng khi không muốn dính tới token, hoặc
+khi máy nào đó không có mạng.
 
-Nó **gộp**, không ghi đè. Mỗi bài lấy bản có `updatedAt` mới hơn; số bài đã ôn
-của từng ngày lấy bên lớn hơn — thà thiếu còn hơn thổi phồng, vì con số thổi
-phồng làm sai cả chuỗi ngày liên tiếp lẫn mọi biểu đồ; huy hiệu và lượt thi thử
-gộp lại hết. Bấm nhầm hai lần liên tiếp cũng không sao, lần thứ hai ra y nguyên.
+Không có bản chụp gốc để so nên số bài ôn từng ngày lấy **bên lớn hơn** thay vì
+cộng — thà thiếu còn hơn thổi phồng, vì con số thổi phồng làm sai cả chuỗi ngày
+liên tiếp lẫn mọi biểu đồ. Bấm nhầm hai lần liên tiếp cũng không sao, lần thứ
+hai ra y nguyên.
 
-Luật gộp nằm ở `src/lib/sync.ts`, có 15 nhóm kiểm thử chạy trong `npm run build`
-(`npm run test:sync`), gồm cả ca "đổi vai hai máy phải ra cùng một kết quả".
+Cả hai đường đều có kiểm thử chạy trong `npm run build` (`npm run test:sync`):
+90 phép kiểm, gồm ca "đổi vai hai máy phải ra cùng một kết quả", ca máy thứ ba
+ghi chen vào giữa, và ca file trên mạng hỏng thì phải dừng chứ không ghi đè.
 
 Nút **⚠️ Khôi phục từ bản sao lưu** thì ngược lại — nó *thay thế* toàn bộ. Chỉ
 dùng khi dữ liệu máy này hỏng, đừng dùng để đồng bộ.
-
-Đồng bộ tự động qua Google Drive vẫn đang chờ hai Client ID:
-[docs/DONG-BO-GOOGLE-DRIVE.md](docs/DONG-BO-GOOGLE-DRIVE.md).
 
 ## Chu kỳ ôn tập
 
@@ -302,12 +321,15 @@ src/
   lib/             kiểu dữ liệu, chu kỳ ôn, thống kê, huy hiệu
   lib/alarm.ts     chuông báo hết giờ, mở khoá tiếng từ lần chạm đầu
   lib/exam.ts      luật đề thi, chấm điểm, phân tích theo chủ đề
+  lib/cloud.ts     một lượt đồng bộ: đọc về, gộp ba chiều, ghi lên
+  lib/github.ts    đọc/ghi một file trong repo qua GitHub Contents API
   lib/normalise.ts nắn JSON bất kỳ về AppData — dùng chung cho cả ba chỗ đọc file
   lib/sync.ts      luật gộp dữ liệu hai máy
   lib/weakness.ts  xếp hạng chủ đề yếu từ ôn tập + thi thử
   lib/history.ts   lịch sử chấm bài ba ngày gần nhất
   lib/vi.ts        tên chủ đề tiếng Việt, bỏ dấu, từ điển Việt–Nhật cho tìm kiếm
   state/           tầng trạng thái, tự lưu sau 600ms
+  state/useSync.ts hẹn nhịp đồng bộ nền
   views/           5 màn hình
   data/catalog.json  danh mục 1609 bài
 scripts/
@@ -319,6 +341,7 @@ scripts/
   sua-danh-muc.py  vá kỳ thi / số câu / link cho danh mục
   nap-tieng-viet.py Excel → bản dịch tên bài (nameVi) cho danh mục
 docs/
+  DONG-BO-GITHUB.md      bật đồng bộ tự động, từng bước
   SAO-LUU-VA-DONG-BO.md  phương án sao lưu và đồng bộ Android
 ```
 

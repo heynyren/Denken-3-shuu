@@ -38,6 +38,8 @@ export interface Capabilities {
   attachments: boolean;
   /** Gộp dữ liệu từ một file sao lưu của máy khác. */
   mergeFile: boolean;
+  /** Đồng bộ tự động qua GitHub. */
+  cloudSync: boolean;
 }
 
 /** Mã lời nhắc hết giờ. Mỗi màn một mã để huỷ đúng cái của mình. */
@@ -68,6 +70,21 @@ export interface Platform {
   /** Đọc một file sao lưu người dùng chọn, trả về nguyên văn để bên ngoài gộp. */
   pickJsonText(): Promise<OpResult & { text?: string }>;
 
+  /* --- kho phụ, nằm ngoài data.json --- */
+  /**
+   * Đọc/ghi một file nhỏ bên cạnh data.json: cấu hình đồng bộ (có token) và bản
+   * chụp của lần đồng bộ trước.
+   *
+   * Cố ý tách khỏi data.json. data.json còn được xuất ra, gửi qua Zalo, chép
+   * sang thư mục Drive — token đi kèm trong đó là cho không người khác quyền
+   * ghi vào repo của bạn. Bản chụp thì chỉ là chuyện riêng của máy này, mang
+   * sang máy khác là sai luật gộp.
+   *
+   * Tên file bị giới hạn ở `[a-z0-9-]+.json`, xem `sideName()`.
+   */
+  sideRead(name: string): Promise<string | null>;
+  sideWrite(name: string, text: string): Promise<OpResult>;
+
   /* --- linh tinh --- */
   openExternal(url: string): Promise<OpResult>;
 
@@ -94,6 +111,17 @@ export interface Platform {
   attachDataUrl(file: string): Promise<OpResult & { dataUrl?: string }>;
   attachOpen(file: string): Promise<OpResult>;
   attachDelete(file: string): Promise<OpResult>;
+}
+
+/**
+ * Chỉ cho phép đúng vài tên file cố định trong kho phụ.
+ *
+ * Cùng một lý do với `safeName()` cho file đính kèm: tên file đi thẳng vào
+ * đường dẫn trên đĩa, mà `../../` trong đó thì ghi được ra ngoài thư mục dữ
+ * liệu. Ở đây còn chặt hơn — kho phụ chỉ có hai file, không cần mở rộng.
+ */
+export function sideName(name: string): string | null {
+  return /^[a-z0-9-]+\.json$/.test(name) ? name : null;
 }
 
 /** Việc nền tảng không làm được — trả lời tử tế thay vì ném lỗi. */

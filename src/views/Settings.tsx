@@ -2,18 +2,22 @@ import { useState } from "react";
 
 import { emptyAppData } from "../lib/defaults";
 import { parseBackup } from "../lib/normalise";
+import { checkAccess } from "../lib/github";
 import type { Overview } from "../lib/stats";
 import { describeMerge, mergeData } from "../lib/sync";
 import type { Store } from "../state/useStore";
+import type { Sync } from "../state/useSync";
 import { platform } from "../platform";
 
 export default function Settings({
   store,
   view,
+  sync,
   onAbout,
 }: {
   store: Store;
   view: Overview;
+  sync: Sync;
   /** Thanh bên bị ẩn trên điện thoại, nên phần giới thiệu vào đây. */
   onAbout(): void;
 }) {
@@ -355,6 +359,8 @@ export default function Settings({
         </div>
       </div>
 
+      {platform.can.cloudSync && <CloudSyncCard sync={sync} />}
+
       {platform.can.mergeFile && (
         <div className="card">
           <div className="card-head">
@@ -505,6 +511,190 @@ export default function Settings({
         </button>
       </div>
 
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Đồng bộ tự động qua GitHub                                          */
+/* ------------------------------------------------------------------ */
+
+const STATE_TEXT: Record<string, string> = {
+  off: "Đang tắt",
+  idle: "Đang bật",
+  running: "Đang đồng bộ…",
+  done: "Đã đồng bộ",
+  error: "Có lỗi",
+};
+
+/** "2026-08-13T04:20:11.000Z" -> "13/08 11:20" theo giờ máy. */
+function whenText(iso: string): string {
+  if (!iso) return "chưa lần nào";
+  const at = new Date(iso);
+  if (Number.isNaN(at.getTime())) return "chưa lần nào";
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(at.getDate())}/${pad(at.getMonth() + 1)} ${pad(at.getHours())}:${pad(at.getMinutes())}`;
+}
+
+function CloudSyncCard({ sync }: { sync: Sync }) {
+  const [repo, setRepo] = useState(sync.config.repo);
+  const [token, setToken] = useState(sync.config.token);
+  const [showToken, setShowToken] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [check, setCheck] = useState<{ kind: string; text: string } | null>(null);
+  // Cấu hình nạp từ đĩa xong mới có giá trị thật; đồng bộ vào ô nhập một lần.
+  const [filled, setFilled] = useState(false);
+  if (sync.ready && !filled) {
+    setFilled(true);
+    setRepo(sync.config.repo);
+    setToken(sync.config.token);
+  }
+
+  const dirty = repo !== sync.config.repo || token !== sync.config.token;
+
+  return (
+    <div className="card">
+      <div className="card-head">
+        <div className="card-title">
+          Đồng bộ tự động qua GitHub
+          <div className="card-sub">
+            Máy tính và điện thoại cùng đọc ghi một file trong repo riêng tư của bạn
+          </div>
+        </div>
+        <span className={`sync-badge ${sync.state}`}>{STATE_TEXT[sync.state]}</span>
+      </div>
+
+      <div className="callout" style={{ marginBottom: 14 }}>
+        Tự chạy lúc mở app, lúc quay lại app, và mỗi 5 phút. Vẫn là <strong>gộp
+        chứ không ghi đè</strong>: hai máy cùng ghi một lúc thì bên sau đọc lại
+        rồi gộp lại, không bên nào mất.
+      </div>
+
+      <div className="field">
+        <label className="field-label" htmlFor="sync-repo">
+          Repo riêng tư (tài-khoản/tên-repo)
+        </label>
+        <input
+          id="sync-repo"
+          className="input"
+          placeholder="heynyren/denken-du-lieu"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          value={repo}
+          onChange={(event) => setRepo(event.target.value.trim())}
+        />
+        <div className="field-hint">
+          Tạo một repo <strong>trống và Private</strong> riêng cho dữ liệu, đừng
+          dùng chung repo mã nguồn.
+        </div>
+      </div>
+
+      <div className="field">
+        <label className="field-label" htmlFor="sync-token">
+          Token GitHub
+        </label>
+        <div className="row" style={{ gap: 8 }}>
+          <input
+            id="sync-token"
+            className="input"
+            style={{ flex: 1, minWidth: 0 }}
+            type={showToken ? "text" : "password"}
+            placeholder="github_pat_…"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            value={token}
+            onChange={(event) => setToken(event.target.value.trim())}
+          />
+          <button
+            className="btn sm ghost"
+            onClick={() => setShowToken((on) => !on)}
+            title={showToken ? "Giấu token" : "Hiện token"}
+          >
+            {showToken ? "🙈" : "👁"}
+          </button>
+        </div>
+        <div className="field-hint">
+          Token nằm riêng, <strong>không</strong> nằm trong data.json — nên file
+          bạn xuất ra hay chép sang Drive không mang theo nó.
+        </div>
+      </div>
+
+      <div className="btn-row" style={{ marginTop: 12 }}>
+        <button
+          className="btn sm"
+          disabled={checking || !repo || !token}
+          onClick={async () => {
+            setChecking(true);
+            setCheck(null);
+            const result = await checkAccess(
+              { repo, token, file: sync.config.file },
+              (url, init) => fetch(url, init),
+            );
+            setChecking(false);
+            if (!result.ok) {
+              setCheck({ kind: "danger", text: result.error });
+              return;
+            }
+            await sync.saveConfig({ repo, token });
+            setCheck(
+              result.private
+                ? { kind: "", text: "Kết nối được. Repo đang là Private, đúng rồi." }
+                : {
+                    kind: "danger",
+                    text:
+                      "Kết nối được, NHƯNG repo này đang công khai — ghi chú của bạn " +
+                      "sẽ ai cũng đọc được. Chuyển sang Private đi đã.",
+                  },
+            );
+          }}
+        >
+          {checking ? "Đang kiểm tra…" : "🔌 Kiểm tra kết nối"}
+        </button>
+
+        <button
+          className={`btn sm ${sync.config.enabled ? "danger" : "primary"}`}
+          disabled={!sync.config.repo || !sync.config.token}
+          onClick={() => void sync.saveConfig({ enabled: !sync.config.enabled })}
+        >
+          {sync.config.enabled ? "⏸ Tắt đồng bộ" : "▶ Bật đồng bộ"}
+        </button>
+
+        <button
+          className="btn sm"
+          disabled={!sync.config.enabled || sync.state === "running"}
+          onClick={() => void sync.run(true)}
+        >
+          🔄 Đồng bộ ngay
+        </button>
+
+        {dirty && (
+          <span className="field-hint" style={{ flex: 1, minWidth: 200 }}>
+            Bấm <strong>Kiểm tra kết nối</strong> để lưu phần vừa sửa.
+          </span>
+        )}
+      </div>
+
+      {check && (
+        <div className={`callout ${check.kind}`} style={{ marginTop: 12 }}>
+          {check.text}
+        </div>
+      )}
+
+      {sync.note && (
+        <div
+          className={`callout ${sync.state === "error" ? "danger" : ""}`}
+          style={{ marginTop: 12 }}
+        >
+          {sync.note}
+        </div>
+      )}
+
+      <div className="field-hint" style={{ marginTop: 10 }}>
+        Lần đồng bộ gần nhất: {whenText(sync.config.lastSyncAt)}. Ảnh đính kèm
+        không đi theo — chỉ tiến độ, ghi chú, link và lịch sử thi.
+      </div>
     </div>
   );
 }

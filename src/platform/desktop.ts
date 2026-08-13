@@ -32,6 +32,7 @@ export const desktop: Platform = {
     revealFolder: true,
     attachments: true,
     mergeFile: true,
+    cloudSync: true,
   },
 
   load: () => window.denken.load(),
@@ -49,6 +50,9 @@ export const desktop: Platform = {
   mirrorNow: () => window.denken.mirrorNow(),
 
   pickJsonText: () => window.denken.pickJsonText(),
+
+  sideRead: (name) => window.denken.sideRead(name),
+  sideWrite: (name, text) => window.denken.sideWrite(name, text),
 
   openExternal: (url) => window.denken.openExternal(url),
 

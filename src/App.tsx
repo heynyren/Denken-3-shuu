@@ -5,6 +5,7 @@ import About, { VietnamFlag } from "./components/About";
 import BadgeCelebration from "./components/BadgeCelebration";
 import { computeOverview } from "./lib/stats";
 import { useStore } from "./state/useStore";
+import { useSync } from "./state/useSync";
 import Dashboard from "./views/Dashboard";
 import Review from "./views/Review";
 import Browse from "./views/Browse";
@@ -33,6 +34,7 @@ const SAVE_TEXT: Record<string, string> = {
 
 export default function App() {
   const store = useStore();
+  const sync = useSync(store);
   const [tab, setTab] = useState<Tab>("dashboard");
   // Bấm một môn ở sidebar thì nhảy sang danh sách bài đã lọc sẵn môn đó.
   const [jumpSubject, setJumpSubject] = useState<SubjectKey | "all">("all");
@@ -188,7 +190,12 @@ export default function App() {
         )}
         {tab === "exam" && <Exam store={store} onOpenTopic={goTopic} />}
         {tab === "settings" && (
-          <Settings store={store} view={view} onAbout={() => setShowAbout(true)} />
+          <Settings
+            store={store}
+            view={view}
+            sync={sync}
+            onAbout={() => setShowAbout(true)}
+          />
         )}
       </main>
 

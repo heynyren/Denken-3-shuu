@@ -1,8 +1,13 @@
-/* Kiểm thử luật gộp dữ liệu hai máy, chuông báo hết giờ và bộ nắn dữ liệu. */
+/* Kiểm thử luật gộp dữ liệu hai máy, đồng bộ GitHub, chuông báo hết giờ. */
+import { syncOnce } from "../src/lib/cloud";
+import type { SyncConfig } from "../src/lib/cloud";
+import type { FetchLike } from "../src/lib/github";
+import { fromBase64, toBase64, validRepo } from "../src/lib/github";
 import { parseBackup } from "../src/lib/normalise";
 import { mergeData } from "../src/lib/sync";
 import type { AppData, ItemProgress } from "../src/lib/types";
 import { safeName } from "../src/platform/android";
+import { sideName } from "../src/platform/types";
 
 let pass = 0;
 let fail = 0;
@@ -276,6 +281,215 @@ const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
     "gộp lại lần nữa ra y nguyên, bấm nhầm hai lần không sao");
 }
 
+/* ================================================================== */
+/* Đồng bộ tự động qua GitHub                                          */
+/* ================================================================== */
+
+/** Một GitHub giả: giữ đúng một file, có `sha`, từ chối ghi bằng `sha` cũ. */
+function fakeGithub(khoiDau: string | null = null) {
+  const kho = { text: khoiDau, sha: khoiDau ? "sha-1" : null as string | null };
+  let dem = 1;
+  const nhatKy: string[] = [];
+  /** Chèn vào giữa lúc đọc xong và ghi — để dựng cảnh hai máy ghi cùng lúc. */
+  let chen: (() => void) | null = null;
+
+  const reply = (status: number, body: unknown) => ({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => body,
+    text: async () => JSON.stringify(body),
+  });
+
+  const doFetch: FetchLike = async (url, init) => {
+    const method = init?.method ?? "GET";
+    nhatKy.push(`${method} ${url.replace("https://api.github.com", "")}`);
+
+    if (url.endsWith("/contents/data.json")) {
+      if (method === "GET") {
+        if (kho.text === null) return reply(404, { message: "Not Found" });
+        const out = reply(200, { content: toBase64(kho.text), sha: kho.sha });
+        if (chen) { chen(); chen = null; }
+        return out;
+      }
+      const body = JSON.parse(init?.body ?? "{}") as { content: string; sha?: string };
+      if ((body.sha ?? null) !== kho.sha) {
+        return reply(409, { message: "does not match" });
+      }
+      kho.text = fromBase64(body.content);
+      dem += 1;
+      kho.sha = `sha-${dem}`;
+      return reply(200, { content: { sha: kho.sha } });
+    }
+
+    // GET /repos/{chu}/{ten}
+    return reply(200, { private: true, permissions: { push: true } });
+  };
+
+  return {
+    doFetch,
+    nhatKy,
+    get noiDung() { return kho.text; },
+    datChen(f: () => void) { chen = f; },
+    /** Máy kia ghi thẳng vào kho, không qua app này. */
+    mayKiaGhi(text: string) { kho.text = text; dem += 1; kho.sha = `sha-${dem}`; },
+  };
+}
+
+function cauHinh(): SyncConfig {
+  return { enabled: true, repo: "ai-do/du-lieu", token: "gh-token", file: "data.json", lastSyncAt: "" };
+}
+
+/** Kho phụ trong bộ nhớ, thay cho platform.sideRead/sideWrite. */
+function khoPhu() {
+  let text: string | null = null;
+  return {
+    readBase: async () => text,
+    writeBase: async (t: string) => { text = t; },
+    get base() { return text; },
+  };
+}
+
+/** Các ca cần `await`; esbuild xuất CJS nên không await được ở cấp cao nhất. */
+async function kiemThuDongBo(): Promise<void> {
+  /* ---- 16. Tên repo và base64 ---- */
+  {
+    for (const tot of ["heynyren/du-lieu", "a/b", "Ten_Co-Dau.1/repo.2"]) {
+      check(validRepo(tot), `nhận repo hợp lệ: ${tot}`);
+    }
+    for (const xau of ["heynyren", "a/b/c", "../../etc", "a b/c", "", "/x"]) {
+      check(!validRepo(xau), `chặn repo sai dạng: ${JSON.stringify(xau)}`);
+    }
+
+    const chu = 'Bài tập tính toán — コンデンサ, 90% "khó"\n\tdòng hai';
+    check(fromBase64(toBase64(chu)) === chu, "base64 giữ nguyên cả tiếng Việt lẫn tiếng Nhật");
+
+    for (const xau of ["../sync-config.json", "a/b.json", "SYNC.json", "x.txt", "..", ""]) {
+      check(sideName(xau) === null, `kho phụ chặn tên file: ${JSON.stringify(xau)}`);
+    }
+    check(sideName("sync-base.json") === "sync-base.json", "kho phụ cho qua tên đúng dạng");
+  }
+
+  /* ---- 17. Lần đầu: repo trống thì đẩy nguyên bản máy này lên ---- */
+  {
+    const pc = blank();
+    pc.progress["a"] = prog("correct", "2026-08-12T10:00:00Z");
+    const gh = fakeGithub(null);
+    const kho = khoPhu();
+
+    const outcome = await syncOnce({ config: cauHinh(), local: pc, ...kho, doFetch: gh.doFetch });
+    check(outcome.pushed, "repo trống thì đẩy lên");
+    check(!outcome.changed, "máy này không phải đổi gì");
+    check(gh.noiDung !== null && JSON.parse(gh.noiDung).progress["a"] !== undefined,
+      "bài của máy này đã nằm trên GitHub");
+    check(kho.base !== null, "có ghi bản chụp cho lần gộp sau");
+  }
+
+  /* ---- 18. Máy thứ hai: kéo về đủ, không đẩy lên vô ích ---- */
+  {
+    const pc = blank();
+    pc.progress["a"] = prog("correct", "2026-08-12T10:00:00Z");
+    const gh = fakeGithub(JSON.stringify(pc));
+
+    const dienThoai = blank();  // máy mới cài
+    const kho = khoPhu();
+    const outcome = await syncOnce({ config: cauHinh(), local: dienThoai, ...kho, doFetch: gh.doFetch });
+
+    check(outcome.changed, "máy mới nhận được dữ liệu");
+    check(!outcome.pushed, "không có gì mới thì không ghi lên GitHub");
+    check(!!outcome.data.progress["a"], "kéo về đủ bài");
+    check(!gh.nhatKy.some((d) => d.startsWith("PUT")), "không gọi PUT lần nào");
+  }
+
+  /* ---- 19. Hai bên đều có phần mới: gộp rồi đẩy, không bên nào mất ---- */
+  {
+    const tren = blank();
+    tren.progress["a"] = prog("correct", "2026-08-12T10:00:00Z");
+    const gh = fakeGithub(JSON.stringify(tren));
+
+    const may = blank();
+    may.progress["b"] = prog("wrong", "2026-08-12T11:00:00Z");
+    const kho = khoPhu();
+
+    const outcome = await syncOnce({ config: cauHinh(), local: may, ...kho, doFetch: gh.doFetch });
+    check(outcome.pushed && outcome.changed, "vừa kéo về vừa đẩy lên");
+    const cuoi = JSON.parse(gh.noiDung!) as AppData;
+    check(!!cuoi.progress["a"] && !!cuoi.progress["b"], "bản trên GitHub có bài của cả hai máy");
+    check(!!outcome.data.progress["a"] && !!outcome.data.progress["b"], "máy này cũng có đủ hai bài");
+  }
+
+  /* ---- 20. Hai bên y hệt: không ghi gì cả ---- */
+  {
+    const cung = blank();
+    cung.progress["a"] = prog("correct", "2026-08-12T10:00:00Z");
+    const gh = fakeGithub(JSON.stringify(cung));
+    const kho = khoPhu();
+
+    const outcome = await syncOnce({ config: cauHinh(), local: cung, ...kho, doFetch: gh.doFetch });
+    check(!outcome.pushed && !outcome.changed, "giống nhau thì không đụng gì");
+    check(outcome.note.includes("giống nhau"), "báo đúng là hai bên đã giống nhau");
+  }
+
+  /* ---- 21. Máy kia ghi chen vào giữa: đọc lại, gộp lại, không mất dữ liệu ---- */
+  {
+    const tren = blank();
+    tren.progress["a"] = prog("correct", "2026-08-12T10:00:00Z");
+    const gh = fakeGithub(JSON.stringify(tren));
+
+    const may = blank();
+    may.progress["b"] = prog("wrong", "2026-08-12T11:00:00Z");
+    const kho = khoPhu();
+
+    // Ngay sau khi ta đọc xong, máy thứ ba ghi thêm bài "c" vào.
+    gh.datChen(() => {
+      const chen = blank();
+      chen.progress["a"] = prog("correct", "2026-08-12T10:00:00Z");
+      chen.progress["c"] = prog("correct", "2026-08-12T12:00:00Z");
+      gh.mayKiaGhi(JSON.stringify(chen));
+    });
+
+    const outcome = await syncOnce({ config: cauHinh(), local: may, ...kho, doFetch: gh.doFetch });
+    const cuoi = JSON.parse(gh.noiDung!) as AppData;
+    check(outcome.pushed, "thử lại rồi ghi được");
+    check(!!cuoi.progress["a"] && !!cuoi.progress["b"] && !!cuoi.progress["c"],
+      "bị ghi chen vẫn giữ đủ cả ba bài, không đè mất bài của máy kia");
+    check(gh.nhatKy.filter((d) => d.startsWith("PUT")).length === 2,
+      "lần PUT đầu bị từ chối, lần sau mới ăn");
+  }
+
+  /* ---- 22. File trên mạng hỏng: dừng lại, tuyệt đối không ghi đè ---- */
+  {
+    const gh = fakeGithub("{ đây không phải JSON");
+    const may = blank();
+    may.progress["b"] = prog("wrong", "2026-08-12T11:00:00Z");
+    const kho = khoPhu();
+
+    let nem = "";
+    try {
+      await syncOnce({ config: cauHinh(), local: may, ...kho, doFetch: gh.doFetch });
+    } catch (cause) {
+      nem = (cause as Error).message;
+    }
+    check(nem.includes("không đọc được"), "báo rõ là file trên GitHub hỏng");
+    check(gh.noiDung === "{ đây không phải JSON", "KHÔNG ghi đè lên file hỏng");
+  }
+
+  /* ---- 23. Token sai: báo bằng tiếng Việt, không ném lỗi kỹ thuật ---- */
+  {
+    const doFetch: FetchLike = async () => ({
+      ok: false, status: 401,
+      json: async () => ({ message: "Bad credentials" }),
+      text: async () => "",
+    });
+    let nem = "";
+    try {
+      await syncOnce({ config: cauHinh(), local: blank(), ...khoPhu(), doFetch });
+    } catch (cause) {
+      nem = (cause as Error).message;
+    }
+    check(nem.includes("Token sai"), `token sai báo dễ hiểu: "${nem}"`);
+  }
+}
+
 /* ---- 14. Chuông báo hết giờ ---- */
 {
   // Dựng đủ thứ trình duyệt mà alarm.ts cần, rồi mới nạp module.
@@ -354,6 +568,8 @@ const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
   const { desktop } = require("../src/platform/desktop") as typeof import("../src/platform/desktop");
 
   void (async () => {
+    await kiemThuDongBo();
+
     const qua = await desktop.notifyAt(1, Date.now() - 1000, "cũ", "rồi");
     check(!qua.ok, "hẹn vào mốc đã qua thì từ chối, không nhắc ngay lập tức");
 

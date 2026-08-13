@@ -22,7 +22,7 @@ import { Share } from "@capacitor/share";
 import { emptyAppData } from "../lib/defaults";
 import type { Attachment, AttachmentKind, OpResult } from "../lib/types";
 import type { Platform } from "./types";
-import { unsupported } from "./types";
+import { sideName, unsupported } from "./types";
 
 const DIR = Directory.Data;
 const FILE = "data.json";
@@ -247,6 +247,7 @@ export const android: Platform = {
     revealFolder: false,
     attachments: true,
     mergeFile: true,
+    cloudSync: true,
   },
 
   async load() {
@@ -342,6 +343,29 @@ export const android: Platform = {
       };
       input.click();
     });
+  },
+
+  async sideRead(name) {
+    const safe = sideName(name);
+    if (!safe) return null;
+    return readText(safe);
+  },
+
+  async sideWrite(name, text) {
+    const safe = sideName(name);
+    if (!safe) return { ok: false, error: "Tên file không hợp lệ." };
+    try {
+      await Filesystem.writeFile({
+        path: safe,
+        directory: DIR,
+        data: text,
+        encoding: Encoding.UTF8,
+        recursive: true,
+      });
+      return { ok: true, path: safe };
+    } catch (cause) {
+      return { ok: false, error: (cause as Error).message };
+    }
   },
 
   async openExternal(url) {

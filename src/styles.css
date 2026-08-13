@@ -1117,6 +1117,31 @@ select {
   color: var(--text);
 }
 
+/* Trạng thái đồng bộ, nằm ở góc phải thẻ Cài đặt. */
+.sync-badge {
+  font-size: 12px;
+  font-weight: 700;
+  border-radius: var(--radius-pill);
+  padding: 3px 11px;
+  background: var(--surface-2);
+  color: var(--text-2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.sync-badge.idle,
+.sync-badge.running {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+.sync-badge.done {
+  background: var(--green-soft);
+  color: var(--green);
+}
+.sync-badge.error {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
 /* Các bước làm theo thứ tự — dùng ở phần đồng bộ máy tính ↔ điện thoại. */
 .step-list {
   margin: 0;

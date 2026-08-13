@@ -229,6 +229,9 @@ export interface DenkenBridge {
   importXlsx(): Promise<OpResult & { data?: AppData; report?: ImportReport }>;
   /** Đọc nguyên văn một file sao lưu người dùng chọn, để giao diện tự gộp. */
   pickJsonText(): Promise<OpResult & { text?: string }>;
+  /** Kho phụ cạnh data.json: cấu hình đồng bộ (có token) và bản chụp lần trước. */
+  sideRead(name: string): Promise<string | null>;
+  sideWrite(name: string, text: string): Promise<OpResult>;
   revealDataFolder(): Promise<OpResult>;
   /** Chọn thư mục nhân bản (thường là thư mục Google Drive trên máy). */
   pickMirrorDir(): Promise<OpResult & { dir?: string }>;

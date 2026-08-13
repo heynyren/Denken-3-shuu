@@ -17,6 +17,7 @@ import { exportZip, mirrorTo } from "./mirror";
 import type { ImportReport } from "./import-xlsx";
 import { countBackups, load, normalise, paths, referencedFiles, save } from "./store";
 import type { Attachment, AppData, OpResult, StoreInfo } from "../src/lib/types";
+import { sideName } from "../src/platform/types";
 
 const isDev = process.env.NODE_ENV === "development";
 const DEV_URL = "http://localhost:5173";
@@ -222,6 +223,48 @@ function registerHandlers(): void {
       return { ok: false, error: (error as Error).message };
     }
   });
+
+  /**
+   * Kho phụ cạnh data.json: cấu hình đồng bộ (có token GitHub) và bản chụp của
+   * lần đồng bộ trước. Cố ý không nhét vào data.json — data.json còn được xuất
+   * ra rồi gửi đi nơi khác, token đi kèm là cho không quyền ghi vào repo.
+   *
+   * `sideName()` chỉ cho qua đúng dạng `[a-z0-9-]+.json`, nên tên file không
+   * bao giờ leo ra khỏi thư mục dữ liệu.
+   */
+  ipcMain.handle(
+    "store:side-read",
+    async (_event, name: unknown): Promise<string | null> => {
+      const safe = typeof name === "string" ? sideName(name) : null;
+      if (!safe) return null;
+      try {
+        return await fs.readFile(path.join(paths.dir, safe), "utf8");
+      } catch {
+        return null; // chưa có file — lần đầu chạy
+      }
+    },
+  );
+
+  ipcMain.handle(
+    "store:side-write",
+    async (_event, name: unknown, text: unknown): Promise<OpResult> => {
+      const safe = typeof name === "string" ? sideName(name) : null;
+      if (!safe || typeof text !== "string") {
+        return { ok: false, error: "Tên file hoặc nội dung không hợp lệ." };
+      }
+      const target = path.join(paths.dir, safe);
+      try {
+        await fs.mkdir(paths.dir, { recursive: true });
+        // Ghi nguyên tử như data.json: mất điện giữa chừng không để lại file cụt.
+        const tmp = `${target}.tmp`;
+        await fs.writeFile(tmp, text, { encoding: "utf8", mode: 0o600 });
+        await fs.rename(tmp, target);
+        return { ok: true, path: target };
+      } catch (error) {
+        return { ok: false, error: (error as Error).message };
+      }
+    },
+  );
 
   /**
    * Chỉ đọc nguyên văn file người dùng chọn, không tự quyết làm gì với nó.
