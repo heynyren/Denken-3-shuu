@@ -13,7 +13,8 @@ import type { AppData, Settings } from "./types";
 // v3 đổi một ghi chú/một link thành danh sách nhiều ghi chú và nhiều link.
 // v4 thêm lịch sử thi thử.
 // v5 mỗi lượt thi lưu thêm bài làm từng câu (scores[].answers).
-export const SCHEMA_VERSION = 5;
+// v6 thêm dấu sao do người dùng tự đánh (progress[].starred).
+export const SCHEMA_VERSION = 6;
 
 export const DEFAULT_SETTINGS: Settings = {
   dailyGoal: 30,

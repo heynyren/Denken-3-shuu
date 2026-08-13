@@ -235,6 +235,31 @@ export function freshQueue(data: AppData): CatalogItem[] {
 }
 
 /**
+ * Bài bạn tự đánh dấu sao.
+ *
+ * Khác hẳn ba hàng đợi kia: chúng dựa trên việc app tính toán (đến hạn, đang
+ * sai, chưa làm), còn cái này hoàn toàn theo ý bạn. Sát ngày thi thì đây là
+ * danh sách đáng lật lại nhất.
+ *
+ * Xếp bài đang sai lên trước, rồi tới bài khó — trong số những bài bạn đã cho
+ * là đáng chú ý, bài đang sai vẫn là bài gấp hơn.
+ */
+export function starredQueue(data: AppData): CatalogItem[] {
+  return items
+    .filter((item) => data.progress[item.id]?.starred === true)
+    .sort((a, b) => {
+      const sai = (item: CatalogItem) =>
+        data.progress[item.id]?.status === "wrong" ? 0 : 1;
+      return sai(a) - sai(b) || b.stars - a.stars;
+    });
+}
+
+/** Đếm số bài đã đánh dấu sao. */
+export function starredCount(data: AppData): number {
+  return Object.values(data.progress).filter((entry) => entry.starred).length;
+}
+
+/**
  * Bài đang sai — nhóm đáng quay lại nhất.
  * Bài khó xếp lên trước vì đó thường là chỗ hổng kiến thức thật sự.
  */

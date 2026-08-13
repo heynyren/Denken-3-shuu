@@ -32,6 +32,7 @@ export function emptyProgress(): ItemProgress {
     links: [],
     updatedAt: new Date().toISOString(),
     doneDate: null,
+    starred: false,
     srsLevel: 0,
     nextReview: null,
     history: [],
@@ -197,6 +198,8 @@ export function normalise(input: unknown, fallback: AppData): AppData {
       updatedAt:
         typeof entry.updatedAt === "string" ? entry.updatedAt : new Date().toISOString(),
       doneDate: entry.doneDate ?? null,
+      // v5 -> v6: sổ cũ chưa có dấu sao, mặc định là chưa đánh.
+      starred: entry.starred === true,
       srsLevel: Number.isFinite(entry.srsLevel) ? Number(entry.srsLevel) : 0,
       nextReview: entry.nextReview ?? null,
       history: Array.isArray(entry.history) ? entry.history : [],

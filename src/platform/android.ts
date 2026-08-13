@@ -374,6 +374,19 @@ export const android: Platform = {
     return { ok: true };
   },
 
+  onBack(handler) {
+    // `addListener` trả về Promise, mà chỗ gọi cần hàm huỷ ngay lập tức — nên
+    // giữ lời hứa lại rồi huỷ khi nó xong.
+    const dangKy = App.addListener("backButton", () => handler());
+    return () => {
+      void dangKy.then((moc) => moc.remove());
+    };
+  },
+
+  exitApp() {
+    void App.exitApp();
+  },
+
   async notifyAt(id, at, title, body) {
     if (at - Date.now() <= 0) return { ok: false, error: "Mốc giờ đã qua." };
     try {

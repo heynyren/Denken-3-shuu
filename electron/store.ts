@@ -100,6 +100,7 @@ function migrate(data: AppData): AppData {
   //   v2 -> v3  đổi note/refLink dạng chuỗi thành notes[]/links[]
   //   v4 -> v5  lượt thi cũ không có scores[].answers, để trống là đúng —
   //             không dựng lại được bài làm từ điểm số, và cũng không nên đoán.
+  //   v5 -> v6  thêm progress[].starred, sổ cũ mặc định chưa đánh dấu sao.
   return data;
 }
 

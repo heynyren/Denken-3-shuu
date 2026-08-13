@@ -5,6 +5,7 @@ import {
   Link2,
   Paperclip,
   RotateCcw,
+  ArrowUpRight,
   Search,
   Star,
   StickyNote,
@@ -28,7 +29,7 @@ const ROW_HEIGHT = 62;
 /** Vẽ dư vài dòng ngoài khung nhìn để cuộn nhanh không thấy khoảng trắng. */
 const OVERSCAN = 6;
 
-type StatusFilter = ItemStatus | "all" | "due";
+type StatusFilter = ItemStatus | "all" | "due" | "starred";
 
 const STATUS_FILTERS: Array<{
   key: StatusFilter;
@@ -41,6 +42,7 @@ const STATUS_FILTERS: Array<{
   { key: "wrong", label: "Sai", icon: XCircle },
   { key: "relearned", label: "Sai → Đúng", icon: RotateCcw },
   { key: "correct", label: "Đúng", icon: Check },
+  { key: "starred", label: "Đánh dấu sao", icon: Star },
 ];
 
 export default function Browse({
@@ -84,6 +86,8 @@ export default function Browse({
       const progress = data.progress[item.id];
       if (status === "due") {
         if (!isDue(progress, today)) return false;
+      } else if (status === "starred") {
+        if (!progress?.starred) return false;
       } else if (status !== "all") {
         if ((progress?.status ?? "todo") !== status) return false;
       }
@@ -364,7 +368,14 @@ function Row({
     >
       <Stars count={item.stars} />
       <div className="item-main">
-        <div className="item-title ja">{item.name}</div>
+        <div className="item-title ja">
+          {progress?.starred && (
+            <span className="item-star" title="Bạn đã đánh dấu bài này">
+              <Star className="h-3.5 w-3.5" strokeWidth={0} fill="currentColor" />
+            </span>
+          )}
+          {item.name}
+        </div>
         <div className="item-meta">
           <span className="ja">{item.topic}</span>
           <span>·</span>
@@ -400,11 +411,25 @@ function Row({
 
       <div className="item-actions" onClick={(event) => event.stopPropagation()}>
         <button
+          className={`icon-btn${progress?.starred ? " starred" : ""}`}
+          title={
+            progress?.starred ? "Bỏ đánh dấu bài này" : "Đánh dấu bài này là đáng chú ý"
+          }
+          aria-pressed={progress?.starred ?? false}
+          onClick={() => store.toggleStar(item.id)}
+        >
+          <Star
+            className="h-4 w-4"
+            strokeWidth={progress?.starred ? 0 : 1.75}
+            fill={progress?.starred ? "currentColor" : "none"}
+          />
+        </button>
+        <button
           className="icon-btn"
           title="Mở bài trên denken-ou.com"
           onClick={() => openLink(item.url)}
         >
-          ↗
+          <Ic i={ArrowUpRight} />
         </button>
         {progress?.links.length === 1 && (
           <button

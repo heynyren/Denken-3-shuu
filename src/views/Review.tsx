@@ -15,19 +15,27 @@ import {
 import { Ic } from "../components/ui/icon";
 import { useEffect, useMemo, useState } from "react";
 
+import { usePaneActive } from "../components/KeepAlive";
 import ItemDetail from "../components/ItemDetail";
 import Timer, { useCountdown } from "../components/Timer";
 import { Bar, Empty, Stars, StatusPill } from "../components/ui";
 import { subjectName, topicsBySubject } from "../lib/catalog";
 import { levelLabel, overdueDays, todayISO } from "../lib/srs";
-import { dueQueue, freshQueue, topicQueue, wrongQueue } from "../lib/stats";
+import {
+  dueQueue,
+  freshQueue,
+  starredCount,
+  starredQueue,
+  topicQueue,
+  wrongQueue,
+} from "../lib/stats";
 import type { Overview } from "../lib/stats";
 import type { AppData, CatalogItem, SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
 import { platform } from "../platform";
 import { topicVi } from "../lib/vi";
 
-type Mode = "due" | "wrong" | "fresh" | "topic";
+type Mode = "due" | "wrong" | "fresh" | "starred" | "topic";
 
 /** Yêu cầu mở thẳng một chủ đề, gửi từ trang Hôm nay hoặc từ bảng phân tích bài thi. */
 export interface TopicFocus {
@@ -61,7 +69,9 @@ function buildQueue(
       ? dueQueue(data)
       : mode === "wrong"
         ? wrongQueue(data)
-        : freshQueue(data);
+        : mode === "starred"
+          ? starredQueue(data)
+          : freshQueue(data);
 
   return base.filter(
     (item) =>
@@ -175,7 +185,13 @@ export default function Review({
     setCursor((index) => Math.min(queue.length - 1, Math.max(0, index + delta)));
 
   // Phím tắt: 1 = đúng, 2 = sai, Space = mở bài, ← → = chuyển bài.
+  //
+  // Chỉ nghe khi màn này đang hiện. Màn bị ẩn vẫn nằm trong DOM và vẫn chạy —
+  // không chặn thì bấm `1` lúc đang xem Danh sách bài sẽ chấm nhầm một bài ở
+  // đây, lặng lẽ, và bạn chỉ phát hiện khi thấy tiến độ tự nhảy.
+  const dangHien = usePaneActive();
   useEffect(() => {
+    if (!dangHien) return;
     const onKey = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null;
       if (target && /^(INPUT|TEXTAREA)$/.test(target.tagName)) return;
@@ -193,6 +209,8 @@ export default function Review({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   });
+
+  const soSao = useMemo(() => starredCount(data), [data]);
 
   const justGraded = item ? graded[item.id] : undefined;
 
@@ -218,6 +236,18 @@ export default function Review({
               onClick={() => setMode("fresh")}
             >
               <Ic i={Sparkles} /> Bài chưa làm ({view.counts.todo})
+            </button>
+            <button
+              className={`chip${mode === "starred" ? " on" : ""}`}
+              onClick={() => setMode("starred")}
+              title="Những bài bạn tự đánh dấu là đáng chú ý"
+            >
+              <Star
+                className="h-3.5 w-3.5 shrink-0"
+                strokeWidth={0}
+                fill="currentColor"
+              />{" "}
+              Đánh dấu sao ({soSao})
             </button>
           </div>
           <div className="small muted nowrap">
@@ -341,6 +371,13 @@ export default function Review({
                   : "Mọi bài từng sai đều đã được sửa thành đúng. Quá tốt!"}
               </p>
             </Empty>
+          ) : mode === "starred" ? (
+            <Empty icon={Star} title="Chưa đánh dấu bài nào">
+              <p>
+                Gặp bài hay hoặc bài dễ nhầm thì bấm ngôi sao ở góc thẻ bài. Sát
+                ngày thi, đây là danh sách đáng lật lại nhất.
+              </p>
+            </Empty>
           ) : mode === "due" ? (
             <Empty icon={CalendarCheck} title="Không còn bài nào đến hạn">
               <p className="muted">
@@ -383,6 +420,22 @@ export default function Review({
               <StatusPill status={progress?.status ?? "todo"} />
               {late > 0 && <span className="pill overdue">Quá hạn {late} ngày</span>}
               <span className="spacer" />
+              <button
+                className={`star-toggle${progress?.starred ? " on" : ""}`}
+                onClick={() => store.toggleStar(item.id)}
+                title={
+                  progress?.starred
+                    ? "Bỏ đánh dấu bài này"
+                    : "Đánh dấu bài này là đáng chú ý"
+                }
+                aria-pressed={progress?.starred ?? false}
+              >
+                <Star
+                  className="h-4 w-4"
+                  strokeWidth={progress?.starred ? 0 : 1.75}
+                  fill={progress?.starred ? "currentColor" : "none"}
+                />
+              </button>
               <span className="small dim nowrap">
                 {cursor + 1} / {queue.length}
               </span>

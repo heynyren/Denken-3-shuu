@@ -1,5 +1,6 @@
 /* Kiểm thử luật gộp dữ liệu hai máy, đồng bộ GitHub, chuông báo hết giờ. */
 import { syncOnce } from "../src/lib/cloud";
+import { SCHEMA_VERSION } from "../src/lib/defaults";
 import type { SyncConfig } from "../src/lib/cloud";
 import type { FetchLike } from "../src/lib/github";
 import { fromBase64, toBase64, validRepo } from "../src/lib/github";
@@ -17,7 +18,9 @@ const check = (cond: boolean, m: string) => (cond ? ok(m) : bad(m));
 
 function blank(): AppData {
   return {
-    schemaVersion: 5,
+    // Lấy từ defaults chứ không gõ số: `normalise()` luôn nâng sổ lên phiên bản
+    // hiện hành, ghim số ở đây là cứ mỗi lần đổi schema lại hỏng kiểm thử oan.
+    schemaVersion: SCHEMA_VERSION,
     createdAt: "2026-01-01T00:00:00.000Z",
     updatedAt: "2026-01-01T00:00:00.000Z",
     settings: { dailyGoal: 30, mirrorDir: "", examDate: "2027-03-21", backupsToKeep: 30 },
@@ -29,9 +32,12 @@ function blank(): AppData {
 }
 
 function prog(status: ItemProgress["status"], updatedAt: string, level = 1): ItemProgress {
+  // Phải có đủ mọi trường như sổ thật. Sổ thật luôn đi qua `normalise()` nên
+  // trường nào thiếu cũng được điền sẵn; bản dựng tay ở đây mà thiếu thì hai
+  // bên khác nhau về hình dạng, và phép so "hai bên đã giống nhau" báo sai.
   return {
     status, notes: [], links: [], updatedAt,
-    doneDate: updatedAt.slice(0, 10), srsLevel: level,
+    doneDate: updatedAt.slice(0, 10), starred: false, srsLevel: level,
     nextReview: "2026-08-20", history: [{ date: updatedAt.slice(0, 10), result: "correct", level }],
   };
 }

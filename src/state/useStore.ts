@@ -53,6 +53,8 @@ export interface Store {
   setStatus(id: string, status: ItemStatus): void;
   resetItem(id: string): void;
   snooze(id: string, days: number): void;
+  /** Bật/tắt dấu sao "bài này đáng chú ý". */
+  toggleStar(id: string): void;
 
   updateSettings(patch: Partial<Settings>): void;
   saveExamResult(result: ExamResult): void;
@@ -357,6 +359,14 @@ export function useStore(): Store {
     [update],
   );
 
+  const toggleStar = useCallback(
+    (id: string) =>
+      update((current) =>
+        withProgress(current, id, (p) => ({ ...p, starred: !p.starred })),
+      ),
+    [update],
+  );
+
   const snooze = useCallback(
     (id: string, days: number) =>
       update((current) => {
@@ -426,6 +436,7 @@ export function useStore(): Store {
     setStatus,
     resetItem,
     snooze,
+    toggleStar,
     updateSettings,
     saveExamResult,
     removeExamResult,

@@ -111,6 +111,14 @@ export interface ItemProgress {
    */
   updatedAt: string;
   doneDate: string | null;
+  /**
+   * Bạn tự đánh dấu bài này là đáng chú ý.
+   *
+   * Khác hẳn với trạng thái đúng/sai: đúng/sai là app tự suy ra từ việc bạn
+   * chấm, còn dấu sao là ý kiến của bạn. Một bài làm đúng ngay lần đầu vẫn có
+   * thể là bài hay đáng xem lại trước hôm thi.
+   */
+  starred: boolean;
   /** 0 = chưa vào chu kỳ ôn; 1..6 ứng với 1/3/7/14/30/90 ngày. */
   srsLevel: number;
   nextReview: string | null;

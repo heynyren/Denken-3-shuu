@@ -88,6 +88,18 @@ export interface Platform {
   /* --- linh tinh --- */
   openExternal(url: string): Promise<OpResult>;
 
+  /**
+   * Bắt nút Quay lại của Android (kể cả cử chỉ vuốt từ mép màn hình).
+   *
+   * Không bắt thì vuốt về là **thoát thẳng app**, dù bạn đang ở giữa màn nào —
+   * đúng cái cảm giác "vuốt về không mượt". Trả về hàm huỷ đăng ký.
+   *
+   * Trên Windows không có nút này; trả về hàm rỗng.
+   */
+  onBack(handler: () => void): () => void;
+  /** Thoát app. Chỉ Android mới làm được, và chỉ khi đang ở màn gốc. */
+  exitApp(): void;
+
   /* --- lời nhắc hết giờ --- */
   /**
    * Hẹn một lời nhắc nổ vào đúng mốc `at` (mili giây kiểu `Date.now()`).

@@ -48,6 +48,7 @@ export function emptyProgress(): ItemProgress {
     links: [],
     updatedAt: new Date().toISOString(),
     doneDate: null,
+    starred: false,
     srsLevel: 0,
     nextReview: null,
     history: [],

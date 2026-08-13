@@ -309,10 +309,23 @@ select {
    Vùng nội dung
    ========================================================================== */
 
+/* Khung ngoài không cuộn. Mỗi màn tự cuộn trong khung riêng của nó, nhờ vậy
+   quay lại màn cũ là về đúng chỗ vừa rời đi. Xem components/KeepAlive.tsx. */
 .main {
   grid-area: main;
+  overflow: hidden;
+  position: relative;
+}
+.pane {
+  height: 100%;
   overflow-y: auto;
   padding: 20px 24px 60px;
+  /* Đà cuộn kiểu điện thoại: thả tay ra vẫn trôi thêm một đoạn rồi mới dừng. */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+.pane[hidden] {
+  display: none;
 }
 
 .container {
@@ -2102,7 +2115,7 @@ select {
   }
 
   /* --- Nội dung --- */
-  .main {
+  .pane {
     padding: 12px 12px 20px;
   }
   .container {
@@ -2209,7 +2222,7 @@ select {
   .nav-label {
     font-size: 10px;
   }
-  .main {
+  .pane {
     padding: 10px 10px 16px;
   }
 }
@@ -2354,4 +2367,56 @@ select {
   display: grid;
   place-items: center;
   color: var(--text-3);
+}
+
+
+/* Nút đánh dấu sao trên thẻ bài. Chưa đánh thì chỉ là cái viền mờ — có mặt để
+   bạn biết là bấm được, nhưng không tranh nhìn với nội dung bài. */
+.star-toggle {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.08s, color 0.08s;
+}
+.star-toggle:hover {
+  background: var(--surface-3);
+  color: var(--text-2);
+}
+.star-toggle.on {
+  color: var(--amber);
+}
+.star-toggle.on:hover {
+  color: var(--amber);
+}
+
+/* Dấu sao nhỏ đứng trước tên bài trong danh sách */
+.item-star {
+  display: inline-grid;
+  place-items: center;
+  color: var(--amber);
+  flex-shrink: 0;
+  vertical-align: -2px;
+  margin-right: 5px;
+}
+
+/* Nút sao trong hàng thao tác của một dòng */
+.icon-btn.starred {
+  color: var(--amber);
+}
+
+/* Thêm một tab nữa thành sáu, mỗi tab hẹp lại một chút cho đủ chỗ. */
+@media (max-width: 860px) {
+  .nav-tabs .nav-item {
+    padding: 0 2px;
+  }
+  .nav-tabs .nav-label {
+    font-size: 10px;
+  }
 }

@@ -56,6 +56,10 @@ export const desktop: Platform = {
 
   openExternal: (url) => window.denken.openExternal(url),
 
+  // Windows không có nút Quay lại của hệ điều hành.
+  onBack: () => () => undefined,
+  exitApp: () => undefined,
+
   async notifyAt(id, at, title, body): Promise<OpResult> {
     clearTimer(id);
     const wait = at - Date.now();
