@@ -256,7 +256,17 @@ function mergeSettings(
   remote: Settings,
   report: MergeReport,
 ): Settings {
-  const same = (a: Settings, b: Settings) => JSON.stringify(a) === JSON.stringify(b);
+  /**
+   * So từng trường một, không so chuỗi JSON.
+   *
+   * `JSON.stringify` phụ thuộc thứ tự khoá, mà bản đọc từ file đi qua
+   * `normalise()` nên thứ tự khoá do DEFAULT_SETTINGS quyết định — khác bản
+   * dựng ở chỗ khác. Hai bộ cài đặt giống hệt nhau về nội dung vẫn bị coi là
+   * khác, và hậu quả không nhỏ: mỗi máy đều tưởng cài đặt của mình mới hơn, nên
+   * cứ năm phút lại ghi đè lẫn nhau một lần, không bao giờ dừng.
+   */
+  const same = (a: Settings, b: Settings) =>
+    (Object.keys({ ...a, ...b }) as (keyof Settings)[]).every((key) => a[key] === b[key]);
 
   if (same(local, remote)) {
     report.settingsFrom = "same";

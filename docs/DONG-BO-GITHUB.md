@@ -79,6 +79,33 @@ Xong. Từ giờ app tự chạy, bạn không phải làm gì nữa.
 
 ---
 
+## Lỡ bật ở điện thoại trước thì sao
+
+Không sao cả, cứ bật ở máy tính rồi bấm **🔄 Đồng bộ ngay**. Máy tính sẽ **không**
+bị bản trên GitHub đè lên.
+
+Lý do: đây là gộp chứ không phải tải về. Sổ trên điện thoại mới cài là sổ trắng,
+không có bản ghi nào — mà thứ không có thì không xoá được thứ đang có. Lượt gộp
+đầu tiên ở máy tính lấy hợp của hai bên: 500 bài của máy tính còn nguyên cả ghi
+chú lẫn cấp độ ôn, cộng thêm mấy bài bạn lỡ chấm trên điện thoại.
+
+Cài đặt (mục tiêu ngày, ngày thi) cũng theo máy tính, không bị mặc định của điện
+thoại đè. Lần đồng bộ sau, điện thoại nhận hết về và hai bên hết lệch.
+
+Có kiểm thử dựng đúng kịch bản này, xem mục 24 trong `scripts/kiem-thu-gop.ts`.
+
+Muốn chắc hơn nữa thì trước khi bấm, vào **Cài đặt → Xuất bản sao lưu (JSON)**
+một cái cất đó. Mất một giây, và nếu có gì bất ngờ thì bạn còn đường lùi.
+
+### Một chỗ hơi thiệt
+
+Ngày nào cả hai máy cùng ôn, mà đó là **lần đồng bộ đầu tiên**, thì số bài của
+ngày đó lấy bên lớn hơn chứ không cộng lại — máy tính 12 bài, điện thoại 2 bài
+thì ra 12 chứ không phải 14. Vì chưa có mốc gốc để biết phần nào là mới, thà
+thiếu còn hơn thổi phồng: con số thổi phồng làm sai cả chuỗi ngày liên tiếp lẫn
+mọi biểu đồ, mà thổi phồng rồi thì không gỡ lại được. Từ lần thứ hai trở đi đã
+có mốc gốc nên cộng đúng.
+
 ## App tự chạy lúc nào
 
 | Lúc nào | Vì sao |

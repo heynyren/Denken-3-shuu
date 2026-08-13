@@ -488,6 +488,78 @@ async function kiemThuDongBo(): Promise<void> {
     }
     check(nem.includes("Token sai"), `token sai báo dễ hiểu: "${nem}"`);
   }
+
+  /* ---- 24. Bật đồng bộ ở ĐIỆN THOẠI TRƯỚC, máy tính mới là bản đúng ----
+     Đây là tình huống thật: điện thoại vừa cài, bấm bật đồng bộ, đẩy một sổ
+     gần như trắng lên GitHub. Sau đó mới tới lượt máy tính — nơi có toàn bộ
+     dữ liệu thật. Máy tính KHÔNG được mất gì. */
+  {
+    // Điện thoại vừa cài, lỡ chấm 2 bài rồi bật đồng bộ.
+    const dienThoai = blank();
+    dienThoai.settings.dailyGoal = 30;          // để nguyên mặc định
+    dienThoai.settings.examDate = "2027-03-21";
+    dienThoai.progress["dt-1"] = prog("correct", "2026-08-13T08:00:00Z");
+    dienThoai.progress["dt-2"] = prog("wrong", "2026-08-13T08:05:00Z");
+    dienThoai.dailyLog["2026-08-13"] = { reviewed: 2, correct: 1, wrong: 1, bySubject: { riron: 2 } };
+
+    const gh = fakeGithub(null);
+    const khoDT = khoPhu();
+    await syncOnce({ config: cauHinh(), local: dienThoai, ...khoDT, doFetch: gh.doFetch });
+    check(gh.noiDung !== null, "điện thoại bật trước: đã đẩy sổ của nó lên");
+
+    // Máy tính: dữ liệu thật, nhiều tháng ôn tập.
+    const may = blank();
+    may.settings.dailyGoal = 50;                 // người dùng đã tự chỉnh
+    may.settings.examDate = "2026-09-01";
+    for (let i = 0; i < 500; i += 1) {
+      may.progress[`bai-${i}`] = prog("correct", "2026-07-01T10:00:00Z", 3);
+    }
+    may.progress["bai-0"].notes = [
+      { id: "n1", text: "ghi chú quan trọng", createdAt: "2026-07-01T10:00:00Z", attachments: [] },
+    ];
+    may.dailyLog["2026-07-01"] = { reviewed: 40, correct: 38, wrong: 2, bySubject: { riron: 40 } };
+    may.dailyLog["2026-08-13"] = { reviewed: 12, correct: 10, wrong: 2, bySubject: { kikai: 12 } };
+    may.badges = { "first-step": "2026-07-01", "streak-7": "2026-07-08" };
+    may.examResults = [{
+      id: "thi-1", exam: "R07下", takenAt: "2026-08-01T09:00:00Z",
+      scores: [{ subject: "riron", score: 72, correct: 13, total: 18, passed: true }],
+    }];
+
+    const khoMay = khoPhu();
+    const kq = await syncOnce({ config: cauHinh(), local: may, ...khoMay, doFetch: gh.doFetch });
+
+    // Máy tính giữ nguyên mọi thứ của nó.
+    check(Object.keys(kq.data.progress).length === 502,
+      `máy tính giữ đủ 500 bài + nhận 2 bài của điện thoại (${Object.keys(kq.data.progress).length})`);
+    check(kq.data.progress["bai-0"].notes.length === 1, "ghi chú của máy tính còn nguyên");
+    check(kq.data.progress["bai-499"].srsLevel === 3, "cấp độ ôn của máy tính còn nguyên");
+    check(kq.data.settings.dailyGoal === 50 && kq.data.settings.examDate === "2026-09-01",
+      "cài đặt của máy tính THẮNG, không bị mặc định của điện thoại đè");
+    check(Object.keys(kq.data.badges).length === 2, "huy hiệu của máy tính còn nguyên");
+    check(kq.data.examResults.length === 1, "lượt thi thử của máy tính còn nguyên");
+    check(kq.data.dailyLog["2026-07-01"].reviewed === 40, "nhật ký ngày cũ của máy tính còn nguyên");
+    // Cùng một ngày hai bên đều có: chưa có mốc gốc nên lấy bên lớn hơn.
+    check(kq.data.dailyLog["2026-08-13"].reviewed === 12,
+      `ngày trùng lấy số lớn hơn, không cộng bừa (${kq.data.dailyLog["2026-08-13"].reviewed})`);
+    // Và bài của điện thoại cũng không mất.
+    check(!!kq.data.progress["dt-1"] && !!kq.data.progress["dt-2"],
+      "hai bài làm trên điện thoại vẫn còn");
+    check(kq.pushed, "máy tính đẩy bản gộp lên");
+
+    // Điện thoại đồng bộ lại: phải nhận đủ về.
+    const kq2 = await syncOnce({ config: cauHinh(), local: dienThoai, ...khoDT, doFetch: gh.doFetch });
+    check(Object.keys(kq2.data.progress).length === 502, "điện thoại kéo về đủ 502 bài");
+    check(kq2.data.settings.dailyGoal === 50,
+      "điện thoại nhận luôn cài đặt của máy tính, hai bên hết lệch");
+    check(!kq2.pushed, "điện thoại không phải ghi lại lần nữa");
+
+    // Và phải DỪNG. Nếu hai bên còn bất đồng về cài đặt thì cứ 5 phút lại ghi
+    // đè lẫn nhau một lần, mãi không thôi — đúng kiểu lỗi không ai để ý.
+    const kq3 = await syncOnce({ config: cauHinh(), local: kq.data, ...khoMay, doFetch: gh.doFetch });
+    check(!kq3.pushed && !kq3.changed, "máy tính đồng bộ tiếp: đứng yên, không ghi qua ghi lại");
+    const kq4 = await syncOnce({ config: cauHinh(), local: kq2.data, ...khoDT, doFetch: gh.doFetch });
+    check(!kq4.pushed && !kq4.changed, "điện thoại đồng bộ tiếp: cũng đứng yên");
+  }
 }
 
 /* ---- 14. Chuông báo hết giờ ---- */
