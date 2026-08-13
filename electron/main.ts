@@ -62,6 +62,9 @@ function createWindow(): void {
       nodeIntegration: false,
       sandbox: true,
       spellcheck: false,
+      // Đồng hồ làm bài phải chạy đúng giờ cả khi cửa sổ bị che hay thu nhỏ —
+      // mà đúng quy trình thì bạn mở đề trên trình duyệt rồi rời khỏi app.
+      backgroundThrottling: false,
     },
   });
 
@@ -219,6 +222,31 @@ function registerHandlers(): void {
       return { ok: false, error: (error as Error).message };
     }
   });
+
+  /**
+   * Chỉ đọc nguyên văn file người dùng chọn, không tự quyết làm gì với nó.
+   * Việc gộp nằm ở giao diện, dùng chung một bộ luật với bản Android.
+   */
+  ipcMain.handle(
+    "store:pick-json-text",
+    async (): Promise<OpResult & { text?: string }> => {
+      const picked = await dialog.showOpenDialog(mainWindow!, {
+        title: "Chọn file sao lưu của máy kia",
+        filters: [{ name: "JSON", extensions: ["json"] }],
+        properties: ["openFile"],
+      });
+      if (picked.canceled || !picked.filePaths[0]) return { ok: false, cancelled: true };
+      try {
+        return {
+          ok: true,
+          path: picked.filePaths[0],
+          text: await fs.readFile(picked.filePaths[0], "utf8"),
+        };
+      } catch (error) {
+        return { ok: false, error: (error as Error).message };
+      }
+    },
+  );
 
   ipcMain.handle(
     "store:import-json",

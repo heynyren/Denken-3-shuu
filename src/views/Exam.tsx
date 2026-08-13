@@ -26,6 +26,8 @@ import {
 import type { AnswerKey, ExamPaper, Picks, SubjectScore } from "../lib/exam";
 import { isPartB } from "../lib/timing";
 import type { SubjectKey } from "../lib/types";
+import { platform } from "../platform";
+import { ALARM_EXAM } from "../platform/types";
 import type { Store } from "../state/useStore";
 
 const ANSWERS = (answersFile as { answers: AnswerKey }).answers;
@@ -128,7 +130,16 @@ export default function Exam({
     if (!paper) return;
     alarm.current.stop();
     setStep(index);
-    setEndsAt(Date.now() + paperSeconds(paper.subject) * 1000);
+    const at = Date.now() + paperSeconds(paper.subject) * 1000;
+    setEndsAt(at);
+    // Lời nhắc của hệ điều hành: đang thi mà lỡ thoát ra hay tắt màn hình thì
+    // vẫn biết là hết giờ môn này.
+    void platform.notifyAt(
+      ALARM_EXAM,
+      at,
+      `⏰ Hết giờ ${subjectViName(paper.subject)}`,
+      "Bài đã tự nộp. Mở app xem điểm nhé.",
+    );
     setStage("running");
   };
 
@@ -159,12 +170,14 @@ export default function Exam({
     });
     setScores((list) => [...list.filter((s) => s.subject !== score.subject), score]);
     setEndsAt(null);
+    void platform.cancelNotify(ALARM_EXAM);
     setStage(next ? "break" : "result");
   };
   submitRef.current = submitPaper;
 
   const quit = () => {
     alarm.current.stop();
+    void platform.cancelNotify(ALARM_EXAM);
     setEndsAt(null);
     setStep(0);
     setScores([]);
@@ -341,7 +354,7 @@ export default function Exam({
           >
             <div className="exam-clock">{formatExamClock(left)}</div>
           </Ring>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="exam-bar-text">
             <div style={{ fontWeight: 700 }}>
               {exam} — <span className="ja">{subjectName(current.subject)}</span>
               {papers.length > 1 && (

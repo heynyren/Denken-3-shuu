@@ -38,4 +38,14 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      Chuông báo hết giờ. Rung để còn báo được lúc máy đang để im lặng, và xin
+      quyền hẹn giờ CHÍNH XÁC vì đây đúng nghĩa là đồng hồ báo thức: hết 5 phút
+      của A問題 là phải kêu ngay lúc đó, trễ mươi phút thì vô nghĩa.
+      SCHEDULE_EXACT_ALARM cho Android 12, USE_EXACT_ALARM cho Android 13 trở lên.
+    -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 </manifest>

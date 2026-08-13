@@ -16,6 +16,7 @@
 import { App } from "@capacitor/app";
 import { Browser } from "@capacitor/browser";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
+import { LocalNotifications } from "@capacitor/local-notifications";
 import { Share } from "@capacitor/share";
 
 import { emptyAppData } from "../lib/defaults";
@@ -245,6 +246,7 @@ export const android: Platform = {
     mirrorFolder: false,
     revealFolder: false,
     attachments: true,
+    mergeFile: true,
   },
 
   async load() {
@@ -324,10 +326,68 @@ export const android: Platform = {
     return unsupported("Nhân bản thư mục");
   },
 
+  async pickJsonText() {
+    return new Promise((resolve) => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "application/json,.json";
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file) return resolve({ ok: false, cancelled: true });
+        try {
+          resolve({ ok: true, text: await file.text(), path: file.name });
+        } catch (cause) {
+          resolve({ ok: false, error: (cause as Error).message });
+        }
+      };
+      input.click();
+    });
+  },
+
   async openExternal(url) {
     if (!/^https?:\/\//i.test(url)) return { ok: false, error: "Link không hợp lệ." };
     await Browser.open({ url });
     return { ok: true };
+  },
+
+  async notifyAt(id, at, title, body) {
+    if (at - Date.now() <= 0) return { ok: false, error: "Mốc giờ đã qua." };
+    try {
+      // Android 13 trở lên phải xin quyền thông báo; hỏi ngay lần hẹn đầu tiên.
+      let allowed = (await LocalNotifications.checkPermissions()).display;
+      if (allowed !== "granted") {
+        allowed = (await LocalNotifications.requestPermissions()).display;
+      }
+      if (allowed !== "granted") {
+        return { ok: false, error: "Bạn chưa cho app gửi thông báo." };
+      }
+
+      await LocalNotifications.cancel({ notifications: [{ id }] });
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            id,
+            title,
+            body,
+            // `allowWhileIdle` để lời nhắc vẫn nổ khi máy đã ngủ sâu (Doze).
+            schedule: { at: new Date(at), allowWhileIdle: true },
+            ongoing: false,
+          },
+        ],
+      });
+      return { ok: true };
+    } catch (cause) {
+      return { ok: false, error: (cause as Error).message };
+    }
+  },
+
+  async cancelNotify(id) {
+    try {
+      await LocalNotifications.cancel({ notifications: [{ id }] });
+      return { ok: true };
+    } catch (cause) {
+      return { ok: false, error: (cause as Error).message };
+    }
   },
 
   async attachPick() {

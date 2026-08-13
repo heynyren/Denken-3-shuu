@@ -3,7 +3,25 @@
  * của Electron gắn vào. Toàn bộ việc nặng nằm ở tiến trình chính (electron/).
  */
 
+import type { OpResult } from "../lib/types";
 import type { Platform } from "./types";
+
+/**
+ * Lời nhắc hết giờ trên Windows.
+ *
+ * Không cần plugin gì: cửa sổ Electron vẫn được cấp nhịp chạy khi bị che hay
+ * thu nhỏ (main.ts tắt `backgroundThrottling`), nên hẹn giờ ngay trong app là
+ * đủ. Thông báo hiện ở góc màn hình Windows, bấm vào là app nhảy lên trước.
+ */
+const timers = new Map<number, ReturnType<typeof setTimeout>>();
+
+function clearTimer(id: number): void {
+  const timer = timers.get(id);
+  if (timer !== undefined) {
+    clearTimeout(timer);
+    timers.delete(id);
+  }
+}
 
 export const desktop: Platform = {
   kind: "desktop",
@@ -13,6 +31,7 @@ export const desktop: Platform = {
     mirrorFolder: true,
     revealFolder: true,
     attachments: true,
+    mergeFile: true,
   },
 
   load: () => window.denken.load(),
@@ -29,7 +48,32 @@ export const desktop: Platform = {
   pickMirrorDir: () => window.denken.pickMirrorDir(),
   mirrorNow: () => window.denken.mirrorNow(),
 
+  pickJsonText: () => window.denken.pickJsonText(),
+
   openExternal: (url) => window.denken.openExternal(url),
+
+  async notifyAt(id, at, title, body): Promise<OpResult> {
+    clearTimer(id);
+    const wait = at - Date.now();
+    if (wait <= 0) return { ok: false, error: "Mốc giờ đã qua." };
+    timers.set(
+      id,
+      setTimeout(() => {
+        timers.delete(id);
+        try {
+          new Notification(title, { body, requireInteraction: true });
+        } catch {
+          // Người dùng tắt thông báo ở Windows — chuông trong app vẫn reo.
+        }
+      }, wait),
+    );
+    return { ok: true };
+  },
+
+  async cancelNotify(id): Promise<OpResult> {
+    clearTimer(id);
+    return { ok: true };
+  },
 
   attachPick: () => window.denken.attachPick(),
   attachSave: (name, bytes) => window.denken.attachSave(name, bytes),

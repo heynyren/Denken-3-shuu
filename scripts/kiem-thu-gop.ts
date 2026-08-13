@@ -1,4 +1,5 @@
-/* Kiểm thử luật gộp dữ liệu hai máy. */
+/* Kiểm thử luật gộp dữ liệu hai máy, chuông báo hết giờ và bộ nắn dữ liệu. */
+import { parseBackup } from "../src/lib/normalise";
 import { mergeData } from "../src/lib/sync";
 import type { AppData, ItemProgress } from "../src/lib/types";
 import { safeName } from "../src/platform/android";
@@ -222,5 +223,159 @@ const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
   check(safeName("abc123.png") === "abc123.png", "tên file trơn thì cho qua");
 }
 
-console.log(`\n${pass} đạt · ${fail} hỏng`);
-process.exit(fail === 0 ? 0 : 1);
+/* ---- 12. Đọc file sao lưu người ta gửi sang ---- */
+{
+  const good = blank();
+  good.progress["a"] = prog("correct", "2026-08-12T10:00:00Z");
+
+  const parsed = parseBackup(JSON.stringify(good), blank());
+  check("data" in parsed && !!parsed.data.progress["a"], "đọc được file sao lưu hợp lệ");
+
+  check("error" in parseBackup("{ hỏng", blank()), "file không phải JSON thì báo lỗi, không ném");
+  check("error" in parseBackup(JSON.stringify({ ten: "file khác" }), blank()),
+    "file JSON nhưng không phải sổ ôn thi thì từ chối");
+  check("error" in parseBackup("[1,2,3]", blank()), "mảng JSON cũng bị từ chối");
+
+  // Dữ liệu bẩn không được làm hỏng cả file.
+  const dirty = JSON.stringify({
+    progress: { a: { status: "correct", srsLevel: "ba", history: "không phải mảng" } },
+    dailyLog: { "2026-08-12": { reviewed: "nhiều" } },
+  });
+  const fixed = parseBackup(dirty, blank());
+  check("data" in fixed && fixed.data.progress["a"].srsLevel === 0,
+    "trường số hỏng thì về 0 chứ không thành NaN");
+  check("data" in fixed && Array.isArray(fixed.data.progress["a"].history),
+    "lịch sử hỏng thì về mảng rỗng");
+  check("data" in fixed && fixed.data.dailyLog["2026-08-12"].reviewed === 0,
+    "số bài ôn hỏng thì về 0");
+}
+
+/* ---- 13. Gộp qua file: xuất bên này, gộp bên kia, không mất gì ---- */
+{
+  const pc = blank();
+  pc.progress["a"] = prog("correct", "2026-08-12T10:00:00Z");
+  pc.dailyLog["2026-08-12"] = { reviewed: 5, correct: 5, wrong: 0, bySubject: { riron: 5 } };
+
+  const phone = blank();
+  phone.progress["b"] = prog("wrong", "2026-08-12T11:00:00Z");
+  phone.dailyLog["2026-08-12"] = { reviewed: 3, correct: 1, wrong: 2, bySubject: { kikai: 3 } };
+
+  // Đúng thao tác thật: xuất ra chuỗi JSON rồi bên kia đọc lại.
+  const parsed = parseBackup(JSON.stringify(pc), blank());
+  if (!("data" in parsed)) throw new Error("không đọc được file vừa xuất");
+  const { data: merged } = mergeData(null, phone, parsed.data);
+
+  check(!!merged.progress["a"] && !!merged.progress["b"], "gộp qua file giữ được bài của cả hai máy");
+  check(merged.dailyLog["2026-08-12"].reviewed === 5,
+    `không có mốc gốc thì lấy số lớn hơn, không cộng bừa (${merged.dailyLog["2026-08-12"].reviewed})`);
+
+  // Bấm gộp hai lần liên tiếp không được đổi gì thêm.
+  const { data: again } = mergeData(null, merged, parsed.data);
+  const boUpdatedAt = (d: AppData) => JSON.stringify({ ...d, updatedAt: "" });
+  check(boUpdatedAt(again) === boUpdatedAt(merged),
+    "gộp lại lần nữa ra y nguyên, bấm nhầm hai lần không sao");
+}
+
+/* ---- 14. Chuông báo hết giờ ---- */
+{
+  // Dựng đủ thứ trình duyệt mà alarm.ts cần, rồi mới nạp module.
+  const rung: unknown[] = [];
+  let daoTao = 0;
+  let daDong = 0;
+  class FakeContext {
+    state = "suspended";
+    currentTime = 0;
+    constructor() { daoTao += 1; }
+    resume() { this.state = "running"; return Promise.resolve(); }
+    close() { daDong += 1; this.state = "closed"; return Promise.resolve(); }
+    createOscillator() {
+      return {
+        type: "", frequency: { value: 0 },
+        connect: (n: unknown) => n, start() {}, stop() {},
+      };
+    }
+    createGain() {
+      return {
+        gain: { setValueAtTime() {}, linearRampToValueAtTime() {} },
+        connect: (n: unknown) => n,
+      };
+    }
+  }
+  const g = globalThis as Record<string, unknown>;
+  g.window = { AudioContext: FakeContext };
+  // `navigator` của Node chỉ có getter, gán thẳng là ném lỗi.
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    value: { vibrate: (p: unknown) => { rung.push(p); return true; } },
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { createAlarm, primeAudio, audioReady } = require("../src/lib/alarm") as typeof import("../src/lib/alarm");
+
+  check(!audioReady(), "chưa chạm gì thì chưa có quyền phát tiếng");
+
+  // Đây là chỗ bản cũ hỏng trên Android: context phải được mở khoá TỪ TRƯỚC,
+  // lúc người dùng còn đang chạm màn hình, chứ không phải lúc chuông reo.
+  primeAudio();
+  check(daoTao === 1, "chạm lần đầu tạo đúng một AudioContext");
+  check(audioReady(), "chạm xong là sẵn sàng phát tiếng");
+
+  primeAudio();
+  primeAudio();
+  check(daoTao === 1, "chạm thêm mấy lần nữa cũng không đẻ thêm context");
+
+  const alarm = createAlarm();
+  alarm.start();
+  check(alarm.ringing, "gọi start thì chuông reo");
+  check(rung.length > 0, "có rung, để máy im lặng vẫn báo được");
+
+  alarm.stop();
+  check(!alarm.ringing, "gọi stop thì chuông tắt");
+  check(daDong === 0, "stop KHÔNG đóng context — đóng là mất quyền phát tiếng lần sau");
+
+  // Lần thứ hai phải kêu được, không cần chạm lại.
+  const truoc = rung.length;
+  alarm.start();
+  check(rung.length > truoc, "reo lần thứ hai vẫn kêu, không cần chạm lại màn hình");
+  check(daoTao === 1, "reo lần hai dùng lại context cũ");
+  alarm.stop();
+}
+
+
+/* ---- 15. Lời nhắc hết giờ trên Windows ---- */
+{
+  const hienRa: string[] = [];
+  const g = globalThis as Record<string, unknown>;
+  g.Notification = function (this: unknown, title: string, opts: { body?: string }) {
+    hienRa.push(`${title} | ${opts?.body ?? ""}`);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { desktop } = require("../src/platform/desktop") as typeof import("../src/platform/desktop");
+
+  void (async () => {
+    const qua = await desktop.notifyAt(1, Date.now() - 1000, "cũ", "rồi");
+    check(!qua.ok, "hẹn vào mốc đã qua thì từ chối, không nhắc ngay lập tức");
+
+    await desktop.notifyAt(1, Date.now() + 40, "⏰ Hết giờ làm bài", "Chốt đáp án nhé.");
+    await desktop.notifyAt(2, Date.now() + 40, "không nên hiện", "");
+    await desktop.cancelNotify(2);
+
+    await new Promise((r) => setTimeout(r, 120));
+    check(hienRa.length === 1, `đúng giờ thì hiện một lời nhắc (${hienRa.length})`);
+    check(hienRa[0]?.startsWith("⏰ Hết giờ làm bài"), "nội dung lời nhắc đúng");
+    check(!hienRa.some((t) => t.includes("không nên hiện")),
+      "huỷ rồi thì không nhắc nữa — nộp bài sớm không bị chuông đuổi theo");
+
+    // Hẹn lại cùng một mã thì lần trước phải bị thay, không nhắc hai lần.
+    hienRa.length = 0;
+    await desktop.notifyAt(1, Date.now() + 500, "lần cũ", "");
+    await desktop.notifyAt(1, Date.now() + 40, "lần mới", "");
+    await new Promise((r) => setTimeout(r, 700));
+    check(hienRa.length === 1 && hienRa[0].startsWith("lần mới"),
+      "hẹn lại cùng mã thì thay lần cũ, không kêu hai lần");
+
+    console.log(`\n${pass} đạt · ${fail} hỏng`);
+    process.exit(fail === 0 ? 0 : 1);
+  })();
+}

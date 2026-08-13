@@ -36,7 +36,13 @@ export interface Capabilities {
   revealFolder: boolean;
   /** Đính kèm ảnh/PDF vào ghi chú. */
   attachments: boolean;
+  /** Gộp dữ liệu từ một file sao lưu của máy khác. */
+  mergeFile: boolean;
 }
+
+/** Mã lời nhắc hết giờ. Mỗi màn một mã để huỷ đúng cái của mình. */
+export const ALARM_REVIEW = 1;
+export const ALARM_EXAM = 2;
 
 export interface Platform {
   readonly kind: "desktop" | "android";
@@ -59,8 +65,25 @@ export interface Platform {
   pickMirrorDir(): Promise<OpResult & { dir?: string }>;
   mirrorNow(): Promise<OpResult & { files?: number }>;
 
+  /** Đọc một file sao lưu người dùng chọn, trả về nguyên văn để bên ngoài gộp. */
+  pickJsonText(): Promise<OpResult & { text?: string }>;
+
   /* --- linh tinh --- */
   openExternal(url: string): Promise<OpResult>;
+
+  /* --- lời nhắc hết giờ --- */
+  /**
+   * Hẹn một lời nhắc nổ vào đúng mốc `at` (mili giây kiểu `Date.now()`).
+   *
+   * Chuông trong app chỉ reo được khi app còn đang chạy và còn được cấp nhịp
+   * chạy. Mà đúng quy trình làm bài thì bạn bấm mở đề rồi rời khỏi app sang
+   * trình duyệt — lúc đó Android hãm hết mọi setInterval, chuông không bao giờ
+   * kêu. Lời nhắc này do hệ điều hành giữ, nên nổ đúng giờ kể cả khi app đang
+   * chạy nền hay màn hình đã tắt.
+   */
+  notifyAt(id: number, at: number, title: string, body: string): Promise<OpResult>;
+  /** Huỷ lời nhắc đã hẹn — tắt đồng hồ, nộp bài sớm, đổi bài. */
+  cancelNotify(id: number): Promise<OpResult>;
 
   /* --- file đính kèm --- */
   attachPick(): Promise<OpResult & { attachments?: Attachment[] }>;

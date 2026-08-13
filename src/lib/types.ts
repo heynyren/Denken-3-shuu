@@ -227,6 +227,8 @@ export interface DenkenBridge {
   importJson(): Promise<OpResult & { data?: AppData }>;
   /** Nhập tiến độ từ file Excel gốc — cách đưa dữ liệu riêng của bạn vào app. */
   importXlsx(): Promise<OpResult & { data?: AppData; report?: ImportReport }>;
+  /** Đọc nguyên văn một file sao lưu người dùng chọn, để giao diện tự gộp. */
+  pickJsonText(): Promise<OpResult & { text?: string }>;
   revealDataFolder(): Promise<OpResult>;
   /** Chọn thư mục nhân bản (thường là thư mục Google Drive trên máy). */
   pickMirrorDir(): Promise<OpResult & { dir?: string }>;

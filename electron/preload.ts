@@ -17,6 +17,7 @@ const bridge: DenkenBridge = {
   exportJson: () => ipcRenderer.invoke("store:export-json"),
   exportXlsx: () => ipcRenderer.invoke("store:export-xlsx"),
   importJson: () => ipcRenderer.invoke("store:import-json"),
+  pickJsonText: () => ipcRenderer.invoke("store:pick-json-text"),
   importXlsx: () => ipcRenderer.invoke("store:import-xlsx"),
   revealDataFolder: () => ipcRenderer.invoke("store:reveal"),
   openExternal: (url: string) => ipcRenderer.invoke("shell:open-external", url),

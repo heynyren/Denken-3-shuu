@@ -1,6 +1,9 @@
 import { useState } from "react";
 
+import { emptyAppData } from "../lib/defaults";
+import { parseBackup } from "../lib/normalise";
 import type { Overview } from "../lib/stats";
+import { describeMerge, mergeData } from "../lib/sync";
 import type { Store } from "../state/useStore";
 import { platform } from "../platform";
 
@@ -351,6 +354,88 @@ export default function Settings({
           </span>
         </div>
       </div>
+
+      {platform.can.mergeFile && (
+        <div className="card">
+          <div className="card-head">
+            <div className="card-title">
+              Đồng bộ máy tính ↔ điện thoại
+              <div className="card-sub">
+                Gộp hai bên bằng một file, không bên nào mất dữ liệu
+              </div>
+            </div>
+          </div>
+
+          <div className="callout" style={{ marginBottom: 14 }}>
+            <strong>Gộp chứ không ghi đè.</strong> Mỗi bài lấy bản{" "}
+            <em>sửa sau cùng</em>; số bài đã ôn của từng ngày thì cộng phần mới của
+            hai bên; huy hiệu và lượt thi thử gộp lại hết. Chạy nhầm hai lần cũng
+            không sao — lần thứ hai sẽ báo "hai bên đã giống nhau".
+          </div>
+
+          <ol className="step-list">
+            <li>
+              Máy đang có dữ liệu mới hơn: bấm <strong>Xuất file để mang sang</strong>.
+            </li>
+            <li>
+              Gửi file đó sang máy kia — Drive, Zalo, Telegram, dây USB, kiểu gì cũng
+              được.
+            </li>
+            <li>
+              Ở máy kia bấm <strong>Gộp từ file</strong> rồi chọn file vừa nhận.
+            </li>
+            <li>Muốn hai bên giống hệt nhau thì làm ngược lại một lượt nữa.</li>
+          </ol>
+
+          <div className="btn-row" style={{ marginTop: 12 }}>
+            <button
+              className="btn sm"
+              onClick={() =>
+                run(
+                  () => platform.exportJson(),
+                  () => "Đã xuất file. Gửi sang máy kia rồi bấm Gộp từ file ở đó nhé.",
+                )
+              }
+            >
+              📤 Xuất file để mang sang
+            </button>
+            <button
+              className="btn sm primary"
+              onClick={async () => {
+                await store.flush();
+                const picked = await platform.pickJsonText();
+                if (picked.cancelled) return;
+                if (!picked.ok || !picked.text) {
+                  setMessage({
+                    kind: "danger",
+                    text: picked.error ?? "Không đọc được file.",
+                  });
+                  return;
+                }
+
+                const parsed = parseBackup(picked.text, emptyAppData());
+                if ("error" in parsed) {
+                  setMessage({ kind: "danger", text: parsed.error });
+                  return;
+                }
+
+                // Không có mốc gốc để so: coi mọi thay đổi là mới, lấy nhiều hơn
+                // thay vì đoán bên nào đã xoá gì.
+                const { data: merged, report } = mergeData(null, data, parsed.data);
+                store.replaceAll(merged);
+                await store.flush();
+                setMessage({ kind: "", text: describeMerge(report) });
+              }}
+            >
+              🔀 Gộp từ file của máy kia
+            </button>
+          </div>
+
+          <div className="field-hint" style={{ marginTop: 8 }}>
+            File JSON không mang theo ảnh đính kèm — ảnh ở máy nào vẫn nằm ở máy đó.
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <div className="card-head">

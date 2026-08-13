@@ -15,7 +15,7 @@ Danh mục **1609 bài** trên denken-ou.com, chia bốn môn:
 
 - **Hôm nay** — vòng tròn KPI ngày, chuỗi ngày liên tiếp 🔥, đếm ngược tới ngày thi, tiến độ bốn môn, biểu đồ 12 tuần, lịch ôn 14 ngày tới, lịch nhiệt 17 tuần, 15 huy hiệu.
 - **Ôn tập** — ba hàng đợi: đến hạn hôm nay / đang làm sai / chưa làm. Lọc theo môn, chủ đề và độ khó ★1–5. Chấm đúng/sai bằng phím `1`/`2`. **Chấm xong app không tự nhảy bài** — bạn ở lại ghi chú bao lâu tuỳ ý, chuyển bài bằng `←` `→`, quay lại bài cũ lúc nào cũng được, bấm nhầm thì chấm lại ngay tại chỗ.
-- **Đồng hồ làm bài** — bấm `Space` là mở bài trên denken-ou.com và bắt đầu đếm ngược: A問題 5 phút, B問題 10 phút. Hết giờ thì chuông reo tới khi bạn tắt.
+- **Đồng hồ làm bài** — bấm `Space` là mở bài trên denken-ou.com và bắt đầu đếm ngược: A問題 5 phút, B問題 10 phút. Hết giờ thì chuông reo tới khi bạn tắt, kèm rung và **một lời nhắc của hệ điều hành** — nên rời khỏi app sang trình duyệt đọc đề hay tắt màn hình cũng vẫn biết là hết giờ.
 - **Danh sách bài** — cả 1609 bài, lọc theo môn / chủ đề / trạng thái / độ khó. **Tìm được bằng cả tiếng Nhật lẫn tiếng Việt**, có dấu hay không đều được: gõ `tụ điện`, `tu dien` hay `コンデンサ` đều ra cùng một chỗ.
 - **Đã làm gần đây** — ba ngày gần nhất, xem lại câu nào bấm đúng câu nào bấm sai. Bài sai xếp lên trước; bấm vào là mở luôn cả chủ đề đó ở chế độ Ôn tập.
 - **Ghi chú** — mỗi bài nhiều ghi chú, mỗi ghi chú đính kèm được ảnh/PDF/Word. Ảnh hiện ngay trong app; chụp màn hình rồi `Ctrl+V` thẳng vào ô ghi chú.
@@ -23,6 +23,7 @@ Danh mục **1609 bài** trên denken-ou.com, chia bốn môn:
 - **Thi thử** — làm nguyên một kỳ thi thật, 24 kỳ từ H18 tới R07下. Chọn nhiều môn thì thi **lần lượt**: mỗi môn một đồng hồ riêng — 90 phút (理論/電力/機械), 65 phút (法規) — nộp xong môn này mới mở môn kia, thời gian **không cộng dồn**. 理論/機械 chỉ được chọn một trong 問17 hoặc 問18. Chấm điểm thang 100, mốc đạt 60, kèm **bảng phân tích**: đúng bao nhiêu phần trăm ở từng chủ đề ra trong đề đó, rồi tới từng câu — bạn chọn gì, đáp án đúng là gì. Mở lại lượt thi cũ trong lịch sử vẫn xem được đúng bảng đó.
 - **Đang yếu ở đâu** — ngay trang Hôm nay: top 5 chủ đề có tỉ lệ sai cao nhất của mỗi môn, tính gộp cả lượt ôn tập hằng ngày lẫn từng ý trong đề thi thử. Bấm một chủ đề là mở màn Ôn tập với **toàn bộ** bài của chủ đề đó, bài đang sai và chưa làm xếp lên trước.
 - **Tiếng Việt** — chế độ Ôn tập hiện **bản dịch tên bài của chính bạn** — bản dịch viết sẵn trong file Excel gốc, 1608/1609 bài — ngay dưới tên bài tiếng Nhật; bài chưa dịch thì lùi về tên chủ đề. Ô tìm kiếm lục cả bản dịch này, nên gõ nguyên cụm như `suy ra lượng điện tích` cũng ra bài. Màn Thi thử cố ý **không** có: thi thì nên quen với chữ Nhật như đề thật.
+- **Đồng bộ máy tính ↔ điện thoại** — xuất một file ở máy này, gộp vào ở máy kia. **Gộp chứ không ghi đè**: mỗi bài lấy bản sửa sau cùng, ngày nào cũng cộng phần mới của cả hai bên, huy hiệu và lượt thi gộp lại hết.
 - **Huy hiệu** — giữ kín tới khi bạn chạm mốc, lúc đó mới nhảy lên chúc mừng.
 - Xuất ra Excel, JSON, hoặc gói `.zip` đầy đủ bất cứ lúc nào.
 
@@ -78,12 +79,12 @@ Hai bên nối nhau bằng `id` sinh từ link denken-ou.com, nên thêm bài m�
 
 Cùng một kho mã, cùng một giao diện. `src/lib/` (chu kỳ ôn, thống kê, engine thi
 thử, huy hiệu) không dính một dòng nào của Electron hay Capacitor — toàn bộ ràng
-buộc với nền tảng gói trong **một interface 17 method** ở `src/platform/`:
+buộc với nền tảng gói trong **một interface 20 method** ở `src/platform/`:
 
 ```
 src/platform/types.ts    interface Platform + bảng "nền tảng này làm được gì"
 src/platform/desktop.ts  Windows — chuyển tiếp sang window.denken của Electron
-src/platform/android.ts  Android — Capacitor Filesystem, Browser, Share
+src/platform/android.ts  Android — Capacitor Filesystem, Browser, Share, LocalNotifications
 src/platform/index.ts    chọn nền tảng lúc chạy
 ```
 
@@ -96,6 +97,14 @@ hướng của hệ điều hành.
 Giao diện đọc `platform.can.*` để **ẩn hẳn** nút nền tảng không làm được, thay vì
 cho bấm rồi báo lỗi. Bản Android hiện chưa có: nhập/xuất Excel, gói `.zip`, nhân
 bản thư mục, mở thư mục dữ liệu — nhập trên máy tính rồi đồng bộ sang là đủ.
+
+**Chuông báo hết giờ** phải làm hai lớp mới kêu được trên điện thoại. WebView
+chặn phát tiếng nếu `AudioContext` sinh ra lúc chưa có thao tác nào của người
+dùng, nên app mở khoá tiếng ngay lần chạm đầu tiên (`primeAudio()` ở
+`src/main.tsx`) thay vì đợi tới lúc chuông reo. Và vì đúng quy trình làm bài là
+bấm mở đề rồi rời khỏi app sang trình duyệt — lúc đó Android hãm hết
+`setInterval` — nên mỗi lần chạy đồng hồ, app hẹn thêm **một lời nhắc ở tầng hệ
+điều hành** nổ đúng giờ kể cả khi màn hình đã tắt.
 
 Ba lớp bảo vệ dữ liệu giữ nguyên trên Android: ghi nguyên tử (`.tmp` rồi đổi
 tên), sao lưu hằng ngày 30 bản, tự cứu hộ từ bản sao lưu khi `data.json` hỏng.
@@ -251,6 +260,25 @@ python3 scripts/nap-tieng-viet.py   # Excel → nameVi cho catalog.json
 Ghép được **1608/1609 bài**. Bài duy nhất chưa có là 電力 H22 問11 — bài do
 script thêm vào lúc vá danh mục nên vốn không có trong Excel.
 
+## Đồng bộ máy tính ↔ điện thoại
+
+**Cài đặt → Đồng bộ máy tính ↔ điện thoại**: xuất một file ở máy này, gộp vào ở
+máy kia, chuyển file bằng gì cũng được.
+
+Nó **gộp**, không ghi đè. Mỗi bài lấy bản có `updatedAt` mới hơn; số bài đã ôn
+của từng ngày lấy bên lớn hơn — thà thiếu còn hơn thổi phồng, vì con số thổi
+phồng làm sai cả chuỗi ngày liên tiếp lẫn mọi biểu đồ; huy hiệu và lượt thi thử
+gộp lại hết. Bấm nhầm hai lần liên tiếp cũng không sao, lần thứ hai ra y nguyên.
+
+Luật gộp nằm ở `src/lib/sync.ts`, có 15 nhóm kiểm thử chạy trong `npm run build`
+(`npm run test:sync`), gồm cả ca "đổi vai hai máy phải ra cùng một kết quả".
+
+Nút **⚠️ Khôi phục từ bản sao lưu** thì ngược lại — nó *thay thế* toàn bộ. Chỉ
+dùng khi dữ liệu máy này hỏng, đừng dùng để đồng bộ.
+
+Đồng bộ tự động qua Google Drive vẫn đang chờ hai Client ID:
+[docs/DONG-BO-GOOGLE-DRIVE.md](docs/DONG-BO-GOOGLE-DRIVE.md).
+
 ## Chu kỳ ôn tập
 
 Giữ đúng chu kỳ trong file Excel gốc. Làm đúng thì lên một cấp, làm sai thì về cấp 1:
@@ -272,7 +300,10 @@ electron/          tiến trình chính — giữ file, gác cổng IPC
   preload.ts       cầu nối duy nhất sang giao diện
 src/
   lib/             kiểu dữ liệu, chu kỳ ôn, thống kê, huy hiệu
+  lib/alarm.ts     chuông báo hết giờ, mở khoá tiếng từ lần chạm đầu
   lib/exam.ts      luật đề thi, chấm điểm, phân tích theo chủ đề
+  lib/normalise.ts nắn JSON bất kỳ về AppData — dùng chung cho cả ba chỗ đọc file
+  lib/sync.ts      luật gộp dữ liệu hai máy
   lib/weakness.ts  xếp hạng chủ đề yếu từ ôn tập + thi thử
   lib/history.ts   lịch sử chấm bài ba ngày gần nhất
   lib/vi.ts        tên chủ đề tiếng Việt, bỏ dấu, từ điển Việt–Nhật cho tìm kiếm

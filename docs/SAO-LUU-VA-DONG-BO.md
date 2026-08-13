@@ -214,3 +214,45 @@ chuỗi ngày liên tiếp lẫn mọi biểu đồ, mà thổi phồng rồi th
   `updatedAt` mới hơn thắng, bên kia mất. App có đếm và báo số bài rơi vào cảnh
   này sau mỗi lần đồng bộ, chứ không lặng lẽ bỏ đi.
 - Đây là đồng bộ **theo nhịp**, không phải thời gian thực.
+
+## 7. Dùng được ngay hôm nay: gộp bằng file
+
+Đồng bộ tự động qua Drive còn chờ hai Client ID (xem
+[DONG-BO-GOOGLE-DRIVE.md](DONG-BO-GOOGLE-DRIVE.md)). Trong lúc chờ, **Cài đặt →
+Đồng bộ máy tính ↔ điện thoại** làm đúng phần lõi ấy bằng tay:
+
+1. Máy đang có dữ liệu mới hơn: **Xuất file để mang sang**. Máy tính hiện hộp
+   thoại lưu file; điện thoại mở khay chia sẻ, chọn gửi đi đâu tuỳ bạn.
+2. Chuyển file sang máy kia — Drive, Zalo, Telegram, dây USB, kiểu gì cũng được.
+3. Ở máy kia bấm **Gộp từ file của máy kia** rồi chọn file vừa nhận.
+4. Muốn hai bên giống hệt nhau thì làm ngược lại một lượt nữa.
+
+Đây là **gộp**, không phải ghi đè — chạy đúng bộ luật ở mục 6.2 với `base = null`
+(mục 6.3). Không có mốc gốc nên nó không đoán bên nào đã xoá gì; kết quả là chỉ
+thêm chứ không bớt. Bấm nhầm hai lần liên tiếp cũng không sao: lần thứ hai ra y
+nguyên, có kiểm thử canh đúng chỗ đó.
+
+Nút **⚠️ Khôi phục từ bản sao lưu** thì ngược lại — nó *thay thế* toàn bộ. Chỉ
+dùng khi máy này hỏng dữ liệu, đừng dùng để đồng bộ.
+
+File JSON không mang theo ảnh đính kèm: ảnh ở máy nào vẫn nằm ở máy đó.
+
+## 8. Chuông báo hết giờ trên điện thoại
+
+Chuông trong app tự tổng hợp bằng Web Audio, mà trình duyệt lẫn WebView đều chặn
+phát tiếng nếu `AudioContext` sinh ra lúc chưa có thao tác nào của người dùng.
+Bản đầu tạo context ngay lúc chuông reo — người gọi lúc đó là đồng hồ đếm ngược,
+không phải ngón tay ai cả, nên trên Android chuông câm hoàn toàn.
+
+Hai việc phải làm cùng lúc:
+
+- **Mở khoá từ sớm.** `primeAudio()` gắn ở `src/main.tsx` chạy ngay lần chạm đầu
+  tiên và mỗi lần app quay lại từ chế độ chạy nền. `alarm.stop()` không đóng
+  context nữa — đóng là mất luôn quyền phát tiếng cho lần sau.
+- **Nhờ hệ điều hành giữ giờ.** Đúng quy trình làm bài là bấm mở đề rồi rời khỏi
+  app sang trình duyệt; lúc đó Android hãm hết `setInterval` và chuông không bao
+  giờ kêu. Nên mỗi lần bấm chạy đồng hồ, app hẹn thêm một lời nhắc ở tầng hệ điều
+  hành (`platform.notifyAt`) — nổ đúng giờ kể cả khi màn hình đã tắt. Nộp bài
+  sớm hay tắt đồng hồ thì huỷ luôn lời nhắc đó.
+
+Kèm theo là rung, để máy đang để im lặng vẫn báo được.

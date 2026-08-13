@@ -14,6 +14,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createAlarm } from "../lib/alarm";
 import { formatClock, partLabel, secondsFor } from "../lib/timing";
 import type { CatalogItem } from "../lib/types";
+import { platform } from "../platform";
+import { ALARM_REVIEW } from "../platform/types";
 import { Ring } from "./ui";
 
 export interface TimerHandle {
@@ -31,37 +33,65 @@ export function useCountdown(item: CatalogItem | undefined) {
 
   const running = endsAt !== null;
 
+  /**
+   * Hẹn lời nhắc ở tầng hệ điều hành song song với chuông trong app.
+   *
+   * Chuông trong app chỉ kêu khi app còn được cấp nhịp chạy. Mà bấm mở bài là
+   * nhảy sang trình duyệt: trên điện thoại app xuống nền, Android hãm hết
+   * setInterval, và bạn ngồi làm bài quá giờ mà không hay. Lời nhắc do hệ điều
+   * hành giữ thì nổ đúng giờ kể cả khi màn hình đã tắt.
+   */
+  const schedule = useCallback((at: number) => {
+    void platform.notifyAt(
+      ALARM_REVIEW,
+      at,
+      "⏰ Hết giờ làm bài",
+      "Chốt đáp án rồi chấm đúng/sai nhé.",
+    );
+  }, []);
+
+  const unschedule = useCallback(() => {
+    void platform.cancelNotify(ALARM_REVIEW);
+  }, []);
+
   const stop = useCallback(() => {
     alarm.current.stop();
+    unschedule();
     setEndsAt(null);
     setPausedLeft(null);
     setExpired(false);
-  }, []);
+  }, [unschedule]);
 
   const start = useCallback(() => {
     if (!item) return;
     alarm.current.stop();
     setExpired(false);
     setPausedLeft(null);
-    setEndsAt(Date.now() + secondsFor(item) * 1000);
-  }, [item]);
+    const at = Date.now() + secondsFor(item) * 1000;
+    setEndsAt(at);
+    schedule(at);
+  }, [item, schedule]);
 
   const pause = useCallback(() => {
     if (endsAt === null) return;
     setPausedLeft(Math.max(0, Math.round((endsAt - Date.now()) / 1000)));
     setEndsAt(null);
-  }, [endsAt]);
+    unschedule();
+  }, [endsAt, unschedule]);
 
   const resume = useCallback(() => {
     if (pausedLeft === null) return;
-    setEndsAt(Date.now() + pausedLeft * 1000);
+    const at = Date.now() + pausedLeft * 1000;
+    setEndsAt(at);
     setPausedLeft(null);
-  }, [pausedLeft]);
+    schedule(at);
+  }, [pausedLeft, schedule]);
 
   const dismiss = useCallback(() => {
     alarm.current.stop();
+    unschedule();
     setExpired(false);
-  }, []);
+  }, [unschedule]);
 
   // Đổi sang bài khác thì bỏ đồng hồ cũ, kể cả khi chuông đang reo.
   useEffect(() => {

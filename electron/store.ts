@@ -24,16 +24,8 @@ import path from "node:path";
 
 import seed from "../src/data/seed.json";
 import { DEFAULT_SETTINGS, SCHEMA_VERSION } from "../src/lib/defaults";
-import type {
-  AppData,
-  Attachment,
-  DayLog,
-  ExamAnswerRecord,
-  ExamResult,
-  ItemProgress,
-  LinkEntry,
-  NoteEntry,
-} from "../src/lib/types";
+import { emptyProgress, normalise as normaliseData } from "../src/lib/normalise";
+import type { AppData, ItemProgress } from "../src/lib/types";
 
 // Phiên bản schema và bộ cài đặt mặc định nằm ở src/lib/defaults.ts để Android
 // dùng chung — hai bản chép tay sẽ lệch nhau, mà lệch schema là hỏng di trú.
@@ -68,106 +60,6 @@ interface SeedShape {
   progress: Record<string, Partial<ItemProgress>>;
 }
 
-function emptyProgress(): ItemProgress {
-  return {
-    status: "todo",
-    notes: [],
-    links: [],
-    updatedAt: new Date().toISOString(),
-    doneDate: null,
-    srsLevel: 0,
-    nextReview: null,
-    history: [],
-  };
-}
-
-/** id ổn định cho ghi chú/link sinh ra lúc chuyển đổi dữ liệu cũ. */
-let counter = 0;
-function newId(prefix: string): string {
-  counter += 1;
-  return `${prefix}-${Date.now().toString(36)}-${counter.toString(36)}`;
-}
-
-function cleanAttachments(input: unknown): Attachment[] {
-  if (!Array.isArray(input)) return [];
-  return input.flatMap((raw) => {
-    if (typeof raw !== "object" || raw === null) return [];
-    const entry = raw as Partial<Attachment>;
-    // Không có tên file trên đĩa thì mô tả này vô dụng, bỏ đi.
-    if (typeof entry.file !== "string" || !entry.file) return [];
-    return [
-      {
-        id: entry.id ?? newId("att"),
-        name: typeof entry.name === "string" ? entry.name : entry.file,
-        file: entry.file,
-        kind: entry.kind ?? "other",
-        size: Number(entry.size) || 0,
-        addedAt: entry.addedAt ?? new Date().toISOString(),
-      },
-    ];
-  });
-}
-
-/**
- * Đọc phần ghi chú, chấp nhận cả dạng cũ (một chuỗi) lẫn dạng mới (danh sách).
- * Đây là toàn bộ đường di trú v2 -> v3 cho ghi chú.
- */
-function cleanNotes(entry: Record<string, unknown>): NoteEntry[] {
-  if (Array.isArray(entry.notes)) {
-    return entry.notes.flatMap((raw) => {
-      if (typeof raw !== "object" || raw === null) return [];
-      const note = raw as Partial<NoteEntry>;
-      const text = typeof note.text === "string" ? note.text : "";
-      const attachments = cleanAttachments(note.attachments);
-      // Ghi chú rỗng và không có file thì không giữ lại làm gì.
-      if (!text.trim() && attachments.length === 0) return [];
-      return [
-        {
-          id: note.id ?? newId("note"),
-          text,
-          createdAt: note.createdAt ?? new Date().toISOString(),
-          attachments,
-        },
-      ];
-    });
-  }
-
-  // Dạng cũ: một chuỗi ghi chú duy nhất.
-  const legacy = typeof entry.note === "string" ? entry.note : "";
-  if (!legacy.trim()) return [];
-  return [
-    {
-      id: newId("note"),
-      text: legacy,
-      createdAt:
-        typeof entry.doneDate === "string" ? entry.doneDate : new Date().toISOString(),
-      attachments: [],
-    },
-  ];
-}
-
-/** Như trên, cho link tham khảo. */
-function cleanLinks(entry: Record<string, unknown>): LinkEntry[] {
-  if (Array.isArray(entry.links)) {
-    return entry.links.flatMap((raw) => {
-      if (typeof raw !== "object" || raw === null) return [];
-      const link = raw as Partial<LinkEntry>;
-      const url = typeof link.url === "string" ? link.url.trim() : "";
-      if (!url) return [];
-      return [
-        {
-          id: link.id ?? newId("link"),
-          url,
-          label: typeof link.label === "string" ? link.label : "",
-        },
-      ];
-    });
-  }
-
-  const legacy = typeof entry.refLink === "string" ? entry.refLink.trim() : "";
-  return legacy ? [{ id: newId("link"), url: legacy, label: "" }] : [];
-}
-
 function buildFromSeed(): AppData {
   const raw = seed as unknown as SeedShape;
   const progress: Record<string, ItemProgress> = {};
@@ -189,111 +81,12 @@ function buildFromSeed(): AppData {
   };
 }
 
-/* ------------------------------------------------------------------ */
-/* Kiểm tra và vá dữ liệu đọc từ đĩa                                   */
-/* ------------------------------------------------------------------ */
-
 /**
- * Nhận vào JSON bất kỳ, trả về AppData hợp lệ.
- * Thà giữ lại được phần lớn dữ liệu còn hơn từ chối cả file vì một trường lạ.
+ * Nắn JSON bất kỳ về AppData, lấy sổ dựng từ seed.json làm chỗ dựa.
+ * Ruột nằm ở src/lib/normalise.ts để Android dùng chung.
  */
-function normalise(input: unknown): AppData {
-  const base = buildFromSeed();
-  if (typeof input !== "object" || input === null) return base;
-  const raw = input as Partial<AppData>;
-
-  const progress: Record<string, ItemProgress> = {};
-  for (const [id, value] of Object.entries(raw.progress ?? {})) {
-    if (typeof value !== "object" || value === null) continue;
-    const entry = value as Record<string, unknown> & Partial<ItemProgress>;
-    progress[id] = {
-      status: entry.status ?? "todo",
-      notes: cleanNotes(entry),
-      links: cleanLinks(entry),
-      updatedAt:
-        typeof entry.updatedAt === "string" ? entry.updatedAt : new Date().toISOString(),
-      doneDate: entry.doneDate ?? null,
-      srsLevel: Number.isFinite(entry.srsLevel) ? Number(entry.srsLevel) : 0,
-      nextReview: entry.nextReview ?? null,
-      history: Array.isArray(entry.history) ? entry.history : [],
-    };
-  }
-
-  const dailyLog: Record<string, DayLog> = {};
-  for (const [day, value] of Object.entries(raw.dailyLog ?? {})) {
-    if (typeof value !== "object" || value === null) continue;
-    const entry = value as Partial<DayLog>;
-    dailyLog[day] = {
-      reviewed: Number(entry.reviewed) || 0,
-      correct: Number(entry.correct) || 0,
-      wrong: Number(entry.wrong) || 0,
-      bySubject: entry.bySubject ?? {},
-    };
-  }
-
-  return {
-    schemaVersion: SCHEMA_VERSION,
-    createdAt: raw.createdAt ?? base.createdAt,
-    updatedAt: raw.updatedAt ?? base.updatedAt,
-    settings: { ...DEFAULT_SETTINGS, ...(raw.settings ?? {}) },
-    progress: Object.keys(progress).length > 0 ? progress : base.progress,
-    dailyLog,
-    badges: raw.badges ?? {},
-    examResults: cleanExamResults(raw.examResults),
-  };
-}
-
-/**
- * Lọc lịch sử thi thử về đúng hình dạng.
- *
- * Bài làm từng câu (`answers`) chỉ có ở lượt thi lưu từ v5 trở đi; lượt cũ giữ
- * nguyên phần điểm, chỉ là không có bảng phân tích chi tiết.
- */
-function cleanExamResults(input: unknown): ExamResult[] {
-  if (!Array.isArray(input)) return [];
-  const out: ExamResult[] = [];
-
-  for (const entry of input) {
-    if (typeof entry !== "object" || entry === null) continue;
-    const raw = entry as Partial<ExamResult>;
-    if (typeof raw.id !== "string" || !Array.isArray(raw.scores)) continue;
-
-    out.push({
-      id: raw.id,
-      exam: typeof raw.exam === "string" ? raw.exam : "",
-      takenAt: typeof raw.takenAt === "string" ? raw.takenAt : new Date().toISOString(),
-      scores: raw.scores.map((score) => {
-        const answers = Array.isArray(score?.answers)
-          ? score.answers
-              .filter(
-                (record): record is ExamAnswerRecord =>
-                  typeof record?.id === "string" &&
-                  Array.isArray(record.picked) &&
-                  Array.isArray(record.truth),
-              )
-              .map((record) => ({
-                id: record.id,
-                picked: record.picked.map((value) =>
-                  typeof value === "number" ? value : null,
-                ),
-                truth: record.truth.map((value) =>
-                  typeof value === "number" ? value : null,
-                ),
-              }))
-          : undefined;
-
-        return {
-          subject: score.subject,
-          score: Number(score.score) || 0,
-          correct: Number(score.correct) || 0,
-          total: Number(score.total) || 0,
-          passed: Boolean(score.passed),
-          ...(answers ? { answers } : {}),
-        };
-      }),
-    });
-  }
-  return out;
+export function normalise(input: unknown): AppData {
+  return normaliseData(input, buildFromSeed());
 }
 
 /**
@@ -341,7 +134,10 @@ async function newestUsableBackup(): Promise<AppData | null> {
   const candidates = names.filter((n) => n.endsWith(".json")).sort().reverse();
   for (const name of candidates) {
     try {
-      return normalise(await readJson(path.join(paths.backupDir, name)));
+      return normaliseData(
+        await readJson(path.join(paths.backupDir, name)),
+        buildFromSeed(),
+      );
     } catch {
       continue; // bản này hỏng, thử bản cũ hơn
     }
@@ -365,7 +161,7 @@ export async function load(): Promise<AppData> {
 
   let data: AppData;
   try {
-    data = migrate(normalise(await readJson(paths.file)));
+    data = migrate(normaliseData(await readJson(paths.file), buildFromSeed()));
   } catch (error) {
     const missing = (error as NodeJS.ErrnoException).code === "ENOENT";
     if (missing) {
@@ -450,4 +246,3 @@ export async function countBackups(): Promise<number> {
   }
 }
 
-export { normalise };

@@ -1117,6 +1117,22 @@ select {
   color: var(--text);
 }
 
+/* Các bước làm theo thứ tự — dùng ở phần đồng bộ máy tính ↔ điện thoại. */
+.step-list {
+  margin: 0;
+  padding-left: 22px;
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.75;
+}
+.step-list li::marker {
+  color: var(--blue);
+  font-weight: 700;
+}
+.step-list strong {
+  color: var(--text);
+}
+
 /* ==========================================================================
    Hộp thoại giới thiệu
    ========================================================================== */
@@ -1628,6 +1644,11 @@ select {
   box-shadow: var(--shadow-lg);
   padding: 12px 16px;
 }
+/* Khối chữ giữa thanh đầu phòng thi: "R07下 — 理論 (môn 1/2)". */
+.exam-bar-text {
+  flex: 1;
+  min-width: 0;
+}
 .exam-clock {
   font-size: 15px;
   font-weight: 800;
@@ -2089,6 +2110,12 @@ select {
   .exam-bar {
     flex-wrap: wrap;
     row-gap: 10px;
+  }
+  /* Khối chữ giữa phải chiếm hết phần còn lại của hàng đầu. Không ép thì hai
+     cái nút bên phải giành hết chỗ và bóp nó thành một cột rộng đúng một chữ,
+     mỗi chữ một dòng. Ring 64px + gap 14px = 78px. */
+  .exam-bar-text {
+    min-width: calc(100% - 78px);
   }
   .exam-bar .btn {
     flex: 1;
