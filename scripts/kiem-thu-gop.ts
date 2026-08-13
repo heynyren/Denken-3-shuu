@@ -5,6 +5,7 @@ import type { SyncConfig } from "../src/lib/cloud";
 import type { FetchLike } from "../src/lib/github";
 import { fromBase64, toBase64, validRepo } from "../src/lib/github";
 import { parseBackup } from "../src/lib/normalise";
+import { highlight, matchesQuery, trichDoan } from "../src/lib/vi";
 import { mergeData } from "../src/lib/sync";
 import type { AppData, ItemProgress } from "../src/lib/types";
 import { safeName } from "../src/platform/android";
@@ -566,6 +567,45 @@ async function kiemThuDongBo(): Promise<void> {
     const kq4 = await syncOnce({ config: cauHinh(), local: kq2.data, ...khoDT, doFetch: gh.doFetch });
     check(!kq4.pushed && !kq4.changed, "điện thoại đồng bộ tiếp: cũng đứng yên");
   }
+}
+
+/* ---- 13b. Tô sáng từ khoá trong kết quả tìm kiếm ---- */
+{
+  const noi = (text: string, q: string) =>
+    highlight(text, q).map((m) => (m.hit ? `[${m.text}]` : m.text)).join("");
+
+  // Chỗ dễ sai nhất: chữ có dấu đứng TRƯỚC chỗ khớp. Bỏ dấu kiểu xoá hẳn sẽ làm
+  // chuỗi ngắn lại và đoạn tô lệch đúng bằng số dấu đã xoá.
+  check(noi("Điện trở của dây dẫn", "dien tro") === "[Điện] [trở] của dây dẫn",
+    `tô đúng chỗ dù gõ không dấu: ${noi("Điện trở của dây dẫn", "dien tro")}`);
+  check(noi("Tính điện trở", "điện trở") === "Tính [điện] [trở]",
+    `gõ có dấu cũng tô đúng: ${noi("Tính điện trở", "điện trở")}`);
+  check(noi("コンデンサの静電容量", "コンデンサ") === "[コンデンサ]の静電容量",
+    "tô được cả tiếng Nhật");
+  check(noi("Bài tập tụ điện", "tụ điện").includes("[tụ] [điện]"),
+    "tô được cụm hai từ");
+  check(noi("không liên quan", "xyz") === "không liên quan",
+    "không khớp thì không tô gì");
+  check(highlight("", "abc").length === 1, "chuỗi rỗng không làm vỡ");
+  check(highlight("abc", "").length === 1 && highlight("abc", "")[0]!.hit === false,
+    "câu tìm rỗng thì trả nguyên chuỗi");
+
+  // Ghép lại phải ra đúng chuỗi gốc — không mất, không thêm ký tự nào.
+  for (const [text, q] of [
+    ["Điện trở suất của đồng", "dien tro"],
+    ["Bài tập về tụ điện phẳng", "tu dien"],
+    ["誘電体挿入量を変化させた", "誘電体"],
+  ] as const) {
+    check(highlight(text, q).map((m) => m.text).join("") === text,
+      `ghép lại đúng nguyên văn: ${text.slice(0, 16)}…`);
+  }
+
+  const dai = "Mẹo nhớ: nhân hai vế rồi rút gọn, chú ý đơn vị micro fara nhé bạn ơi";
+  const doan = trichDoan(dai, "rút gọn", 12);
+  check(doan.includes("rút gọn") && doan.length < dai.length,
+    `trích đoạn quanh chỗ khớp: ${doan}`);
+  check(matchesQuery("ghi chú: mẹo nhớ công thức", "meo nho"),
+    "tìm không dấu vẫn khớp chữ trong ghi chú");
 }
 
 /* ---- 14. Chuông báo hết giờ ---- */

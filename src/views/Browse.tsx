@@ -22,10 +22,18 @@ import { items, subjectName, subjects, topicsBySubject } from "../lib/catalog";
 import { isDue, overdueDays, todayISO } from "../lib/srs";
 import type { CatalogItem, ItemStatus, SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
-import { haystackOf, matchesQuery } from "../lib/vi";
+import { haystackOf, highlight, matchesQuery, topicVi, trichDoan } from "../lib/vi";
 
 /** Chiều cao cố định mỗi dòng — cần cho phép tính cuộn ảo. */
-const ROW_HEIGHT = 62;
+/**
+ * Chiều cao một dòng, KHOÁ CỨNG.
+ *
+ * Danh sách 1609 bài chạy ảo hoá: chỉ vẽ những dòng đang lọt trong khung nhìn,
+ * vị trí tính bằng phép nhân với hằng số này. Nội dung cao hơn con số này là
+ * các dòng đè lên nhau — nên mọi thứ trong dòng phải cắt bằng dấu ba chấm, và
+ * đổi bố cục dòng thì phải đo lại rồi sửa số này.
+ */
+const ROW_HEIGHT = 84;
 /** Vẽ dư vài dòng ngoài khung nhìn để cuộn nhanh không thấy khoảng trắng. */
 const OVERSCAN = 6;
 
@@ -270,6 +278,7 @@ export default function Browse({
                     store={store}
                     today={today}
                     selected={selected === item.id}
+                    query={query}
                     onSelect={() =>
                       setSelected((current) => (current === item.id ? null : item.id))
                     }
@@ -343,22 +352,51 @@ export default function Browse({
 
 /* ------------------------------------------------------------------ */
 
+/** Một mẩu chữ, phần khớp câu tìm thì tô sáng. */
+function To({ text, q }: { text: string; q: string }) {
+  if (!q.trim() || !text) return <>{text}</>;
+  return (
+    <>
+      {highlight(text, q).map((manh, i) =>
+        manh.hit ? (
+          <mark key={i} className="hit">
+            {manh.text}
+          </mark>
+        ) : (
+          <span key={i}>{manh.text}</span>
+        ),
+      )}
+    </>
+  );
+}
+
 function Row({
   item,
   store,
   today,
   selected,
+  query,
   onSelect,
 }: {
   item: CatalogItem;
   store: Store;
   today: string;
   selected: boolean;
+  /** Câu đang tìm, để tô sáng chỗ khớp. */
+  query: string;
   onSelect(): void;
 }) {
   const progress = store.data!.progress[item.id];
   const late = overdueDays(progress, today);
   const due = isDue(progress, today);
+
+  // Ghi chú nào chứa câu đang tìm; lấy đoạn quanh chỗ khớp để hiện trong dòng.
+  const khopGhiChu = (() => {
+    const needle = query.trim();
+    if (!needle) return "";
+    const note = (progress?.notes ?? []).find((n) => matchesQuery(n.text, needle));
+    return note ? trichDoan(note.text, needle) : "";
+  })();
 
   return (
     <div
@@ -374,8 +412,25 @@ function Row({
               <Star className="h-3.5 w-3.5" strokeWidth={0} fill="currentColor" />
             </span>
           )}
-          {item.name}
+          <To text={item.name} q={query} />
         </div>
+
+        {/* Tiếng Việt hiện luôn, không phải bấm vào mới thấy. Bài chưa dịch thì
+            lùi về tên chủ đề — dòng này không bao giờ trống. */}
+        <div className="item-title-vi">
+          <To text={item.nameVi || topicVi(item.topic)} q={query} />
+        </div>
+        {/* Khớp nhờ ghi chú thì phải cho thấy chỗ khớp, không thì người dùng
+            nhìn vào không hiểu vì sao bài này lại ra. */}
+        {khopGhiChu && (
+          <div className="item-note">
+            <Ic i={StickyNote} className="h-3 w-3" />
+            <span className="item-note-text">
+              <To text={khopGhiChu} q={query} />
+            </span>
+          </div>
+        )}
+
         <div className="item-meta">
           <span className="ja">{item.topic}</span>
           <span>·</span>

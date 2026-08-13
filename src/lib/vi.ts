@@ -330,3 +330,100 @@ export function matchesQuery(haystack: string, query: string): boolean {
   const terms = expandQuery(needle);
   return terms.some((term) => haystack.includes(term));
 }
+
+/* ------------------------------------------------------------------ */
+/* Tô sáng từ khoá trong kết quả tìm kiếm                              */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Bỏ dấu nhưng GIỮ NGUYÊN độ dài chuỗi: mỗi ký tự vào là đúng một ký tự ra.
+ *
+ * `noAccent()` ở trên dùng NFD rồi xoá dấu, nên chuỗi ra ngắn hơn chuỗi vào —
+ * dùng để so khớp thì không sao, nhưng để TÔ SÁNG thì hỏng: vị trí tìm được
+ * trên bản bỏ dấu không còn trỏ đúng chỗ trên chuỗi gốc, và đoạn tô sẽ lệch dần
+ * đi mỗi khi gặp một chữ có dấu.
+ *
+ * Ký tự nào bỏ dấu xong không ra đúng một ký tự thì giữ nguyên, thà không tô
+ * còn hơn tô lệch.
+ */
+function boDauGiuDoDai(text: string): string {
+  let out = "";
+  for (const ch of text) {
+    const bo = ch.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    out += bo.length === 1 ? (bo === "đ" ? "d" : bo) : ch.toLowerCase();
+  }
+  return out;
+}
+
+/** Một mẩu văn bản: có phải phần khớp câu tìm không. */
+export interface Manh {
+  text: string;
+  hit: boolean;
+}
+
+/**
+ * Cắt một đoạn chữ thành các mẩu, đánh dấu mẩu nào khớp câu tìm.
+ *
+ * Chỗ khó: phép khớp của app bỏ qua dấu tiếng Việt và còn tra từ điển sang
+ * tiếng Nhật. Nếu tô sáng bằng cách so chuỗi thẳng thì gõ "dien tro" sẽ ra kết
+ * quả nhưng chẳng chỗ nào sáng lên — người dùng nhìn vào không hiểu vì sao bài
+ * này lại khớp.
+ *
+ * Nên dò trên bản bỏ dấu **giữ nguyên độ dài** (`boDauGiuDoDai`), rồi cắt trên
+ * chuỗi GỐC theo đúng vị trí ấy. Dùng `noAccent()` ở đây là sai: nó xoá hẳn dấu
+ * nên chuỗi ngắn lại, và đoạn tô sáng lệch dần theo số chữ có dấu đứng trước.
+ */
+export function highlight(text: string, query: string): Manh[] {
+  const needle = query.trim();
+  if (!text || !needle) return [{ text, hit: false }];
+
+  const kho = boDauGiuDoDai(text);
+  // Từng từ một, cộng thêm các từ tiếng Nhật tra được từ điển.
+  const tu = [
+    ...boDauGiuDoDai(needle).split(/\s+/).filter((t) => t.length > 0),
+    ...expandQuery(needle).map((t) => boDauGiuDoDai(t)),
+  ];
+  if (tu.length === 0) return [{ text, hit: false }];
+
+  // Đánh dấu từng ký tự có nằm trong một lần khớp nào không, rồi mới gộp lại —
+  // làm vậy hai từ khớp chồng lấn nhau cũng không sinh ra mẩu lồng nhau.
+  const danh = new Array<boolean>(text.length).fill(false);
+  for (const t of tu) {
+    let from = 0;
+    for (;;) {
+      const at = kho.indexOf(t, from);
+      if (at < 0) break;
+      for (let i = at; i < at + t.length && i < danh.length; i += 1) danh[i] = true;
+      from = at + t.length;
+    }
+  }
+
+  const manh: Manh[] = [];
+  for (let i = 0; i < text.length; i += 1) {
+    const hit = danh[i]!;
+    const cuoi = manh[manh.length - 1];
+    if (cuoi && cuoi.hit === hit) cuoi.text += text[i];
+    else manh.push({ text: text[i]!, hit });
+  }
+  return manh;
+}
+
+/**
+ * Lấy một đoạn ngắn quanh chỗ khớp trong ghi chú.
+ *
+ * Ghi chú có thể dài cả trang; hiện nguyên văn trong một dòng danh sách là vô
+ * dụng. Cắt lấy quanh chỗ khớp đầu tiên, chừa hai bên mỗi bên vài chục ký tự để
+ * đọc còn ra nghĩa.
+ */
+export function trichDoan(text: string, query: string, quanh = 40): string {
+  const needle = boDauGiuDoDai(query.trim()).split(/\s+/)[0] ?? "";
+  const kho = boDauGiuDoDai(text);
+  const at = needle ? kho.indexOf(needle) : -1;
+  if (at < 0) return text.slice(0, quanh * 2).trim();
+
+  const dau = Math.max(0, at - quanh);
+  const cuoi = Math.min(text.length, at + needle.length + quanh);
+  return (
+    (dau > 0 ? "…" : "") + text.slice(dau, cuoi).trim() + (cuoi < text.length ? "…" : "")
+  );
+}

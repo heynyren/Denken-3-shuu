@@ -18,6 +18,7 @@ import { Browser } from "@capacitor/browser";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { LocalNotifications } from "@capacitor/local-notifications";
 import { Share } from "@capacitor/share";
+import { StatusBar, Style } from "@capacitor/status-bar";
 
 import { emptyAppData } from "../lib/defaults";
 import type { Attachment, AttachmentKind, OpResult } from "../lib/types";
@@ -233,6 +234,30 @@ async function shareText(name: string, text: string, title: string): Promise<OpR
 /* ------------------------------------------------------------------ */
 /* Nền tảng                                                            */
 /* ------------------------------------------------------------------ */
+
+/**
+ * Dọn thanh trạng thái ngay lúc app khởi động.
+ *
+ * Android 15 trở đi ép mọi app vẽ tràn ra sau thanh trạng thái, nên nếu không
+ * làm gì thì đồng hồ, pin và biểu tượng thông báo của máy nằm đè lên phần đầu
+ * app. Hai việc phải làm, thiếu cái nào cũng còn lỗi:
+ *
+ *   1. Đặt màu chữ của thanh trạng thái thành SÁNG — nền app tối, để chữ tối
+ *      thì không đọc được giờ với phần trăm pin.
+ *   2. Tô nền thanh đó cùng màu với thanh đầu app, cho liền một khối.
+ *
+ * Còn phần chừa chỗ thì nằm ở CSS (`env(safe-area-inset-top)`), vì chỉ CSS mới
+ * biết bố cục bên trong sắp xếp ra sao.
+ */
+void (async () => {
+  try {
+    await StatusBar.setStyle({ style: Style.Dark });
+    await StatusBar.setBackgroundColor({ color: "#1c1c1e" });
+  } catch {
+    // Máy cũ hoặc bản Android không cho đổi thì thôi, phần chừa chỗ bằng CSS
+    // vẫn còn tác dụng.
+  }
+})();
 
 export const android: Platform = {
   kind: "android",

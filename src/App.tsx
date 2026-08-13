@@ -17,6 +17,7 @@ import BadgeCelebration from "./components/BadgeCelebration";
 import { computeOverview } from "./lib/stats";
 import { useStore } from "./state/useStore";
 import { useSync } from "./state/useSync";
+import { useSwipeTabs } from "./state/useSwipeTabs";
 import { KeepAlive } from "./components/KeepAlive";
 import { platform } from "./platform";
 import Dashboard from "./views/Dashboard";
@@ -92,6 +93,13 @@ export default function App() {
   // tập với đúng chủ đề đó, để ôn lại cả mảng kiến thức chứ không vá từng bài.
   const [reviewFocus, setReviewFocus] = useState<TopicFocus | null>(null);
   const [showAbout, setShowAbout] = useState(false);
+
+  /* --- Vuốt ngang để đổi tab --- */
+  const soTab = TABS.findIndex((entry) => entry.key === tab);
+  useSwipeTabs(soTab, TABS.length, (toi) => {
+    const dich = TABS[toi];
+    if (dich) setTab(dich.key);
+  });
 
   /* --- Nút Quay lại của Android --- */
   useEffect(() => {

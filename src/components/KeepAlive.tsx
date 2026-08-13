@@ -60,7 +60,7 @@ export function KeepAlive({
 
   return (
     <DangHien.Provider value={active}>
-      <div className="pane" hidden={!active}>
+      <div className={`pane${active ? " vao" : ""}`} hidden={!active}>
         {children}
       </div>
     </DangHien.Provider>

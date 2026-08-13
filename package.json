@@ -1,6 +1,6 @@
 {
   "name": "denken-3-shuu",
-  "version": "1.16.0",
+  "version": "1.17.0",
   "description": "App ôn thi 電験三種 - theo dõi KPI, ôn tập giãn cách và tiến bộ hằng ngày",
   "author": "heynyren",
   "license": "MIT",
@@ -32,6 +32,7 @@
     "@capacitor/local-notifications": "^7.0.7",
     "@capacitor/preferences": "^7.0.4",
     "@capacitor/share": "^7.0.4",
+    "@capacitor/status-bar": "^7.0.6",
     "@radix-ui/react-progress": "^1.1.16",
     "@radix-ui/react-tooltip": "^1.2.16",
     "archiver": "^5.3.2",
