@@ -1,5 +1,8 @@
 /** Hộp giới thiệu tác giả, mở từ nút nhỏ ở cuối thanh bên. */
 
+import { X } from "lucide-react";
+
+import { Ic } from "./ui/icon";
 import { useEffect } from "react";
 
 import { ExternalLink } from "./ui";
@@ -53,7 +56,7 @@ export default function About({ onClose }: { onClose(): void }) {
             <div className="small dim">Ninh Bình, Việt Nam</div>
           </div>
           <button className="icon-btn" onClick={onClose} title="Đóng (Esc)">
-            ✕
+            <Ic i={X} />
           </button>
         </div>
 

@@ -1,3 +1,18 @@
+import {
+  CalendarCheck,
+  CheckCircle2,
+  Star,
+  Moon,
+  PartyPopper,
+  RotateCcw,
+  Search,
+  Sparkles,
+  Target,
+  Trophy,
+  X,
+  XCircle,
+} from "lucide-react";
+import { Ic } from "../components/ui/icon";
 import { useEffect, useMemo, useState } from "react";
 
 import ItemDetail from "../components/ItemDetail";
@@ -190,19 +205,19 @@ export default function Review({
               className={`chip${mode === "due" ? " on" : ""}`}
               onClick={() => setMode("due")}
             >
-              🎯 Đến hạn hôm nay ({view.dueToday})
+              <Ic i={Target} /> Đến hạn hôm nay ({view.dueToday})
             </button>
             <button
               className={`chip${mode === "wrong" ? " on" : ""}`}
               onClick={() => setMode("wrong")}
             >
-              ❌ Đang làm sai ({view.counts.wrong})
+              <Ic i={XCircle} /> Đang làm sai ({view.counts.wrong})
             </button>
             <button
               className={`chip${mode === "fresh" ? " on" : ""}`}
               onClick={() => setMode("fresh")}
             >
-              ✨ Bài chưa làm ({view.counts.todo})
+              <Ic i={Sparkles} /> Bài chưa làm ({view.counts.todo})
             </button>
           </div>
           <div className="small muted nowrap">
@@ -221,7 +236,7 @@ export default function Review({
                 </span>
               </div>
               <button className="btn ghost sm" onClick={() => setMode("due")}>
-                ✕ Thoát chế độ chủ đề
+                <Ic i={X} /> Thoát chế độ chủ đề
               </button>
             </div>
           </div>
@@ -270,13 +285,19 @@ export default function Review({
                   onClick={() => toggleStar(value)}
                   title={`Chỉ ôn bài ${value} sao`}
                 >
-                  {"★".repeat(value)}
-                  <span className="star-off">{"★".repeat(5 - value)}</span>
+                  {[1, 2, 3, 4, 5].map((level) => (
+                    <Star
+                      key={level}
+                      className={`h-3 w-3 shrink-0${level > value ? " star-off" : ""}`}
+                      strokeWidth={level > value ? 1.75 : 0}
+                      fill={level > value ? "none" : "currentColor"}
+                    />
+                  ))}
                 </button>
               ))}
               {stars.size > 0 && (
                 <button className="chip" onClick={() => setStars(new Set())}>
-                  ✕ Bỏ lọc
+                  <Ic i={X} /> Bỏ lọc
                 </button>
               )}
             </div>
@@ -291,14 +312,14 @@ export default function Review({
               color={view.today.metGoal ? "var(--green)" : "var(--blue)"}
             />
             <span className="nowrap">
-              {view.today.metGoal ? "Đạt mục tiêu 🎉" : `còn ${view.today.remaining}`}
+              {view.today.metGoal ? "Đạt mục tiêu" : `còn ${view.today.remaining}`}
             </span>
             <button
               className="btn ghost xs"
               onClick={() => setRebuild((n) => n + 1)}
               title="Bỏ những bài đã xử lý xong khỏi danh sách rồi dựng lại từ đầu"
             >
-              🔄 Dựng lại danh sách
+              <Ic i={RotateCcw} /> Dựng lại danh sách
             </button>
           </div>
         )}
@@ -307,13 +328,13 @@ export default function Review({
       {!item ? (
         <div className="card">
           {mode === "topic" ? (
-            <Empty icon="🔍" title="Chủ đề này chưa có bài nào">
+            <Empty icon={Search} title="Chủ đề này chưa có bài nào">
               <p className="muted">
                 Có thể tên chủ đề đã đổi ở bản danh mục mới. Thử tìm trong Danh sách bài.
               </p>
             </Empty>
           ) : mode === "wrong" ? (
-            <Empty icon="🎉" title="Không còn bài nào đang sai">
+            <Empty icon={PartyPopper} title="Không còn bài nào đang sai">
               <p className="muted">
                 {stars.size > 0 || subject !== "all" || topic !== "all"
                   ? "Không có bài sai nào khớp bộ lọc."
@@ -321,7 +342,7 @@ export default function Review({
               </p>
             </Empty>
           ) : mode === "due" ? (
-            <Empty icon="🌤️" title="Không còn bài nào đến hạn">
+            <Empty icon={CalendarCheck} title="Không còn bài nào đến hạn">
               <p className="muted">
                 {stars.size > 0 || subject !== "all" || topic !== "all"
                   ? "Không có bài nào khớp bộ lọc. Thử bỏ bớt điều kiện xem sao."
@@ -338,7 +359,7 @@ export default function Review({
               )}
             </Empty>
           ) : (
-            <Empty icon="🏆" title="Đã đụng tới toàn bộ giáo trình">
+            <Empty icon={Trophy} title="Đã đụng tới toàn bộ giáo trình">
               <p className="muted">
                 Không còn bài nào chưa làm khớp bộ lọc. Quay lại ôn theo lịch nhé.
               </p>
@@ -381,13 +402,13 @@ export default function Review({
                 className={`btn success${justGraded === "correct" ? " chosen" : ""}`}
                 onClick={() => grade("correct")}
               >
-                ✅ Làm đúng <span className="small dim">(1)</span>
+                <Ic i={CheckCircle2} /> Làm đúng <span className="small dim">1</span>
               </button>
               <button
                 className={`btn danger${justGraded === "wrong" ? " chosen" : ""}`}
                 onClick={() => grade("wrong")}
               >
-                ❌ Làm sai <span className="small dim">(2)</span>
+                <Ic i={XCircle} /> Làm sai <span className="small dim">2</span>
               </button>
             </div>
 
@@ -422,7 +443,7 @@ export default function Review({
               </button>
               <span className="spacer" />
               <button className="btn ghost sm" onClick={() => store.snooze(item.id, 1)}>
-                😴 Hoãn 1 ngày
+                <Ic i={Moon} /> Hoãn 1 ngày
               </button>
               <button className="btn ghost sm" onClick={() => store.snooze(item.id, 7)}>
                 Hoãn 1 tuần

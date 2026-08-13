@@ -1,3 +1,18 @@
+import {
+  Bookmark,
+  Check,
+  CircleDashed,
+  Link2,
+  Paperclip,
+  RotateCcw,
+  Search,
+  Star,
+  StickyNote,
+  Target,
+  X,
+  XCircle,
+} from "lucide-react";
+import { Ic, type IconType } from "../components/ui/icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import ItemDetail from "../components/ItemDetail";
@@ -15,13 +30,17 @@ const OVERSCAN = 6;
 
 type StatusFilter = ItemStatus | "all" | "due";
 
-const STATUS_FILTERS: Array<{ key: StatusFilter; label: string }> = [
+const STATUS_FILTERS: Array<{
+  key: StatusFilter;
+  label: string;
+  icon?: IconType;
+}> = [
   { key: "all", label: "Tất cả" },
-  { key: "due", label: "🎯 Đến hạn" },
-  { key: "todo", label: "⬜ Chưa làm" },
-  { key: "wrong", label: "❌ Sai" },
-  { key: "relearned", label: "🔄 Sai → Đúng" },
-  { key: "correct", label: "✅ Đúng" },
+  { key: "due", label: "Đến hạn", icon: Target },
+  { key: "todo", label: "Chưa làm", icon: CircleDashed },
+  { key: "wrong", label: "Sai", icon: XCircle },
+  { key: "relearned", label: "Sai → Đúng", icon: RotateCcw },
+  { key: "correct", label: "Đúng", icon: Check },
 ];
 
 export default function Browse({
@@ -124,7 +143,9 @@ export default function Browse({
       <div className="card">
         <div className="row wrap" style={{ gap: 10, marginBottom: 12 }}>
           <div className="search-wrap">
-            <span className="search-icon">🔍</span>
+            <span className="search-icon">
+              <Ic i={Search} />
+            </span>
             <input
               className="input"
               placeholder="Tìm theo tên bài, chủ đề, kỳ thi, hoặc trong ghi chú…"
@@ -185,6 +206,7 @@ export default function Browse({
               className={`chip${status === entry.key ? " on" : ""}`}
               onClick={() => setStatus(entry.key)}
             >
+              {entry.icon && <Ic i={entry.icon} className="h-3.5 w-3.5" />}
               {entry.label}
             </button>
           ))}
@@ -199,13 +221,19 @@ export default function Browse({
               onClick={() => toggleStar(value)}
               title={`Bài ${value} sao`}
             >
-              {"★".repeat(value)}
-              <span className="star-off">{"★".repeat(5 - value)}</span>
+              {[1, 2, 3, 4, 5].map((level) => (
+                <Star
+                  key={level}
+                  className={`h-3 w-3 shrink-0${level > value ? " star-off" : ""}`}
+                  strokeWidth={level > value ? 1.75 : 0}
+                  fill={level > value ? "none" : "currentColor"}
+                />
+              ))}
             </button>
           ))}
           {stars.size > 0 && (
             <button className="chip" onClick={() => setStars(new Set())}>
-              ✕ Bỏ lọc sao
+              <Ic i={X} /> Bỏ lọc sao
             </button>
           )}
         </div>
@@ -214,7 +242,7 @@ export default function Browse({
       {/* Danh sách */}
       <div className="card flush">
         {filtered.length === 0 ? (
-          <Empty icon="🔍" title="Không có bài nào khớp">
+          <Empty icon={Search} title="Không có bài nào khớp">
             <p className="muted">Thử bỏ bớt bộ lọc hoặc đổi từ khoá tìm kiếm.</p>
           </Empty>
         ) : (
@@ -260,7 +288,7 @@ export default function Browse({
               )}
             </div>
             <button className="icon-btn" onClick={() => setSelected(null)} title="Đóng">
-              ✕
+              <Ic i={X} />
             </button>
           </div>
           <div className="review-topic" style={{ marginBottom: 14 }}>
@@ -286,13 +314,13 @@ export default function Browse({
               className="btn success sm"
               onClick={() => store.review(selectedItem.id, "correct")}
             >
-              ✅ Ghi nhận làm đúng
+              <Ic i={Check} /> Ghi nhận làm đúng
             </button>
             <button
               className="btn danger sm"
               onClick={() => store.review(selectedItem.id, "wrong")}
             >
-              ❌ Ghi nhận làm sai
+              <Ic i={XCircle} /> Ghi nhận làm sai
             </button>
             <span className="spacer" />
             <button
@@ -300,7 +328,7 @@ export default function Browse({
               onClick={() => store.resetItem(selectedItem.id)}
               title="Xoá trạng thái và lịch ôn, giữ nguyên ghi chú và link tham khảo"
             >
-              ↺ Đặt lại tiến độ
+              <Ic i={RotateCcw} /> Đặt lại tiến độ
             </button>
           </div>
         </div>
@@ -345,16 +373,20 @@ function Row({
           </span>
           {(progress?.notes.length ?? 0) > 0 && (
             <span title={`${progress!.notes.length} ghi chú`}>
-              📝{progress!.notes.length > 1 && progress!.notes.length}
+              <Ic i={StickyNote} className="h-3.5 w-3.5" />
+                  {progress!.notes.length > 1 && progress!.notes.length}
             </span>
           )}
           {(progress?.links.length ?? 0) > 0 && (
             <span title={`${progress!.links.length} link tham khảo`}>
-              🔗{progress!.links.length > 1 && progress!.links.length}
+              <Ic i={Link2} className="h-3.5 w-3.5" />
+                  {progress!.links.length > 1 && progress!.links.length}
             </span>
           )}
           {(progress?.notes.some((n) => n.attachments.length > 0) ?? false) && (
-            <span title="Có file đính kèm">📎</span>
+            <span title="Có file đính kèm">
+                  <Ic i={Paperclip} className="h-3.5 w-3.5" />
+                </span>
           )}
         </div>
       </div>
@@ -380,7 +412,7 @@ function Row({
             title={`Mở link tham khảo: ${progress.links[0]!.url}`}
             onClick={() => openLink(progress.links[0]!.url)}
           >
-            🔖
+            <Ic i={Bookmark} />
           </button>
         )}
       </div>

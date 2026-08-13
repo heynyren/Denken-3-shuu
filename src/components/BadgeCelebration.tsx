@@ -66,7 +66,9 @@ export default function BadgeCelebration({
               key={badge.id}
               style={{ animationDelay: `${index * 0.16}s` }}
             >
-              <div className="celebrate-icon">{badge.icon}</div>
+              <div className="celebrate-icon">
+                <badge.icon strokeWidth={1.25} />
+              </div>
               <div className="celebrate-name">{badge.name}</div>
               <div className="celebrate-desc">{badge.description}</div>
             </div>

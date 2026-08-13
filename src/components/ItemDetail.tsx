@@ -5,6 +5,17 @@
  * Nếu đẩy lên sau mỗi phím thì cả cây React sẽ vẽ lại 1608 dòng mỗi lần bấm phím.
  */
 
+import {
+  AlertTriangle,
+  FileText,
+  Image as ImageIcon,
+  Link2,
+  Paperclip,
+  StickyNote,
+  Trash2,
+  X,
+} from "lucide-react";
+import { Ic, type IconType } from "./ui/icon";
 import { useEffect, useRef, useState } from "react";
 
 import { levelLabel, overdueDays, todayISO } from "../lib/srs";
@@ -57,11 +68,11 @@ function prettySize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
-const KIND_ICON: Record<Attachment["kind"], string> = {
-  image: "🖼️",
-  pdf: "📕",
-  docx: "📘",
-  other: "📎",
+const KIND_ICON: Record<Attachment["kind"], IconType> = {
+  image: ImageIcon,
+  pdf: FileText,
+  docx: FileText,
+  other: Paperclip,
 };
 
 /* ------------------------------------------------------------------ */
@@ -102,10 +113,18 @@ function AttachmentChip({
             onClick={() => void platform.attachOpen(attachment.file)}
           />
         ) : (
-          <div className="attach-image-loading">{failed ? "⚠️ mất file" : "…"}</div>
+          <div className="attach-image-loading">
+          {failed ? (
+            <>
+              <Ic i={AlertTriangle} /> mất file
+            </>
+          ) : (
+            "…"
+          )}
+        </div>
         )}
         <button className="attach-remove" onClick={onRemove} title="Gỡ file này">
-          ✕
+          <Ic i={X} />
         </button>
         <div className="attach-caption">{attachment.name}</div>
       </div>
@@ -124,14 +143,16 @@ function AttachmentChip({
           if (event.key === "Enter") void platform.attachOpen(attachment.file);
         }}
       >
-        <span className="attach-file-icon">{KIND_ICON[attachment.kind]}</span>
+        <span className="attach-file-icon">
+          <Ic i={KIND_ICON[attachment.kind]} className="h-5 w-5" />
+        </span>
         <span className="attach-file-text">
           <span className="attach-file-name">{attachment.name}</span>
           <span className="attach-file-size">{prettySize(attachment.size)}</span>
         </span>
       </span>
       <button className="icon-btn" onClick={onRemove} title="Gỡ file này">
-        🗑
+        <Ic i={Trash2} />
       </button>
     </div>
   );
@@ -214,7 +235,7 @@ function NoteCard({
           onClick={() => store.removeNote(itemId, note.id)}
           title="Xoá ghi chú này"
         >
-          🗑
+          <Ic i={Trash2} />
         </button>
       </div>
 
@@ -254,7 +275,7 @@ function NoteCard({
 
       <div className="note-foot">
         <button className="btn sm" onClick={() => void pick()} disabled={busy}>
-          📎 {busy ? "Đang thêm…" : "Đính kèm file"}
+          <Ic i={Paperclip} /> {busy ? "Đang thêm…" : "Đính kèm file"}
         </button>
         <span className="field-hint">Ảnh, PDF, Word — hoặc dán ảnh vào ô trên.</span>
       </div>
@@ -313,7 +334,7 @@ function LinkRow({
         onClick={() => store.removeLink(itemId, link.id)}
         title="Xoá link này"
       >
-        🗑
+        <Ic i={Trash2} />
       </button>
     </div>
   );
@@ -373,7 +394,7 @@ export default function ItemDetail({
       <div>
         <div className="row between" style={{ marginBottom: 8 }}>
           <span className="field-label">
-            📝 Ghi chú {notes.length > 0 && <span className="dim">({notes.length})</span>}
+            <Ic i={StickyNote} /> Ghi chú {notes.length > 0 && <span className="dim">({notes.length})</span>}
           </span>
           <button
             className="btn sm"
@@ -408,7 +429,7 @@ export default function ItemDetail({
       <div>
         <div className="row between" style={{ marginBottom: 8 }}>
           <span className="field-label">
-            🔗 Link tham khảo của bạn{" "}
+            <Ic i={Link2} /> Link tham khảo của bạn{" "}
             {links.length > 0 && <span className="dim">({links.length})</span>}
           </span>
           <button className="btn sm" onClick={() => store.addLink(item.id)}>

@@ -1,41 +1,55 @@
 /* ==========================================================================
-   Hệ màu và kiểu dáng — dark mode theo phong cách Facebook.
-   Nền xám rất tối, nội dung nằm trong các thẻ bo góc, điểm nhấn xanh dương.
+   Kiểu dáng chung — tối kiểu macOS, dựng theo bản mô tả Raycast trong repo
+   design-ai. Xem thêm src/design/theme.css.
+
+   Vì sao vẫn giữ file này thay vì viết lại toàn bộ bằng Tailwind
+   -------------------------------------------------------------
+   Bốn màn Ôn tập / Danh sách bài / Thi thử / Cài đặt cộng lại 2.400 dòng JSX,
+   trong đó có phòng thi và danh sách 1609 bài chạy ảo hoá theo chiều cao hàng
+   cố định. Viết lại toàn bộ markup một lượt là đổi rất nhiều thứ cùng lúc mà
+   không có cách nào kiểm lại từng cái.
+
+   Nên đổi ở tầng BIẾN: các tên biến giữ nguyên (--blue, --surface…), chỉ trỏ
+   sang bảng màu mới. Một dòng đổi màu ở đây lan ra đúng những chỗ đang dùng nó,
+   không sót và cũng không lệch. Tên `--blue` giờ không còn xanh nữa — hơi kỳ,
+   nhưng đổi tên biến thì phải sửa 2.400 dòng, đúng cái ta đang tránh.
    ========================================================================== */
 
 :root {
-  /* Nền và bề mặt */
-  --bg: #18191a;
-  --surface: #242526;
-  --surface-2: #3a3b3c;
-  --surface-3: #4e4f50;
-  --divider: #3e4042;
-  --overlay: rgba(0, 0, 0, 0.6);
+  /* Nền và bề mặt — bốn tầng đen, phân biệt nhau bằng độ sáng chứ không bằng viền */
+  --bg: #141416;
+  --surface: #1c1c1e;
+  --surface-2: #2c2c2e;
+  --surface-3: #3a3a3c;
+  --divider: rgba(255, 255, 255, 0.1);
+  --overlay: rgba(0, 0, 0, 0.72);
 
-  /* Chữ */
-  --text: #e4e6eb;
-  --text-2: #b0b3b8;
-  --text-3: #8a8d91;
+  /* Chữ: trắng pha trong suốt như macOS, tự hoà theo nền bên dưới */
+  --text: #ffffff;
+  --text-2: rgba(235, 235, 245, 0.8);
+  --text-3: rgba(235, 235, 245, 0.45);
 
-  /* Điểm nhấn */
-  --blue: #2d88ff;
-  --blue-soft: rgba(45, 136, 255, 0.16);
-  --green: #31a24c;
-  --green-soft: rgba(49, 162, 76, 0.16);
-  --red: #f02849;
-  --red-soft: rgba(240, 40, 73, 0.16);
-  --amber: #f7b928;
-  --amber-soft: rgba(247, 185, 40, 0.16);
-  --purple: #b57bff;
+  /* Màu nhấn. `--blue` là màu nhấn CHÍNH của app — nay là đỏ cam của Raycast,
+     tên biến giữ nguyên để 2.400 dòng còn lại không phải sửa. */
+  --blue: #ff6363;
+  --blue-soft: rgba(255, 99, 99, 0.14);
+  --green: #32d74b;
+  --green-soft: rgba(50, 215, 75, 0.14);
+  --red: #ff453a;
+  --red-soft: rgba(255, 69, 58, 0.14);
+  --amber: #ffd60a;
+  --amber-soft: rgba(255, 214, 10, 0.14);
+  --purple: #bf5af2;
 
-  --radius: 12px;
-  --radius-lg: 16px;
+  /* Bo góc dứt khoát hơn bản cũ: 16px trông mềm oặt cạnh viền nửa pixel */
+  --radius: 8px;
+  --radius-lg: 12px;
   --radius-pill: 999px;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.5);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  --shadow-lg: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 0 0.5px rgba(255, 255, 255, 0.1);
 
-  --header-h: 56px;
-  --sidebar-w: 268px;
+  --header-h: 52px;
+  --sidebar-w: 244px;
 
   color-scheme: dark;
 }
@@ -54,9 +68,10 @@ body,
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: system-ui, -apple-system, "Segoe UI", "Yu Gothic UI", "Meiryo",
-    "Hiragino Kaku Gothic ProN", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 15px;
+  font-family: -apple-system, "SF Pro Text", "Segoe UI Variable", "Segoe UI",
+    Inter, system-ui, "Yu Gothic UI", "Meiryo", "Hiragino Kaku Gothic ProN",
+    Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
   line-height: 1.45;
   -webkit-font-smoothing: antialiased;
   overflow: hidden;
@@ -124,16 +139,16 @@ select {
   min-width: 0;
 }
 .brand img {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
   flex-shrink: 0;
 }
 .brand-text {
   min-width: 0;
 }
 .brand-title {
-  font-size: 17px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: 0.5px;
   line-height: 1.1;
@@ -150,10 +165,10 @@ select {
 .header-stat {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   background: var(--surface-2);
-  border-radius: 999px;
-  padding: 6px 14px;
+  border-radius: var(--radius);
+  padding: 5px 10px;
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
@@ -193,41 +208,44 @@ select {
   gap: 4px;
 }
 
+/* Hàng điều hướng: cao 36px, bo 8px, đổi nền trong 80ms — cùng nhịp với hàng
+   danh sách ở màn Hôm nay, để cả app có chung một cảm giác khi rê chuột. */
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  padding: 9px 12px;
+  min-height: 36px;
+  padding: 0 10px;
   border: 0;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius);
   background: transparent;
   cursor: pointer;
   text-align: left;
-  transition: background 0.12s;
+  transition: background 0.08s;
 }
 .nav-item:hover {
   background: var(--surface-2);
 }
 .nav-item.active {
-  background: var(--blue-soft);
+  background: var(--surface-2);
 }
 .nav-item.active .nav-label {
-  color: var(--blue);
+  color: var(--text);
   font-weight: 600;
 }
+/* Icon để trần, không nền không khung. Bọc trong hình tròn xám là kiểu của
+   những năm 2018; ở đây chỉ cần chính nét icon. */
 .nav-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--surface-2);
+  width: 20px;
+  height: 20px;
   display: grid;
   place-items: center;
-  font-size: 17px;
+  color: var(--text-3);
   flex-shrink: 0;
 }
 .nav-item.active .nav-icon {
-  background: var(--blue);
+  color: var(--blue);
 }
 .nav-label {
   font-size: 14px;
@@ -253,12 +271,12 @@ select {
 }
 
 .sidebar-section {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-3);
   text-transform: uppercase;
-  letter-spacing: 0.4px;
-  padding: 6px 10px 2px;
+  letter-spacing: 0.06em;
+  padding: 8px 10px 4px;
 }
 
 .subject-row {
@@ -306,7 +324,7 @@ select {
 }
 
 .card {
-  background: var(--surface);
+  background: var(--surface-2);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow);
   padding: 16px;
@@ -368,22 +386,23 @@ select {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 9px 18px;
+  padding: 0 16px;
+  min-height: 36px;
   border: 0;
-  border-radius: var(--radius-pill);
-  background: var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--surface-3);
   color: var(--text);
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  transition: background 0.12s, transform 0.06s;
+  transition: background 0.1s;
   white-space: nowrap;
 }
 .btn:hover {
-  background: var(--surface-3);
+  background: #48484a;
 }
 .btn:active {
-  transform: scale(0.97);
+  background: #545456;
 }
 .btn:disabled {
   opacity: 0.45;
@@ -396,16 +415,21 @@ select {
 .btn.primary:hover {
   background: #4e96ff;
 }
+/* Hai nút chấm bài. Nền đặc rực nguyên màu thì át hết mọi thứ khác trên màn,
+   mà đây là màn bạn nhìn nhiều nhất trong ngày. Nền dịu + chữ màu vẫn phân biệt
+   tức thì, lại không đánh nhau với màu nhấn chung của app. */
 .btn.success {
-  background: var(--green);
-  color: #fff;
+  background: var(--green-soft);
+  color: var(--green);
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--green) 45%, transparent);
 }
 .btn.success:hover {
-  background: #3cb85a;
+  background: color-mix(in srgb, var(--green) 26%, transparent);
 }
 .btn.danger {
-  background: var(--red);
-  color: #fff;
+  background: var(--red-soft);
+  color: var(--red);
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--red) 45%, transparent);
 }
 .btn.danger:hover {
   background: #ff3d5c;
@@ -2270,4 +2294,64 @@ select {
   color: var(--text-3);
   font-size: 12px;
   white-space: nowrap;
+}
+
+
+/* ==========================================================================
+   Icon Lucide nằm lẫn trong chữ
+   Bộ icon là SVG chứ không phải ký tự, nên vài chỗ trước đây canh theo emoji
+   phải chỉnh lại: emoji tự nằm trên đường chữ, còn SVG thì không.
+   ========================================================================== */
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  color: var(--amber);
+  vertical-align: -1px;
+}
+.stars .off,
+.star-off {
+  color: var(--text-3);
+}
+
+/* Chip lọc và nhãn trạng thái: icon đi trước chữ, cách 6px */
+.chip,
+.pill,
+.field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Ô trống giữa danh sách: icon to, nét mảnh, màu chìm */
+.empty-icon {
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
+  margin-bottom: 10px;
+}
+
+/* Icon của file đính kèm và huy hiệu mừng */
+.attach-file-icon,
+.celebrate-icon,
+.exam-break-icon,
+.exam-verdict-icon {
+  display: grid;
+  place-items: center;
+  color: var(--blue);
+}
+.exam-review-mark {
+  display: inline-grid;
+  place-items: center;
+}
+.history-caret {
+  display: inline-grid;
+  place-items: center;
+  color: var(--text-3);
+}
+.search-icon {
+  display: grid;
+  place-items: center;
+  color: var(--text-3);
 }

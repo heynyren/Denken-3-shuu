@@ -26,6 +26,7 @@ import {
   Brain,
   CalendarClock,
   CalendarDays,
+  Check,
   Circle,
   Flame,
   History,
@@ -33,6 +34,7 @@ import {
   Stethoscope,
   Target,
   TrendingUp,
+  X,
   XCircle,
 } from "lucide-react";
 
@@ -47,6 +49,7 @@ import type { Overview } from "../lib/stats";
 import type { ItemStatus, SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
 import { platform } from "../platform";
+import { Ic } from "../components/ui/icon";
 import { Panel, PanelHead } from "../components/ui/panel";
 import { Badge, Button, Dial, Meter, Row } from "../components/ui/primitives";
 
@@ -473,16 +476,29 @@ export default function Dashboard({
           activity.map((day) => (
             <div key={day.date} className="mb-1 last:mb-0">
               <div className="flex items-center gap-2 px-3 pt-3 pb-1">
-                <span className="dx-eyebrow">{day.label}</span>
+                <span className="dx-eyebrow" data-testid="day-name">{day.label}</span>
                 <span className="text-micro text-ink-4">{day.date}</span>
-                <span className="ml-auto flex gap-2">
-                  <Badge tone="good">{day.correct}</Badge>
-                  <Badge tone="bad">{day.wrong}</Badge>
+                <span
+                  className="ml-auto flex gap-2"
+                  data-testid="day-tally"
+                  data-correct={String(day.correct)}
+                  data-wrong={String(day.wrong)}
+                >
+                  <Badge tone="good">
+                    <Ic i={Check} className="h-3 w-3" strokeWidth={2.5} />
+                    {day.correct}
+                  </Badge>
+                  <Badge tone="bad">
+                    <Ic i={X} className="h-3 w-3" strokeWidth={2.5} />
+                    {day.wrong}
+                  </Badge>
                 </span>
               </div>
               {day.entries.map((entry) => (
                 <Row
                   key={entry.item.id}
+                  data-testid="log-row"
+                  data-result={entry.result}
                   onClick={() => onOpenTopic(entry.item.subject, entry.item.topic)}
                 >
                   <span
@@ -502,7 +518,7 @@ export default function Dashboard({
                   </span>
                   <span className="shrink-0 text-micro tabular-nums text-ink-4">
                     {entry.item.exam} {entry.item.question}
-                    {entry.times > 1 && ` · ${entry.times} lần`}
+                    {entry.times > 1 && ` · chấm ${entry.times} lần`}
                   </span>
                 </Row>
               ))}
@@ -529,7 +545,7 @@ export default function Dashboard({
         ) : (
           <div className="dx-grid grid-cols-1 gap-x-6 gap-y-5 xl:grid-cols-2">
             {weakSubjects.map((subject) => (
-              <div key={subject.key}>
+              <div key={subject.key} data-testid="weak-subject">
                 <div className="mb-1.5 flex items-center gap-2 px-3">
                   <span className="ja text-body font-semibold">
                     {subjectName(subject.key)}
@@ -541,9 +557,13 @@ export default function Dashboard({
                 {weak[subject.key].map((row) => (
                   <Row
                     key={row.topic}
+                    data-testid="weak-row"
                     onClick={() => onOpenTopic(row.subject, row.topic)}
                   >
-                    <span className="ja min-w-0 flex-1 truncate text-small">
+                    <span
+                      className="ja min-w-0 flex-1 truncate text-small"
+                      data-testid="weak-topic"
+                    >
                       {row.topic}
                     </span>
                     <span className="hidden w-20 shrink-0 sm:block">
@@ -552,8 +572,9 @@ export default function Dashboard({
                     <span className="w-10 shrink-0 text-right text-small font-semibold tabular-nums text-accent">
                       {Math.round(row.ratio * 100)}%
                     </span>
-                    <span className="w-24 shrink-0 text-right text-micro tabular-nums text-ink-4">
+                    <span className="shrink-0 text-right text-micro tabular-nums text-ink-4">
                       sai {row.wrong}/{row.attempts}
+                      {row.fromExam > 0 && ` · ${row.fromExam} ý từ thi thử`}
                     </span>
                   </Row>
                 ))}
@@ -702,7 +723,9 @@ export default function Dashboard({
                       MỚI
                     </span>
                   )}
-                  <div className="text-title leading-none">{badge.icon}</div>
+                  <div className="dx-grid place-items-center text-accent">
+                    <badge.icon className="h-6 w-6" strokeWidth={1.5} />
+                  </div>
                   <div className="mt-1.5 truncate text-tiny font-medium">
                     {badge.name}
                   </div>

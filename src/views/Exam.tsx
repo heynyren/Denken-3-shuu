@@ -5,6 +5,20 @@
  * Luật thi mô phỏng đề thật, xem src/lib/exam.ts.
  */
 
+import {
+  BookOpen,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  CircleDashed,
+  Coffee,
+  PartyPopper,
+  Save,
+  SquarePen,
+  Trash2,
+  X,
+} from "lucide-react";
+import { Ic } from "../components/ui/icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AttemptAnalysis, QuestionTable, TopicTable } from "../components/ExamAnalysis";
@@ -137,7 +151,7 @@ export default function Exam({
     void platform.notifyAt(
       ALARM_EXAM,
       at,
-      `⏰ Hết giờ ${subjectViName(paper.subject)}`,
+      `Hết giờ ${subjectViName(paper.subject)}`,
       "Bài đã tự nộp. Mở app xem điểm nhé.",
     );
     setStage("running");
@@ -200,7 +214,7 @@ export default function Exam({
         <div className="card">
           <div className="card-head">
             <div className="card-title">
-              📝 Thi thử
+              <Ic i={SquarePen} /> Thi thử
               <div className="card-sub">
                 Làm nguyên một kỳ thi thật, có bấm giờ và chấm điểm
               </div>
@@ -421,7 +435,9 @@ export default function Exam({
     return (
       <div className="container">
         <div className="card center exam-break">
-          <div className="exam-break-icon">☕</div>
+          <div className="exam-break-icon">
+            <Coffee className="h-9 w-9" strokeWidth={1.25} />
+          </div>
           <div className="exam-break-title">
             Xong <span className="ja">{justDone && subjectName(justDone.subject)}</span>
           </div>
@@ -624,7 +640,13 @@ function ExamResult({
   return (
     <div className="container">
       <div className={`card exam-verdict ${allPassed ? "pass" : "fail"}`}>
-        <div className="exam-verdict-icon">{allPassed ? "🎉" : "📖"}</div>
+        <div className="exam-verdict-icon">
+            {allPassed ? (
+              <PartyPopper className="h-9 w-9" strokeWidth={1.25} />
+            ) : (
+              <BookOpen className="h-9 w-9" strokeWidth={1.25} />
+            )}
+          </div>
         <div>
           <div className="exam-verdict-title">
             {gradable.length === 0
@@ -662,8 +684,15 @@ function ExamResult({
               <span style={{ fontSize: 14, fontWeight: 600 }}> /100</span>
             </div>
             <div className="small muted" style={{ marginTop: 8, lineHeight: 1.8 }}>
-              ✅ Đúng {score.correct} · ❌ Sai {score.wrong}
-              {score.blank > 0 && ` · ⬜ Bỏ trống ${score.blank}`}
+              <Ic i={Check} className="h-3.5 w-3.5" /> Đúng {score.correct} ·{" "}
+                  <Ic i={X} className="h-3.5 w-3.5" /> Sai {score.wrong}
+              {score.blank > 0 && (
+                    <>
+                      {" · "}
+                      <Ic i={CircleDashed} className="h-3.5 w-3.5" /> Bỏ trống{" "}
+                      {score.blank}
+                    </>
+                  )}
               <br />
               <span className="dim">tính theo ý — B問題 mỗi câu 2 ý</span>
               {score.ungraded > 0 && (
@@ -703,7 +732,7 @@ function ExamResult({
       <div className="card center">
         <div className="btn-row" style={{ justifyContent: "center" }}>
           <button className="btn primary" onClick={onSave}>
-            💾 Lưu kết quả và quay lại
+            <Ic i={Save} /> Lưu kết quả và quay lại
           </button>
           <button className="btn ghost" onClick={onAgain}>
             Không lưu, thi lại
@@ -760,7 +789,9 @@ function ExamHistory({
                     }
                   }}
                 >
-                  <span className="history-caret">{open ? "▾" : "▸"}</span>
+                  <span className="history-caret">
+                  <Ic i={open ? ChevronDown : ChevronRight} className="h-4 w-4" />
+                </span>
                   <span style={{ fontWeight: 700, minWidth: 64 }}>{result.exam}</span>
                   <span className="small dim" style={{ minWidth: 96 }}>
                     {result.takenAt.slice(0, 10)}
@@ -785,7 +816,7 @@ function ExamHistory({
                       store.removeExamResult(result.id);
                     }}
                   >
-                    🗑
+                    <Ic i={Trash2} />
                   </button>
                 </div>
 

@@ -9,6 +9,8 @@
  * đồng hồ chạy chậm dần đúng lúc bạn đang mở tab denken-ou để làm bài.
  */
 
+import { BellOff, Pause, Play, RotateCcw, Timer as TimerIcon, X } from "lucide-react";
+import { Ic } from "./ui/icon";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { createAlarm } from "../lib/alarm";
@@ -45,7 +47,7 @@ export function useCountdown(item: CatalogItem | undefined) {
     void platform.notifyAt(
       ALARM_REVIEW,
       at,
-      "⏰ Hết giờ làm bài",
+      "Hết giờ làm bài",
       "Chốt đáp án rồi chấm đúng/sai nhé.",
     );
   }, []);
@@ -156,7 +158,9 @@ export default function Timer({
   if (!clock.running && !clock.paused && !clock.expired) {
     return (
       <div className="timer-idle">
-        <span className="small dim">⏱ {partLabel(item)}</span>
+        <span className="small dim">
+          <Ic i={TimerIcon} className="h-3.5 w-3.5" /> {partLabel(item)}
+        </span>
         <button className="btn sm" onClick={clock.start}>
           Bắt đầu tính giờ
         </button>
@@ -180,7 +184,7 @@ export default function Timer({
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 700 }}>
           {clock.expired
-            ? "⏰ Hết giờ rồi!"
+            ? "Hết giờ rồi!"
             : clock.paused
               ? "Đang tạm dừng"
               : "Đang tính giờ"}
@@ -193,22 +197,22 @@ export default function Timer({
         <div className="btn-row" style={{ marginTop: 10 }}>
           {clock.expired ? (
             <button className="btn danger" onClick={clock.dismiss}>
-              🔕 Tắt chuông
+              <Ic i={BellOff} /> Tắt chuông
             </button>
           ) : clock.paused ? (
             <button className="btn sm primary" onClick={clock.resume}>
-              ▶ Tiếp tục
+              <Ic i={Play} /> Tiếp tục
             </button>
           ) : (
             <button className="btn sm" onClick={clock.pause}>
-              ⏸ Tạm dừng
+              <Ic i={Pause} /> Tạm dừng
             </button>
           )}
           <button className="btn sm ghost" onClick={clock.start}>
-            ↺ Bắt đầu lại
+            <Ic i={RotateCcw} /> Bắt đầu lại
           </button>
           <button className="btn sm ghost" onClick={clock.stop}>
-            ✕ Bỏ đồng hồ
+            <Ic i={X} /> Bỏ đồng hồ
           </button>
         </div>
       </div>

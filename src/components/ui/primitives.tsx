@@ -188,14 +188,18 @@ export function Row({
   onClick,
   className,
   children,
+  ...rest
 }: {
   onClick?: () => void;
   className?: string;
   children: ReactNode;
+  /** Cho phép gắn `data-*` — kiểm thử bám vào đó thay vì bám tên lớp CSS. */
+  [key: `data-${string}`]: string | undefined;
 }) {
   const Tag = onClick ? "button" : "div";
   return (
     <Tag
+      {...rest}
       onClick={onClick}
       className={cn(
         "dx-btn flex w-full min-h-11 items-center gap-3 rounded-row px-3 text-left",

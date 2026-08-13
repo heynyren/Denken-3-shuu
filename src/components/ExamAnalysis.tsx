@@ -6,12 +6,19 @@
  * gì — nên không có đường nào để hai chỗ hiện ra hai kết quả khác nhau.
  */
 
+import { Check, CircleDashed, Minus, X } from "lucide-react";
+import { Ic } from "./ui/icon";
 import { itemById, subjectName, subjectViName } from "../lib/catalog";
 import { SUB_LABELS, subState, topicBreakdown } from "../lib/exam";
 import type { ExamAnswerRecord, ExamResult, SubjectKey } from "../lib/types";
 import { Bar, openLink } from "./ui";
 
-const STATE_MARK = { right: "✅", wrong: "❌", blank: "⬜", unknown: "－" } as const;
+const STATE_MARK = {
+  right: Check,
+  wrong: X,
+  blank: CircleDashed,
+  unknown: Minus,
+} as const;
 
 /** Màu theo tỉ lệ đúng: đỏ là chỗ phải ôn lại ngay. */
 function ratioColor(ratio: number): string {
@@ -103,7 +110,9 @@ export function QuestionTable({ records }: { records: ExamAnswerRecord[] }) {
                 {item?.question ?? "?"}
                 {subs > 1 && ` ${SUB_LABELS[index]}`}
               </span>
-              <span className="exam-review-mark">{STATE_MARK[state]}</span>
+              <span className="exam-review-mark">
+                <Ic i={STATE_MARK[state]} className="h-4 w-4" strokeWidth={2.5} />
+              </span>
               <span className="small dim">
                 {state === "unknown"
                   ? "chưa có đáp án"

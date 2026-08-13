@@ -6,12 +6,33 @@
  * Đã đạt rồi thì không bao giờ mất, kể cả khi số liệu tụt xuống.
  */
 
+import {
+  BookOpen,
+  Brain,
+  Crown,
+  Dumbbell,
+  Flame,
+  Gem,
+  GraduationCap,
+  Library,
+  Map as MapIcon,
+  Mountain,
+  Sprout,
+  Sunrise,
+  Target,
+} from "lucide-react";
+
+import type { IconType } from "../components/ui/icon";
 import type { Overview } from "./stats";
 import type { AppData } from "./types";
 
 export interface Badge {
   id: string;
-  icon: string;
+  /**
+   * Icon Lucide, không phải emoji. Emoji do phông chữ của máy vẽ nên mỗi hệ
+   * điều hành ra một kiểu; huy hiệu là thứ người ta khoe, không nên tuỳ máy.
+   */
+  icon: IconType;
   name: string;
   description: string;
   /** Đã đạt hay chưa, tính từ số liệu hiện tại. */
@@ -25,7 +46,7 @@ const ratio = (value: number, target: number) =>
 
 function milestone(
   id: string,
-  icon: string,
+  icon: IconType,
   name: string,
   description: string,
   target: number,
@@ -72,7 +93,7 @@ function totalReviews(data: AppData): number {
 export const BADGES: Badge[] = [
   milestone(
     "start",
-    "🌱",
+    Sprout,
     "Khởi hành",
     "Hoàn thành bài ôn đầu tiên trong app",
     1,
@@ -80,7 +101,7 @@ export const BADGES: Badge[] = [
   ),
   milestone(
     "goal-day",
-    "🎯",
+    Target,
     "Đúng hẹn",
     "Đạt mục tiêu ngày lần đầu tiên",
     1,
@@ -89,34 +110,34 @@ export const BADGES: Badge[] = [
         (day) => day.reviewed >= view.today.goal,
       ).length,
   ),
-  milestone("streak-3", "🔥", "Ba ngày liền", "Giữ chuỗi 3 ngày liên tiếp", 3,
+  milestone("streak-3", Flame, "Ba ngày liền", "Giữ chuỗi 3 ngày liên tiếp", 3,
     (view) => Math.max(view.streak.current, view.streak.longest)),
-  milestone("streak-7", "🔥", "Trọn một tuần", "Giữ chuỗi 7 ngày liên tiếp", 7,
+  milestone("streak-7", Flame, "Trọn một tuần", "Giữ chuỗi 7 ngày liên tiếp", 7,
     (view) => Math.max(view.streak.current, view.streak.longest)),
-  milestone("streak-30", "🏔️", "Một tháng bền bỉ", "Giữ chuỗi 30 ngày liên tiếp", 30,
+  milestone("streak-30", Mountain, "Một tháng bền bỉ", "Giữ chuỗi 30 ngày liên tiếp", 30,
     (view) => Math.max(view.streak.current, view.streak.longest)),
-  milestone("streak-100", "💎", "Trăm ngày", "Giữ chuỗi 100 ngày liên tiếp", 100,
+  milestone("streak-100", Gem, "Trăm ngày", "Giữ chuỗi 100 ngày liên tiếp", 100,
     (view) => Math.max(view.streak.current, view.streak.longest)),
 
-  milestone("reviews-100", "📗", "100 lượt ôn", "Ôn 100 lượt trong app", 100,
+  milestone("reviews-100", BookOpen, "100 lượt ôn", "Ôn 100 lượt trong app", 100,
     (_view, data) => totalReviews(data)),
-  milestone("reviews-500", "📘", "500 lượt ôn", "Ôn 500 lượt trong app", 500,
+  milestone("reviews-500", BookOpen, "500 lượt ôn", "Ôn 500 lượt trong app", 500,
     (_view, data) => totalReviews(data)),
-  milestone("reviews-2000", "📚", "2000 lượt ôn", "Ôn 2000 lượt trong app", 2000,
+  milestone("reviews-2000", Library, "2000 lượt ôn", "Ôn 2000 lượt trong app", 2000,
     (_view, data) => totalReviews(data)),
 
-  milestone("done-all", "🗺️", "Phủ kín giáo trình", "Đụng tới cả 1608 bài", 1608,
+  milestone("done-all", MapIcon, "Phủ kín giáo trình", "Đụng tới cả 1608 bài", 1608,
     (view) => view.attempted),
-  milestone("mastered-200", "🧠", "Nhớ lâu", "200 bài đạt chu kỳ ôn từ 14 ngày", 200,
+  milestone("mastered-200", Brain, "Nhớ lâu", "200 bài đạt chu kỳ ôn từ 14 ngày", 200,
     (view) => view.mastered),
-  milestone("mastered-800", "🦉", "Vững kiến thức", "800 bài đạt chu kỳ ôn từ 14 ngày", 800,
+  milestone("mastered-800", GraduationCap, "Vững kiến thức", "800 bài đạt chu kỳ ôn từ 14 ngày", 800,
     (view) => view.mastered),
 
-  milestone("comeback-100", "💪", "Sửa sai", "100 bài từ Sai chuyển thành Đúng", 100,
+  milestone("comeback-100", Dumbbell, "Sửa sai", "100 bài từ Sai chuyển thành Đúng", 100,
     (_view, data) => comebacks(data)),
   {
     id: "clear-due",
-    icon: "🌤️",
+    icon: Sunrise,
     name: "Bàn học sạch",
     description: "Ôn hết bài đến hạn, không còn bài nào quá hạn",
     // "Hết bài đến hạn" chỉ là thành tích khi bạn thực sự đang chạy một lịch ôn
@@ -131,7 +152,7 @@ export const BADGES: Badge[] = [
 
   {
     id: "all-subjects",
-    icon: "👑",
+    icon: Crown,
     name: "Bốn môn trọn vẹn",
     description: "Không còn bài chưa làm ở cả bốn môn",
     earned: (view) => view.bySubject.every((subject) => subject.counts.todo === 0),

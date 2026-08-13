@@ -1,7 +1,9 @@
 /** Các mảnh giao diện nhỏ dùng lại ở nhiều màn hình. */
 
 import type { ReactNode } from "react";
+import { Check, CircleDashed, RotateCcw, Star, X } from "lucide-react";
 
+import { Ic, type IconType } from "./ui/icon";
 import { fromISO } from "../lib/srs";
 import type { ItemStatus } from "../lib/types";
 import { platform } from "../platform";
@@ -17,24 +19,26 @@ export const STATUS_TEXT: Record<ItemStatus, string> = {
   todo: "Chưa làm",
 };
 
-export const STATUS_ICON: Record<ItemStatus, string> = {
-  correct: "✅",
-  relearned: "🔄",
-  wrong: "❌",
-  todo: "⬜",
+export const STATUS_ICON: Record<ItemStatus, IconType> = {
+  correct: Check,
+  relearned: RotateCcw,
+  wrong: X,
+  todo: CircleDashed,
 };
 
+/* Bộ màu hệ thống của macOS — trầm hơn bản cũ, không tranh với màu nhấn. */
 export const STATUS_COLOR: Record<ItemStatus, string> = {
-  correct: "#31a24c",
-  relearned: "#2d88ff",
-  wrong: "#f02849",
-  todo: "#4e4f50",
+  correct: "#32d74b",
+  relearned: "#0a84ff",
+  wrong: "#ff453a",
+  todo: "#3a3a3c",
 };
 
 export function StatusPill({ status }: { status: ItemStatus }) {
   return (
     <span className={`pill ${status}`}>
-      {STATUS_ICON[status]} {STATUS_TEXT[status]}
+      <Ic i={STATUS_ICON[status]} className="h-3 w-3" strokeWidth={2.5} />
+      {STATUS_TEXT[status]}
     </span>
   );
 }
@@ -43,11 +47,21 @@ export function StatusPill({ status }: { status: ItemStatus }) {
 /* Sao độ khó                                                          */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Độ khó ★1–5. Sao đặc là mức đã đạt, sao rỗng là phần còn lại — vẽ bằng cùng
+ * một icon, chỉ khác chỗ có tô nền hay không, nên hai hàng luôn thẳng nhau.
+ */
 export function Stars({ count, title }: { count: number; title?: string }) {
   return (
     <span className="stars" title={title ?? `Độ khó ${count}/5`}>
-      {"★".repeat(count)}
-      <span className="off">{"★".repeat(Math.max(0, 5 - count))}</span>
+      {[1, 2, 3, 4, 5].map((level) => (
+        <Star
+          key={level}
+          className={`h-3 w-3 shrink-0${level > count ? " off" : ""}`}
+          strokeWidth={level > count ? 1.75 : 0}
+          fill={level > count ? "none" : "currentColor"}
+        />
+      ))}
     </span>
   );
 }
@@ -314,17 +328,19 @@ export function ExternalLink({
 /* ------------------------------------------------------------------ */
 
 export function Empty({
-  icon,
+  icon: Icon,
   title,
   children,
 }: {
-  icon: string;
+  icon: IconType;
   title: string;
   children?: ReactNode;
 }) {
   return (
     <div className="empty">
-      <div className="empty-icon">{icon}</div>
+      <div className="empty-icon">
+        <Icon className="h-8 w-8" strokeWidth={1.25} />
+      </div>
       <div className="empty-title">{title}</div>
       {children}
     </div>

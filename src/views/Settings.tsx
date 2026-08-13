@@ -1,3 +1,22 @@
+import {
+  AlertTriangle,
+  Archive,
+  CalendarDays,
+  Download,
+  Eye,
+  EyeOff,
+  FileSpreadsheet,
+  FolderOpen,
+  GitMerge,
+  Pause,
+  Play,
+  Plug,
+  RefreshCw,
+  Save,
+  Share2,
+  Target,
+} from "lucide-react";
+import { Ic } from "../components/ui/icon";
 import { useState } from "react";
 
 import { emptyAppData } from "../lib/defaults";
@@ -53,7 +72,7 @@ export default function Settings({
         <div className="grid cols-2">
           <div className="field">
             <label className="field-label" htmlFor="goal">
-              🎯 Mục tiêu mỗi ngày (số bài)
+              <Ic i={Target} /> Mục tiêu mỗi ngày (số bài)
             </label>
             <input
               id="goal"
@@ -75,7 +94,7 @@ export default function Settings({
 
           <div className="field">
             <label className="field-label" htmlFor="exam">
-              📆 Ngày thi
+              <Ic i={CalendarDays} /> Ngày thi
             </label>
             <input
               id="exam"
@@ -144,7 +163,7 @@ export default function Settings({
                 )
               }
             >
-              📊 Xuất ra Excel
+              <Ic i={FileSpreadsheet} /> Xuất ra Excel
             </button>
           )}
           <button
@@ -156,14 +175,14 @@ export default function Settings({
               )
             }
           >
-            💾 Xuất bản sao lưu (JSON)
+            <Ic i={Save} /> Xuất bản sao lưu (JSON)
           </button>
           {platform.can.revealFolder && (
             <button
               className="btn"
               onClick={() => void platform.revealDataFolder()}
             >
-              📂 Mở thư mục dữ liệu
+              <Ic i={FolderOpen} /> Mở thư mục dữ liệu
             </button>
           )}
         </div>
@@ -211,7 +230,7 @@ export default function Settings({
               }
             }}
           >
-            📥 Nhập từ file Excel
+            <Ic i={Download} /> Nhập từ file Excel
           </button>
         </div>
         )}
@@ -242,7 +261,7 @@ export default function Settings({
               }
             }}
           >
-            ⚠️ Khôi phục từ bản sao lưu
+            <Ic i={AlertTriangle} /> Khôi phục từ bản sao lưu
           </button>
         </div>
 
@@ -273,7 +292,9 @@ export default function Settings({
 
         {platform.can.mirrorFolder && (
         <div className="field" style={{ marginBottom: 12 }}>
-          <span className="field-label">📁 Thư mục nhân bản</span>
+          <span className="field-label">
+            <Ic i={FolderOpen} /> Thư mục nhân bản
+          </span>
           <div className="row wrap" style={{ gap: 8 }}>
             <input
               className="input"
@@ -336,7 +357,7 @@ export default function Settings({
               );
             }}
           >
-            🔄 Nhân bản ngay
+            <Ic i={RefreshCw} /> Nhân bản ngay
           </button>
           )}
           {platform.can.mirrorFolder && (
@@ -349,7 +370,7 @@ export default function Settings({
               )
             }
           >
-            🗜️ Xuất toàn bộ (.zip)
+            <Ic i={Archive} /> Xuất toàn bộ (.zip)
           </button>
           )}
           <span className="field-hint" style={{ flex: 1, minWidth: 220 }}>
@@ -403,7 +424,7 @@ export default function Settings({
                 )
               }
             >
-              📤 Xuất file để mang sang
+              <Ic i={Share2} /> Xuất file để mang sang
             </button>
             <button
               className="btn sm primary"
@@ -433,7 +454,7 @@ export default function Settings({
                 setMessage({ kind: "", text: describeMerge(report) });
               }}
             >
-              🔀 Gộp từ file của máy kia
+              <Ic i={GitMerge} /> Gộp từ file của máy kia
             </button>
           </div>
 
@@ -612,7 +633,7 @@ function CloudSyncCard({ sync }: { sync: Sync }) {
             onClick={() => setShowToken((on) => !on)}
             title={showToken ? "Giấu token" : "Hiện token"}
           >
-            {showToken ? "🙈" : "👁"}
+            <Ic i={showToken ? EyeOff : Eye} />
           </button>
         </div>
         <div className="field-hint">
@@ -650,7 +671,13 @@ function CloudSyncCard({ sync }: { sync: Sync }) {
             );
           }}
         >
-          {checking ? "Đang kiểm tra…" : "🔌 Kiểm tra kết nối"}
+          {checking ? (
+            "Đang kiểm tra…"
+          ) : (
+            <>
+              <Ic i={Plug} /> Kiểm tra kết nối
+            </>
+          )}
         </button>
 
         <button
@@ -658,7 +685,15 @@ function CloudSyncCard({ sync }: { sync: Sync }) {
           disabled={!sync.config.repo || !sync.config.token}
           onClick={() => void sync.saveConfig({ enabled: !sync.config.enabled })}
         >
-          {sync.config.enabled ? "⏸ Tắt đồng bộ" : "▶ Bật đồng bộ"}
+          {sync.config.enabled ? (
+            <>
+              <Ic i={Pause} /> Tắt đồng bộ
+            </>
+          ) : (
+            <>
+              <Ic i={Play} /> Bật đồng bộ
+            </>
+          )}
         </button>
 
         <button
@@ -666,7 +701,7 @@ function CloudSyncCard({ sync }: { sync: Sync }) {
           disabled={!sync.config.enabled || sync.state === "running"}
           onClick={() => void sync.run(true)}
         >
-          🔄 Đồng bộ ngay
+          <Ic i={RefreshCw} /> Đồng bộ ngay
         </button>
 
         {dirty && (

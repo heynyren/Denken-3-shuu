@@ -27,6 +27,40 @@ Danh mục **1609 bài** trên denken-ou.com, chia bốn môn:
 - **Huy hiệu** — giữ kín tới khi bạn chạm mốc, lúc đó mới nhảy lên chúc mừng.
 - Xuất ra Excel, JSON, hoặc gói `.zip` đầy đủ bất cứ lúc nào.
 
+## Giao diện
+
+Tối kiểu macOS, dựng theo bản mô tả Raycast trong repo
+[design-ai](https://github.com/heynyren/design-ai) — nền đen nhiều tầng, viền
+nửa pixel, chữ font hệ thống, và **đúng một màu nhấn** dùng rất dè cho thứ đang
+được chọn.
+
+| Thứ | Dùng gì |
+|---|---|
+| Lớp tiện ích CSS | Tailwind v4 |
+| Thành phần giao diện | Viết theo lối shadcn/ui — code nằm trong `src/components/ui/`, không phải thư viện cài vào |
+| Icon | [Lucide](https://lucide.dev) |
+
+**Không dùng Material UI**: Material là ngôn ngữ thiết kế của Google — nút nổi
+khối, gợn sóng khi bấm, nhãn trôi trong ô nhập. Nó đá nhau với cái macOS ở trên,
+mà nhét hai hệ thiết kế vào một app thì chẳng bên nào thắng.
+
+**Không còn emoji trong giao diện.** Emoji do phông chữ của máy vẽ chứ không
+phải app vẽ, nên mỗi hệ điều hành ra một kiểu, không chỉnh được nét lẫn màu, và
+cạnh chữ tiếng Việt có dấu thì lệch chân. Toàn bộ đã thay bằng SVG của Lucide.
+
+Hai chỗ dễ vỡ, và cách xử:
+
+- **Không nạp `preflight` của Tailwind.** Nó là bộ đặt lại toàn cục xoá sạch
+  style mặc định của mọi thẻ; nạp vào là vỡ cả năm màn. Chỉ nạp `theme` +
+  `utilities`, xếp vào tầng riêng — `styles.css` để ngoài tầng nên luôn thắng
+  khi trùng tên lớp. Xem `src/design/theme.css`.
+- **`npm run soat:lop`** quét các lớp dùng ở màn mới, đối chiếu với lớp định
+  nghĩa trần trong `styles.css`, báo cái nào sẽ bị chặn **im lặng**. Đã nối vào
+  `npm run build`.
+
+Kiểm thử bám vào `data-testid`, không bám tên lớp CSS — đổi giao diện thì kiểm
+thử không vỡ oan.
+
 ## Cập nhật app không mất dữ liệu
 
 Đây là điều được thiết kế trước tiên, và đã được kiểm chứng bằng thực nghiệm.
