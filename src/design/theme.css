@@ -1,0 +1,169 @@
+/* ==========================================================================
+   Hệ thiết kế mới — tối kiểu macOS, dựng theo bản mô tả Raycast trong repo
+   design-ai (design-md/raycast/DESIGN.md).
+
+   Vì sao KHÔNG nạp `@import "tailwindcss"` như hướng dẫn mặc định
+   ---------------------------------------------------------------
+   Nạp trọn gói sẽ kéo theo `preflight` — bộ đặt lại toàn cục xoá sạch style
+   mặc định của mọi thẻ. App này đã có 2.200 dòng CSS viết tay cho năm màn
+   hình, preflight vào là vỡ hết cả năm ngay lập tức, trong khi ta mới chỉ định
+   làm lại MỘT màn.
+
+   Nên nạp riêng hai phần cần dùng, và xếp tầng cho rõ ai thắng ai:
+
+       theme      biến màu, thang chữ, thang khoảng cách của Tailwind
+       utilities  các lớp tiện ích (p-4, flex, text-sm…)
+
+   `styles.css` cố ý để NGOÀI mọi tầng. Theo luật CSS, style không nằm trong
+   tầng nào luôn thắng style nằm trong tầng — nên chỗ nào hai bên trùng tên lớp
+   (`.container`, `.grid`, `.ring`…) thì bản cũ thắng, bốn màn chưa làm lại
+   không suy suyển một pixel. Xem `scripts/soat-trung-lop.mjs` để biết danh sách
+   trùng chính xác.
+   ========================================================================== */
+
+@layer theme, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+/* --------------------------------------------------------------------------
+   Bảng màu — lấy từ mục 2 của bản mô tả Raycast.
+
+   Nguyên tắc gắt nhất của phong cách này: **chỉ một màu nhấn duy nhất**, dùng
+   rất dè, cho thứ đang được chọn. Mọi thứ còn lại là các tầng xám đen phân biệt
+   nhau bằng độ sáng và một đường viền mảnh nửa pixel.
+   -------------------------------------------------------------------------- */
+
+@theme {
+  /* Nền, từ sâu nhất ra ngoài cùng */
+  --color-obsidian: #141416;
+  --color-base: #1c1c1e;
+  --color-raised: #2c2c2e;
+  --color-hover: #3a3a3c;
+  --color-sunken: #0f0f10;
+
+  /* Chữ. Chữ phụ dùng trắng pha trong suốt như macOS, chứ không phải xám đục —
+     nhờ vậy nó tự hoà theo nền bên dưới thay vì chỏi ra. */
+  --color-ink: #ffffff;
+  --color-ink-2: rgba(235, 235, 245, 0.8);
+  --color-ink-3: rgba(235, 235, 245, 0.45);
+  --color-ink-4: rgba(235, 235, 245, 0.28);
+
+  /* Viền nửa pixel — đặc trưng macOS, đủ tách khối mà không thành cái khung */
+  --color-hairline: rgba(255, 255, 255, 0.1);
+  --color-hairline-strong: rgba(255, 255, 255, 0.16);
+
+  /* Màu nhấn duy nhất */
+  --color-accent: #ff6363;
+  --color-accent-dim: #e54545;
+  --color-accent-soft: rgba(255, 99, 99, 0.14);
+
+  /* Màu báo trạng thái. Cố ý giữ ít và trầm — bảng phân tích và biểu đồ cần
+     phân biệt đúng/sai, nhưng không được rực tới mức át màu nhấn. */
+  --color-good: #32d74b;
+  --color-good-soft: rgba(50, 215, 75, 0.14);
+  --color-warn: #ffd60a;
+  --color-warn-soft: rgba(255, 214, 10, 0.14);
+  --color-bad: #ff453a;
+  --color-bad-soft: rgba(255, 69, 58, 0.14);
+  --color-info: #0a84ff;
+  --color-info-soft: rgba(10, 132, 255, 0.14);
+
+  /* Chữ: ưu tiên font hệ thống của máy, đúng tinh thần macOS-native */
+  --font-sans: -apple-system, "SF Pro Text", "Segoe UI Variable", "Segoe UI",
+    Inter, system-ui, sans-serif;
+  --font-mono: "SF Mono", "JetBrains Mono", "Cascadia Mono", ui-monospace, monospace;
+
+  /* Thang chữ của bản mô tả: nhỏ, sít, không có cỡ nào phá nhịp */
+  --text-micro: 11px;
+  --text-micro--line-height: 1.2;
+  --text-tiny: 12px;
+  --text-tiny--line-height: 1.35;
+  --text-small: 13px;
+  --text-small--line-height: 1.4;
+  --text-body: 14px;
+  --text-body--line-height: 1.45;
+  --text-lead: 16px;
+  --text-lead--line-height: 1.4;
+  --text-title: 20px;
+  --text-title--line-height: 1.25;
+  --text-hero: 32px;
+  --text-hero--line-height: 1.1;
+
+  /* Bo góc: dứt khoát, không mềm oặt */
+  --radius-hair: 4px;
+  --radius-row: 8px;
+  --radius-panel: 12px;
+
+  /* Đổ bóng kiểu macOS: sâu, rất nhẹ, kèm một viền sáng nửa pixel */
+  --shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  --shadow-float: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 0 0.5px rgba(255, 255, 255, 0.1);
+}
+
+@layer theme {
+  /**
+   * Đặt lại kiểu mặc định của thẻ <button>.
+   *
+   * Vì cố ý không nạp `preflight`, thẻ <button> vẫn mang nguyên kiểu mặc định
+   * của trình duyệt — nền xám, viền nổi, chữ nhỏ. Bốn màn cũ không sao vì
+   * styles.css đã đặt nền cho từng loại nút của nó, nhưng nút của hệ mới thì lòi
+   * hộp xám ra ngay.
+   *
+   * Đặt trong tầng `theme` chứ không để ngoài tầng, vì như vậy các lớp tiện ích
+   * (`bg-accent`…) nằm ở tầng `utilities` cao hơn vẫn đè lên được. Để ngoài tầng
+   * là nút chính mất luôn màu nền.
+   *
+   * Và cố ý đòi phải có lớp `dx-btn` chứ không nhắm thẳng vào `button`: nhắm
+   * thẳng thì đụng cả nút của bốn màn chưa làm lại.
+   */
+  .dx-btn {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+    font: inherit;
+    text-align: inherit;
+    cursor: pointer;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Vài lớp dùng lại nhiều, đặt ngoài tầng để chắc chắn thắng lớp trùng tên bên
+   styles.css. Đều mang tiền tố `dx-` nên không đụng ai.
+   -------------------------------------------------------------------------- */
+
+/* Lưới, thay cho `.grid` của bản cũ — bản cũ ép sẵn gap 16px, ở đây tự đặt. */
+.dx-grid {
+  display: grid;
+}
+
+/* Nhãn mục: 11px, hoa, giãn chữ. Bản mô tả nhấn: tuyệt đối không in đậm. */
+.dx-eyebrow {
+  font-size: var(--text-micro);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-ink-3);
+}
+
+/* Phím tắt hiện thành viên gạch nhỏ, đúng kiểu macOS. */
+.dx-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  padding: 2px 6px;
+  border-radius: var(--radius-hair);
+  background: var(--color-hover);
+  border: 0.5px solid var(--color-hairline-strong);
+  font-family: var(--font-sans);
+  font-size: var(--text-micro);
+  font-weight: 500;
+  color: var(--color-ink-2);
+}
+
+/* Đường kẻ nửa pixel. Dùng border thường ở màn thường sẽ ra 1px dày cộp. */
+.dx-hairline {
+  border-top: 0.5px solid var(--color-hairline);
+}

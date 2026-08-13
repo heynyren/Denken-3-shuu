@@ -1,4 +1,40 @@
+/**
+ * Màn Hôm nay — bản dựng lại theo hệ thiết kế mới.
+ *
+ * Tạo hình theo bản mô tả Raycast trong repo design-ai: nền đen nhiều tầng,
+ * viền nửa pixel, chữ font hệ thống, và **đúng một màu nhấn** dùng rất dè.
+ *
+ * Ba luật của bản mô tả được giữ chặt nhất ở đây:
+ *
+ *   1. Chỉ một thứ trên màn được mang màu nhấn tại một thời điểm. Ở đây là vòng
+ *      tiến độ ngày và nút bắt đầu ôn — vì đó là việc bạn mở app ra để làm.
+ *   2. Nhãn mục là 11px viết hoa, KHÔNG in đậm. Đó là thứ làm màn hình trông có
+ *      tổ chức mà không ồn ào.
+ *   3. Không chuyển màu trang trí, không hình minh hoạ. Phân tầng bằng độ sáng
+ *      nền và một đường viền mảnh, chấm hết.
+ *
+ * Biểu đồ ở đây cố ý viết riêng chứ không dùng lại `components/ui.tsx`: bốn màn
+ * còn lại vẫn đang dùng file đó với bảng màu cũ, sửa vào là đổi lây sang chúng.
+ */
+
 import { useMemo } from "react";
+import type { ComponentType } from "react";
+import {
+  AlertTriangle,
+  Award,
+  BookOpen,
+  Brain,
+  CalendarClock,
+  CalendarDays,
+  Circle,
+  Flame,
+  History,
+  Layers,
+  Stethoscope,
+  Target,
+  TrendingUp,
+  XCircle,
+} from "lucide-react";
 
 import { BADGES } from "../lib/badges";
 import { subjectName, subjectViName } from "../lib/catalog";
@@ -8,18 +44,31 @@ import { topicVi } from "../lib/vi";
 import { todayISO } from "../lib/srs";
 import { MIN_ATTEMPTS, weakTopics } from "../lib/weakness";
 import type { Overview } from "../lib/stats";
-import type { SubjectKey } from "../lib/types";
+import type { ItemStatus, SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
 import { platform } from "../platform";
-import {
-  Bar,
-  BarChart,
-  Heatmap,
-  Ring,
-  StatusStack,
-  STATUS_COLOR,
-  STATUS_TEXT,
-} from "../components/ui";
+import { Panel, PanelHead } from "../components/ui/panel";
+import { Badge, Button, Dial, Meter, Row } from "../components/ui/primitives";
+
+/* ------------------------------------------------------------------ */
+/* Màu theo trạng thái — dùng bộ màu hệ thống của macOS, trầm hơn bản cũ */
+/* ------------------------------------------------------------------ */
+
+const STATUS_TONE: Record<ItemStatus, string> = {
+  correct: "var(--color-good)",
+  relearned: "var(--color-info)",
+  wrong: "var(--color-bad)",
+  todo: "var(--color-hover)",
+};
+
+const STATUS_LABEL: Record<ItemStatus, string> = {
+  correct: "Đúng",
+  relearned: "Sai → Đúng",
+  wrong: "Sai",
+  todo: "Chưa làm",
+};
+
+const STATUS_ORDER: ItemStatus[] = ["correct", "relearned", "wrong", "todo"];
 
 /** Câu chào đổi theo giờ trong ngày, cho đỡ khô khan. */
 function greeting(): string {
@@ -41,6 +90,118 @@ function encouragement(view: Overview): string {
     return `Sát rồi, chỉ còn ${view.today.remaining} bài nữa là đạt mục tiêu.`;
   return `Còn ${view.today.remaining} bài nữa là đạt mục tiêu hôm nay.`;
 }
+
+/* ------------------------------------------------------------------ */
+/* Mảnh dựng riêng cho màn này                                         */
+/* ------------------------------------------------------------------ */
+
+/** Thanh chia bốn trạng thái của một môn. */
+function StatusBar({ counts }: { counts: Record<ItemStatus, number> }) {
+  const total =
+    counts.correct + counts.relearned + counts.wrong + counts.todo || 1;
+  return (
+    <div className="flex h-[6px] w-full overflow-hidden rounded-full bg-sunken">
+      {STATUS_ORDER.map((status) => (
+        <span
+          key={status}
+          title={`${STATUS_LABEL[status]}: ${counts[status]}`}
+          style={{
+            width: `${(counts[status] / total) * 100}%`,
+            background: STATUS_TONE[status],
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+/** Ô số liệu nhỏ: nhãn viết hoa ở trên, số to ở giữa, chú thích ở dưới. */
+function Stat({
+  icon: Icon,
+  label,
+  value,
+  foot,
+  tone = "text-ink",
+}: {
+  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+  label: string;
+  value: number | string;
+  foot: string;
+  tone?: string;
+}) {
+  return (
+    <Panel className="p-3.5">
+      <div className="flex items-center gap-1.5">
+        <Icon className="h-3.5 w-3.5 text-ink-4" strokeWidth={2} />
+        <span className="dx-eyebrow">{label}</span>
+      </div>
+      <div
+        className={`mt-1.5 text-hero font-semibold tabular-nums tracking-tight ${tone}`}
+      >
+        {value}
+      </div>
+      <div className="mt-1 text-tiny text-ink-3">{foot}</div>
+    </Panel>
+  );
+}
+
+/** Cột đứng cho biểu đồ tuần và lịch 14 ngày. */
+function Columns({
+  bars,
+  labels,
+  height = 116,
+}: {
+  bars: Array<Array<{ ratio: number; tone: string }>>;
+  labels: string[];
+  height?: number;
+}) {
+  return (
+    <div>
+      <div className="flex items-end gap-1" style={{ height }}>
+        {bars.map((stack, index) => (
+          <div key={index} className="flex h-full flex-1 flex-col justify-end gap-px">
+            {stack.map((part, layer) => (
+              <div
+                key={layer}
+                className="w-full rounded-[3px]"
+                style={{
+                  height: `${Math.max(part.ratio * 100, part.ratio > 0 ? 3 : 0)}%`,
+                  background: part.tone,
+                }}
+              />
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="mt-2 flex gap-1 text-micro text-ink-4">
+        {labels.map((label, index) => (
+          <span key={index} className="flex-1 truncate text-center">
+            {label}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Chú giải màu, dùng chung cho các biểu đồ. */
+function Legend({ items }: { items: Array<{ tone: string; text: string }> }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+      {items.map((item) => (
+        <span key={item.text} className="flex items-center gap-1.5 text-micro text-ink-3">
+          <i
+            className="block h-2 w-2 rounded-[2px]"
+            style={{ background: item.tone }}
+          />
+          {item.text}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 
 export default function Dashboard({
   store,
@@ -73,6 +234,8 @@ export default function Dashboard({
   const earnedToday = earned.filter((badge) => data.badges[badge.id] === today);
 
   const maxUpcoming = Math.max(1, ...upcoming.map((day) => day.count));
+  const maxWeek = Math.max(1, ...weeks.map((w) => w.correct + w.wrong));
+  const maxHeat = Math.max(1, ...heat.map((d) => d.reviewed));
 
   // Lần chạy đầu: app mới cài chưa có tiến độ nào, mời nhập từ Excel.
   const isFresh = Object.keys(data.progress).length === 0;
@@ -80,428 +243,478 @@ export default function Dashboard({
   return (
     <div className="container">
       {isFresh && (
-        <div className="card">
-          <div style={{ fontSize: 17, fontWeight: 700 }}>
-            👋 Chào mừng bạn đến với sổ ôn thi <span className="ja">電験三種</span>
+        <Panel>
+          <div className="text-title font-semibold">
+            Chào mừng bạn đến với sổ ôn thi <span className="ja">電験三種</span>
           </div>
-          <div className="small muted" style={{ marginTop: 5, maxWidth: 640 }}>
-            App đã có sẵn đầy đủ <strong>{view.total} bài</strong> của cả bốn môn,
-            kèm link tới denken-ou.com và độ khó từng bài. Cứ làm bài, app sẽ tự
-            xếp lịch ôn lại đúng lúc bạn sắp quên.
-          </div>
-
-          <div className="row wrap" style={{ gap: 14, marginTop: 16 }}>
-            <button className="btn primary lg" onClick={onStartReview}>
+          <p className="mt-2 max-w-[640px] text-small text-ink-2">
+            App đã có sẵn đầy đủ <strong className="text-ink">{view.total} bài</strong>{" "}
+            của cả bốn môn, kèm link tới denken-ou.com và độ khó từng bài. Cứ làm bài,
+            app sẽ tự xếp lịch ôn lại đúng lúc bạn sắp quên.
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-4">
+            <Button tone="accent" onClick={onStartReview}>
               Học bài đầu tiên →
-            </button>
+            </Button>
             {/* Lối nhập Excel để nhỏ: chỉ người chuyển từ file theo dõi cũ mới cần. */}
             {platform.can.excelImport && (
-            <span className="small dim">
-              Đã có file Excel theo dõi từ trước?{" "}
-              <span
-                className="link"
-                role="button"
-                tabIndex={0}
-                onClick={async () => {
-                  const result = await platform.importXlsx();
-                  if (result.ok && result.data) store.replaceAll(result.data);
-                }}
-              >
-                Nhập vào đây
+              <span className="text-small text-ink-3">
+                Đã có file Excel theo dõi từ trước?{" "}
+                <button
+                  className="dx-btn text-accent underline underline-offset-2 hover:text-accent-dim"
+                  onClick={async () => {
+                    const result = await platform.importXlsx();
+                    if (result.ok && result.data) store.replaceAll(result.data);
+                  }}
+                >
+                  Nhập vào đây
+                </button>
               </span>
-            </span>
             )}
           </div>
-        </div>
+        </Panel>
       )}
 
-      {/* Hàng trên: vòng KPI + streak + đếm ngược */}
-      <div className="grid cols-3">
-        <div className="card">
-          <div className="ring-wrap">
-            <Ring
-              ratio={view.today.ratio}
-              color={view.today.metGoal ? "var(--green)" : "var(--blue)"}
+      {/* ---- Khối mở đầu: tiến độ ngày, chuỗi ngày, đếm ngược ---- */}
+      <Panel className="p-0">
+        <div className="dx-grid grid-cols-1 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_minmax(0,1fr)]">
+          {/* Tiến độ hôm nay */}
+          <div className="flex items-center gap-4 p-4">
+            <Dial
+              value={view.today.ratio}
+              tone={
+                view.today.metGoal ? "var(--color-good)" : "var(--color-accent)"
+              }
             >
-              <div>
-                <div className="ring-value">{view.today.reviewed}</div>
-                <div className="ring-caption">/ {view.today.goal} bài</div>
+              <div className="text-title font-semibold tabular-nums">
+                {view.today.reviewed}
               </div>
-            </Ring>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 17, fontWeight: 700 }}>
-                {greeting()}!
+              <div className="text-micro text-ink-3">/ {view.today.goal}</div>
+            </Dial>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <Target className="h-3.5 w-3.5 text-ink-4" strokeWidth={2} />
+                <span className="dx-eyebrow">Hôm nay</span>
               </div>
-              <div className="small muted" style={{ marginTop: 4 }}>
-                {encouragement(view)}
-              </div>
+              <div className="mt-1 text-lead font-semibold">{greeting()}!</div>
+              <p className="mt-1 text-small text-ink-2">{encouragement(view)}</p>
               {view.today.reviewed > 0 && (
-                <div className="small dim" style={{ marginTop: 6 }}>
-                  Đúng {view.today.correct} · Sai {view.today.wrong}
+                <div className="mt-2 flex gap-2">
+                  <Badge tone="good">Đúng {view.today.correct}</Badge>
+                  <Badge tone="bad">Sai {view.today.wrong}</Badge>
                 </div>
               )}
             </div>
           </div>
-        </div>
 
-        <div className="streak-hero">
-          <span className="flame">{view.streak.current > 0 ? "🔥" : "🕯️"}</span>
-          <div style={{ minWidth: 0 }}>
-            <div className="streak-num">{view.streak.current}</div>
-            <div className="streak-label">ngày liên tiếp đạt mục tiêu</div>
-            {view.streak.atRisk ? (
-              <div className="streak-warn" style={{ marginTop: 6 }}>
-                ⚠️ Học hôm nay để giữ chuỗi!
+          {/* Chuỗi ngày */}
+          <div className="flex items-center gap-4 border-t-[0.5px] border-hairline p-4 lg:border-t-0 lg:border-l-[0.5px]">
+            <Flame
+              className={`h-8 w-8 shrink-0 ${
+                view.streak.current > 0 ? "text-accent" : "text-ink-4"
+              }`}
+              strokeWidth={1.5}
+            />
+            <div className="min-w-0">
+              <div className="dx-eyebrow">Chuỗi ngày</div>
+              <div className="mt-1 text-hero font-semibold tabular-nums leading-none">
+                {view.streak.current}
               </div>
-            ) : (
-              <div className="small dim" style={{ marginTop: 6 }}>
-                Kỷ lục: {view.streak.longest} ngày
+              <div className="mt-1.5 text-tiny text-ink-3">
+                ngày liên tiếp đạt mục tiêu
               </div>
+              {view.streak.atRisk ? (
+                <Badge tone="warn" className="mt-2">
+                  <AlertTriangle className="h-3 w-3" strokeWidth={2.25} />
+                  Học hôm nay để giữ chuỗi
+                </Badge>
+              ) : (
+                <div className="mt-2 text-tiny text-ink-4">
+                  Kỷ lục {view.streak.longest} ngày
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Đếm ngược tới kỳ thi */}
+          <div className="border-t-[0.5px] border-hairline p-4 lg:border-t-0 lg:border-l-[0.5px]">
+            <div className="flex items-center gap-1.5">
+              <CalendarClock className="h-3.5 w-3.5 text-ink-4" strokeWidth={2} />
+              <span className="dx-eyebrow">Còn lại tới kỳ thi</span>
+            </div>
+            <div className="mt-1 flex items-baseline gap-1.5">
+              <span
+                className={`text-hero font-semibold tabular-nums leading-none ${
+                  view.daysToExam <= 30 ? "text-bad" : "text-ink"
+                }`}
+              >
+                {view.daysToExam > 0 ? view.daysToExam : 0}
+              </span>
+              <span className="text-small text-ink-3">ngày</span>
+            </div>
+            <div className="mt-1.5 text-tiny text-ink-4">Ngày thi {view.examDate}</div>
+            {view.remaining > 0 && view.daysToExam > 0 && (
+              <p className="mt-2.5 text-tiny text-ink-2">
+                Cần <strong className="text-ink">{view.paceNeeded} bài/ngày</strong> để
+                xử lý hết {view.remaining} bài còn nợ ({view.counts.todo} chưa làm +{" "}
+                {view.counts.wrong} đang sai).
+              </p>
             )}
           </div>
         </div>
+      </Panel>
 
-        <div className="card">
-          <div className="stat-label">📆 Còn lại tới kỳ thi</div>
-          <div
-            className={`stat-value ${view.daysToExam <= 30 ? "red" : "amber"}`}
-            style={{ marginTop: 4 }}
-          >
-            {view.daysToExam > 0 ? view.daysToExam : 0}
-            <span style={{ fontSize: 15, fontWeight: 600 }}> ngày</span>
-          </div>
-          <div className="stat-foot" style={{ marginTop: 6 }}>
-            Ngày thi {view.examDate}
-          </div>
-          {view.remaining > 0 && view.daysToExam > 0 && (
-            <div className="small muted" style={{ marginTop: 10 }}>
-              Cần <strong>{view.paceNeeded} bài/ngày</strong> để xử lý hết{" "}
-              {view.remaining} bài còn nợ ({view.counts.todo} chưa làm +{" "}
-              {view.counts.wrong} đang sai).
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Nút bắt đầu ôn */}
-      <div className="card">
-        <div className="row between wrap" style={{ gap: 14 }}>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 16, fontWeight: 700 }}>
+      {/* ---- Việc chính của hôm nay ---- */}
+      <Panel>
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="text-lead font-semibold">
               {view.dueToday > 0
                 ? `${view.dueToday} bài đến hạn ôn hôm nay`
                 : "Không còn bài nào đến hạn"}
             </div>
-            <div className="small muted" style={{ marginTop: 3 }}>
+            <p className="mt-1 text-small text-ink-2">
               {view.overdue > 0
                 ? `Trong đó ${view.overdue} bài đã quá hạn — nên ưu tiên làm trước.`
                 : "Ôn đúng lịch giúp nhớ lâu hơn nhiều so với học dồn."}
-            </div>
+            </p>
           </div>
-          <button className="btn primary lg" onClick={onStartReview}>
+          <Button tone="accent" onClick={onStartReview}>
             {view.dueToday > 0 ? "Bắt đầu ôn →" : "Học bài mới →"}
-          </button>
+          </Button>
         </div>
+      </Panel>
+
+      {/* ---- Bốn số liệu tổng ---- */}
+      <div className="dx-grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <Stat
+          icon={BookOpen}
+          label="Đã làm"
+          value={view.attempted}
+          foot={`trên ${view.total} bài · ${Math.round(view.progress * 100)}%`}
+        />
+        <Stat
+          icon={Brain}
+          label="Nhớ lâu"
+          value={view.mastered}
+          tone="text-good"
+          foot="đạt chu kỳ ôn từ 14 ngày trở lên"
+        />
+        <Stat
+          icon={XCircle}
+          label="Đang sai"
+          value={view.counts.wrong}
+          tone="text-bad"
+          foot="cần quay lại xử lý"
+        />
+        <Stat
+          icon={Circle}
+          label="Chưa làm"
+          value={view.counts.todo}
+          tone="text-ink-2"
+          foot="còn lại trong giáo trình"
+        />
       </div>
 
-      {/* Bốn ô số liệu tổng */}
-      <div className="grid cols-4">
-        <div className="stat">
-          <div className="stat-label">📚 Đã làm</div>
-          <div className="stat-value blue">{view.attempted}</div>
-          <div className="stat-foot">
-            trên tổng {view.total} bài · {Math.round(view.progress * 100)}%
-          </div>
-        </div>
-        <div className="stat">
-          <div className="stat-label">🧠 Nhớ lâu</div>
-          <div className="stat-value green">{view.mastered}</div>
-          <div className="stat-foot">bài đạt chu kỳ ôn từ 14 ngày trở lên</div>
-        </div>
-        <div className="stat">
-          <div className="stat-label">❌ Đang sai</div>
-          <div className="stat-value red">{view.counts.wrong}</div>
-          <div className="stat-foot">cần quay lại xử lý</div>
-        </div>
-        <div className="stat">
-          <div className="stat-label">⬜ Chưa làm</div>
-          <div className="stat-value">{view.counts.todo}</div>
-          <div className="stat-foot">còn lại trong giáo trình</div>
-        </div>
-      </div>
-
-      {/* Tiến độ từng môn */}
-      <div className="card">
-        <div className="card-head">
-          <div className="card-title">Tiến độ từng môn</div>
-          <div className="legend">
-            {(["correct", "relearned", "wrong", "todo"] as const).map((status) => (
-              <span key={status}>
-                <i style={{ background: STATUS_COLOR[status] }} />
-                {STATUS_TEXT[status]}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* ---- Tiến độ từng môn ---- */}
+      <Panel>
+        <PanelHead
+          icon={Layers}
+          eyebrow="Bốn môn"
+          title="Tiến độ từng môn"
+          right={
+            <Legend
+              items={STATUS_ORDER.map((status) => ({
+                tone: STATUS_TONE[status],
+                text: STATUS_LABEL[status],
+              }))}
+            />
+          }
+        />
+        <div className="flex flex-col gap-4">
           {view.bySubject.map((subject) => (
             <div key={subject.key}>
-              <div className="row between" style={{ marginBottom: 6 }}>
-                <div className="row" style={{ gap: 8 }}>
-                  <span
-                    className="link ja"
-                    style={{ fontWeight: 700 }}
-                    onClick={() => onOpenSubject(subject.key)}
-                  >
-                    {subject.name}
-                  </span>
-                  <span className="small dim">{subject.viName}</span>
-                  {subject.due > 0 && (
-                    <span className="pill due">{subject.due} đến hạn</span>
-                  )}
-                </div>
-                <div className="small muted nowrap">
+              <div className="mb-2 flex items-center gap-2">
+                <button
+                  className="dx-btn ja text-body font-semibold hover:text-accent"
+                  onClick={() => onOpenSubject(subject.key)}
+                >
+                  {subject.name}
+                </button>
+                <span className="text-tiny text-ink-3">{subject.viName}</span>
+                {subject.due > 0 && (
+                  <Badge tone="accent">{subject.due} đến hạn</Badge>
+                )}
+                <span className="ml-auto shrink-0 text-tiny tabular-nums text-ink-3">
                   {subject.attempted}/{subject.total} ·{" "}
                   {Math.round(subject.progress * 100)}%
-                </div>
+                </span>
               </div>
-              <StatusStack counts={subject.counts} />
+              <StatusBar counts={subject.counts} />
             </div>
           ))}
         </div>
-      </div>
+      </Panel>
 
-      {/* Đã làm gần đây — ba ngày, xem lại câu nào đúng câu nào sai */}
-      <div className="card">
-        <div className="card-head">
-          <div className="card-title">
-            🕘 Đã làm gần đây
-            <div className="card-sub">
-              Ba ngày gần nhất. Bài làm sai xếp lên trước — đó là thứ cần nhìn lại.
-            </div>
-          </div>
-        </div>
+      {/* ---- Đã làm gần đây ---- */}
+      <Panel>
+        <PanelHead
+          icon={History}
+          eyebrow="Ba ngày gần nhất"
+          title="Đã làm gần đây"
+          hint="Bài làm sai xếp lên trước — đó là thứ cần nhìn lại."
+        />
 
         {activity.length === 0 ? (
-          <div className="empty small">
+          <p className="rounded-row bg-sunken px-3 py-6 text-center text-small text-ink-3">
             Chưa chấm bài nào trong ba ngày qua. Làm vài bài là hiện ngay ở đây.
-          </div>
+          </p>
         ) : (
           activity.map((day) => (
-            <div key={day.date}>
-              <div className="day-head">
-                <span className="day-name">{day.label}</span>
-                <span className="small dim">{day.date}</span>
-                <span className="small muted">
-                  ✅ {day.correct} · ❌ {day.wrong}
+            <div key={day.date} className="mb-1 last:mb-0">
+              <div className="flex items-center gap-2 px-3 pt-3 pb-1">
+                <span className="dx-eyebrow">{day.label}</span>
+                <span className="text-micro text-ink-4">{day.date}</span>
+                <span className="ml-auto flex gap-2">
+                  <Badge tone="good">{day.correct}</Badge>
+                  <Badge tone="bad">{day.wrong}</Badge>
                 </span>
               </div>
               {day.entries.map((entry) => (
-                <div
-                  className={`log-row ${entry.result}`}
+                <Row
                   key={entry.item.id}
-                  role="button"
-                  tabIndex={0}
-                  title="Ôn lại cả chủ đề này"
                   onClick={() => onOpenTopic(entry.item.subject, entry.item.topic)}
                 >
-                  <span className="log-mark">
-                    {entry.result === "correct" ? "✅" : "❌"}
+                  <span
+                    className="h-1.5 w-1.5 shrink-0 rounded-full"
+                    style={{
+                      background:
+                        entry.result === "correct"
+                          ? "var(--color-good)"
+                          : "var(--color-bad)",
+                    }}
+                  />
+                  <span className="ja min-w-0 flex-1 truncate text-body">
+                    {entry.item.name}
                   </span>
-                  <span className="log-name ja">{entry.item.name}</span>
-                  <span className="log-where">
-                    {topicVi(entry.item.topic) || entry.item.topic} ·{" "}
+                  <span className="hidden shrink-0 text-tiny text-ink-4 sm:block">
+                    {topicVi(entry.item.topic) || entry.item.topic}
+                  </span>
+                  <span className="shrink-0 text-micro tabular-nums text-ink-4">
                     {entry.item.exam} {entry.item.question}
-                    {entry.times > 1 && ` · chấm ${entry.times} lần`}
+                    {entry.times > 1 && ` · ${entry.times} lần`}
                   </span>
-                </div>
+                </Row>
               ))}
             </div>
           ))
         )}
-      </div>
+      </Panel>
 
-      {/* Đang yếu ở đâu — gộp cả ôn tập lẫn thi thử */}
-      <div className="card">
-        <div className="card-head">
-          <div className="card-title">
-            🩹 Đang yếu ở đâu
-            <div className="card-sub">
-              Top 5 chủ đề có tỉ lệ sai cao nhất mỗi môn, tính gộp cả lượt ôn tập
-              lẫn từng ý trong đề thi thử. Bấm vào một chủ đề để ôn lại cả chủ đề đó.
-            </div>
-          </div>
-        </div>
+      {/* ---- Đang yếu ở đâu ---- */}
+      <Panel>
+        <PanelHead
+          icon={Stethoscope}
+          eyebrow="Top 5 mỗi môn"
+          title="Đang yếu ở đâu"
+          hint="Tính gộp cả lượt ôn tập lẫn từng ý trong đề thi thử. Bấm một chủ đề để ôn lại cả chủ đề đó."
+        />
 
         {weakSubjects.length === 0 ? (
-          <div className="empty small">
+          <p className="rounded-row bg-sunken px-3 py-6 text-center text-small text-ink-3">
             Chưa đủ dữ liệu để kết luận chỗ nào yếu. Một chủ đề phải có ít nhất{" "}
-            {MIN_ATTEMPTS} lượt chấm (ôn tập hoặc thi thử) mới được xếp hạng — làm
-            đúng một bài rồi sai một bài thì con số 50% chẳng nói lên điều gì.
-          </div>
+            {MIN_ATTEMPTS} lượt chấm mới được xếp hạng — làm đúng một bài rồi sai một
+            bài thì con số 50% chẳng nói lên điều gì.
+          </p>
         ) : (
-          <div className="weak-grid">
+          <div className="dx-grid grid-cols-1 gap-x-6 gap-y-5 xl:grid-cols-2">
             {weakSubjects.map((subject) => (
-              <div className="weak-subject" key={subject.key}>
-                <div className="row" style={{ gap: 8, marginBottom: 8 }}>
-                  <span className="ja" style={{ fontWeight: 700 }}>
+              <div key={subject.key}>
+                <div className="mb-1.5 flex items-center gap-2 px-3">
+                  <span className="ja text-body font-semibold">
                     {subjectName(subject.key)}
                   </span>
-                  <span className="small dim">{subjectViName(subject.key)}</span>
+                  <span className="text-tiny text-ink-3">
+                    {subjectViName(subject.key)}
+                  </span>
                 </div>
-
                 {weak[subject.key].map((row) => (
-                  <button
-                    className="weak-row"
+                  <Row
                     key={row.topic}
                     onClick={() => onOpenTopic(row.subject, row.topic)}
-                    title={`Ôn lại cả ${row.totalItems} bài của chủ đề này`}
                   >
-                    <span className="weak-topic ja">{row.topic}</span>
-                    <span className="weak-bar">
-                      <Bar ratio={row.ratio} color="var(--red)" thin />
+                    <span className="ja min-w-0 flex-1 truncate text-small">
+                      {row.topic}
                     </span>
-                    <span className="weak-pct">{Math.round(row.ratio * 100)}%</span>
-                    <span className="small dim nowrap">
+                    <span className="hidden w-20 shrink-0 sm:block">
+                      <Meter value={row.ratio} tone="accent" />
+                    </span>
+                    <span className="w-10 shrink-0 text-right text-small font-semibold tabular-nums text-accent">
+                      {Math.round(row.ratio * 100)}%
+                    </span>
+                    <span className="w-24 shrink-0 text-right text-micro tabular-nums text-ink-4">
                       sai {row.wrong}/{row.attempts}
-                      {row.fromExam > 0 && ` · ${row.fromExam} ý từ thi thử`}
                     </span>
-                    <span className="weak-go">ôn lại {row.totalItems} bài →</span>
-                  </button>
+                  </Row>
                 ))}
               </div>
             ))}
           </div>
         )}
-      </div>
+      </Panel>
 
-      {/* Biểu đồ tiến bộ */}
-      <div className="grid cols-2">
-        <div className="card">
-          <div className="card-head">
-            <div className="card-title">
-              12 tuần gần đây
-              <div className="card-sub">Số lượt ôn mỗi tuần</div>
-            </div>
-          </div>
+      {/* ---- Hai biểu đồ ---- */}
+      <div className="dx-grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Panel>
+          <PanelHead icon={TrendingUp} eyebrow="12 tuần" title="Số lượt ôn mỗi tuần" />
           {weeks.some((week) => week.reviewed > 0) ? (
             <>
-              <BarChart data={weeks} />
-              <div className="legend" style={{ marginTop: 10 }}>
-                <span>
-                  <i style={{ background: "var(--blue)" }} />
-                  Đúng
-                </span>
-                <span>
-                  <i style={{ background: "var(--red)" }} />
-                  Sai
-                </span>
+              <Columns
+                bars={weeks.map((week) => [
+                  { ratio: week.wrong / maxWeek, tone: "var(--color-bad)" },
+                  { ratio: week.correct / maxWeek, tone: "var(--color-good)" },
+                ])}
+                labels={weeks.map((week) => week.label)}
+              />
+              <div className="mt-3">
+                <Legend
+                  items={[
+                    { tone: "var(--color-good)", text: "Đúng" },
+                    { tone: "var(--color-bad)", text: "Sai" },
+                  ]}
+                />
               </div>
             </>
           ) : (
-            <div className="empty small">
+            <p className="rounded-row bg-sunken px-3 py-6 text-center text-small text-ink-3">
               Chưa có dữ liệu. Ôn vài bài là biểu đồ hiện lên ngay.
-            </div>
+            </p>
           )}
-        </div>
+        </Panel>
 
-        <div className="card">
-          <div className="card-head">
-            <div className="card-title">
-              Lịch ôn 14 ngày tới
-              <div className="card-sub">Biết trước ngày nào nặng để sắp xếp</div>
-            </div>
-          </div>
-          <div className="chart-bars" style={{ height: 130 }}>
-            {upcoming.map((day, index) => (
-              <div
-                className="chart-bar"
-                key={day.date}
-                title={`${day.date}: ${day.count} bài`}
-              >
-                <div
-                  className="chart-bar-fill"
-                  style={{
-                    height: `${(day.count / maxUpcoming) * 100}%`,
-                    background: index === 0 ? "var(--amber)" : "var(--blue)",
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-          <div className="chart-axis">
-            {upcoming.map((day, index) => (
-              <span key={day.date}>{index === 0 ? "nay" : day.date.slice(8)}</span>
-            ))}
-          </div>
-        </div>
+        <Panel>
+          <PanelHead icon={CalendarDays} eyebrow="14 ngày tới" title="Lịch ôn sắp tới" />
+          <Columns
+            bars={upcoming.map((day, index) => [
+              {
+                ratio: day.count / maxUpcoming,
+                tone: index === 0 ? "var(--color-accent)" : "var(--color-info)",
+              },
+            ])}
+            labels={upcoming.map((day, index) =>
+              index === 0 ? "nay" : day.date.slice(8),
+            )}
+          />
+          <p className="mt-3 text-tiny text-ink-4">
+            Biết trước ngày nào nặng để sắp xếp thời gian.
+          </p>
+        </Panel>
       </div>
 
-      {/* Lịch nhiệt */}
-      <div className="card">
-        <div className="card-head">
-          <div className="card-title">
-            Nhịp học 17 tuần qua
-            <div className="card-sub">Ô càng sáng là ngày đó học càng nhiều</div>
-          </div>
-        </div>
-        <Heatmap days={heat} goal={view.today.goal} />
-        <div className="legend" style={{ marginTop: 10 }}>
-          <span>Ít</span>
-          {["var(--surface-2)", "#193b63", "#1d4d8c", "#2569c4", "#2d88ff"].map(
-            (color) => (
-              <i
-                key={color}
-                style={{ background: color, width: 12, height: 12, marginRight: 0 }}
+      {/* ---- Lịch nhiệt 17 tuần ---- */}
+      <Panel>
+        <PanelHead
+          icon={CalendarClock}
+          eyebrow="17 tuần qua"
+          title="Nhịp học"
+          hint="Ô càng sáng là ngày đó học càng nhiều."
+        />
+        {/* Ghim cả bề rộng cột lẫn chiều cao hàng. Chỉ đặt số hàng thôi thì lưới
+            giãn cột ra cho đầy khối, mỗi ô thành một hình vuông to tướng. */}
+        <div
+          className="dx-grid grid-flow-col justify-start gap-[3px] overflow-x-auto pb-1"
+          style={{
+            gridTemplateRows: "repeat(7, 11px)",
+            gridAutoColumns: "11px",
+          }}
+        >
+          {heat.map((day) => {
+            const level =
+              day.reviewed === 0 ? 0 : Math.min(4, Math.ceil((day.reviewed / maxHeat) * 4));
+            return (
+              <span
+                key={day.date}
+                title={`${day.date}: ${day.reviewed} bài`}
+                className="h-[11px] w-[11px] rounded-[2px]"
+                style={{
+                  background:
+                    level === 0
+                      ? "var(--color-sunken)"
+                      : `color-mix(in srgb, var(--color-accent) ${level * 25}%, var(--color-sunken))`,
+                }}
               />
-            ),
-          )}
+            );
+          })}
+        </div>
+        <div className="mt-3 flex items-center gap-1.5 text-micro text-ink-4">
+          <span>Ít</span>
+          {[0, 1, 2, 3, 4].map((level) => (
+            <i
+              key={level}
+              className="block h-2.5 w-2.5 rounded-[2px]"
+              style={{
+                background:
+                  level === 0
+                    ? "var(--color-sunken)"
+                    : `color-mix(in srgb, var(--color-accent) ${level * 25}%, var(--color-sunken))`,
+              }}
+            />
+          ))}
           <span>Nhiều</span>
         </div>
-      </div>
+      </Panel>
 
-      {/* Huy hiệu — chỉ hiện những cái đã đạt được */}
-      <div className="card">
-        <div className="card-head">
-          <div className="card-title">
-            Huy hiệu đã đạt
-            <div className="card-sub">
-              {earned.length === 0
-                ? "Chưa có huy hiệu nào — cứ học đều, tự khắc mở khoá"
-                : `${earned.length} huy hiệu${
-                    earnedToday.length > 0 ? ` · ${earnedToday.length} mở hôm nay` : ""
-                  }`}
-            </div>
-          </div>
-        </div>
+      {/* ---- Huy hiệu đã đạt ---- */}
+      <Panel>
+        <PanelHead
+          icon={Award}
+          eyebrow="Thành tích"
+          title="Huy hiệu đã đạt"
+          hint={
+            earned.length === 0
+              ? "Chưa có huy hiệu nào — cứ học đều, tự khắc mở khoá."
+              : `${earned.length} huy hiệu${
+                  earnedToday.length > 0 ? ` · ${earnedToday.length} mở hôm nay` : ""
+                }`
+          }
+        />
 
         {earned.length === 0 ? (
-          <div className="empty small">
-            Huy hiệu được giữ kín cho tới lúc bạn chạm mốc. Đang học mà đạt được
-            thì app sẽ báo ngay.
-          </div>
+          <p className="rounded-row bg-sunken px-3 py-6 text-center text-small text-ink-3">
+            Huy hiệu được giữ kín cho tới lúc bạn chạm mốc. Đang học mà đạt được thì
+            app sẽ báo ngay.
+          </p>
         ) : (
-          <div className="badge-grid">
+          <div className="dx-grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
             {earned.map((badge) => {
               const day = data.badges[badge.id]!;
               const isToday = day === today;
               return (
                 <div
-                  className={`badge${isToday ? " fresh" : ""}`}
                   key={badge.id}
                   title={badge.description}
+                  className={`relative rounded-row bg-sunken p-3 text-center ring-[0.5px] ${
+                    isToday ? "ring-accent" : "ring-hairline"
+                  }`}
                 >
-                  {isToday && <span className="badge-new">MỚI</span>}
-                  <div className="badge-icon">{badge.icon}</div>
-                  <div className="badge-name">{badge.name}</div>
-                  <div className="badge-date">{isToday ? "hôm nay" : day}</div>
+                  {isToday && (
+                    <span className="absolute right-1.5 top-1.5 rounded-[3px] bg-accent px-1 text-[9px] font-bold text-white">
+                      MỚI
+                    </span>
+                  )}
+                  <div className="text-title leading-none">{badge.icon}</div>
+                  <div className="mt-1.5 truncate text-tiny font-medium">
+                    {badge.name}
+                  </div>
+                  <div className="text-micro text-ink-4">
+                    {isToday ? "hôm nay" : day}
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
-      </div>
-
+      </Panel>
     </div>
   );
 }

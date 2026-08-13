@@ -1,4 +1,14 @@
 import { useMemo, useState } from "react";
+import type { ComponentType } from "react";
+import {
+  BookMarked,
+  CalendarClock,
+  Flame,
+  House,
+  Settings as SettingsIcon,
+  SquarePen,
+  Target,
+} from "lucide-react";
 
 import mark from "./assets/mark.svg";
 import About, { VietnamFlag } from "./components/About";
@@ -16,12 +26,24 @@ import type { SubjectKey } from "./lib/types";
 
 type Tab = "dashboard" | "review" | "browse" | "exam" | "settings";
 
-const TABS: Array<{ key: Tab; icon: string; label: string }> = [
-  { key: "dashboard", icon: "🏠", label: "Hôm nay" },
-  { key: "review", icon: "🎯", label: "Ôn tập" },
-  { key: "browse", icon: "📚", label: "Danh sách bài" },
-  { key: "exam", icon: "📝", label: "Thi thử" },
-  { key: "settings", icon: "⚙️", label: "Cài đặt" },
+/**
+ * Icon lấy từ bộ Lucide — SVG nét mảnh, cùng một tay vẽ.
+ *
+ * Trước đây chỗ này là emoji. Emoji do PHÔNG CHỮ CỦA MÁY vẽ chứ không phải app,
+ * nên mỗi hệ điều hành ra một kiểu: Windows vẽ phẳng nhiều màu, Android vẽ tròn
+ * mập, máy cũ thì vẽ như hồi 2015. Không chỉnh được nét, không chỉnh được màu,
+ * và cạnh chữ tiếng Việt thì luôn lệch chân.
+ */
+const TABS: Array<{
+  key: Tab;
+  icon: ComponentType<{ className?: string; strokeWidth?: number }>;
+  label: string;
+}> = [
+  { key: "dashboard", icon: House, label: "Hôm nay" },
+  { key: "review", icon: Target, label: "Ôn tập" },
+  { key: "browse", icon: BookMarked, label: "Danh sách bài" },
+  { key: "exam", icon: SquarePen, label: "Thi thử" },
+  { key: "settings", icon: SettingsIcon, label: "Cài đặt" },
 ];
 
 const SAVE_TEXT: Record<string, string> = {
@@ -83,7 +105,7 @@ export default function App() {
         <div className="header-spacer" />
 
         <div className="header-stat" title="Chuỗi ngày liên tiếp đạt mục tiêu">
-          🔥 {view.streak.current}
+          <Flame className="h-3.5 w-3.5" strokeWidth={2} /> {view.streak.current}
           <span className="label">ngày</span>
         </div>
         <div className="header-stat" title="Số bài đã ôn hôm nay trên mục tiêu">
@@ -91,7 +113,7 @@ export default function App() {
           <span className="label">hôm nay</span>
         </div>
         <div className="header-stat" title={`Ngày thi ${view.examDate}`}>
-          ⏳ {view.daysToExam}
+          <CalendarClock className="h-3.5 w-3.5" strokeWidth={2} /> {view.daysToExam}
           <span className="label">ngày tới kỳ thi</span>
         </div>
         <div className="header-stat" title={SAVE_TEXT[store.saveState]}>
@@ -110,7 +132,9 @@ export default function App() {
             className={`nav-item${tab === entry.key ? " active" : ""}`}
             onClick={() => setTab(entry.key)}
           >
-            <span className="nav-icon">{entry.icon}</span>
+            <span className="nav-icon">
+              <entry.icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
+            </span>
             <span className="nav-label">{entry.label}</span>
             {entry.key === "review" && view.dueToday > 0 && (
               <span className="nav-badge">{view.dueToday}</span>

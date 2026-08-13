@@ -3,6 +3,9 @@ import { createRoot } from "react-dom/client";
 
 import App from "./App";
 import { primeAudio } from "./lib/alarm";
+// Thứ tự nạp có ý nghĩa: theme.css xếp Tailwind vào tầng riêng, còn styles.css
+// để ngoài tầng nên luôn thắng khi trùng tên lớp. Đảo lại là vỡ bốn màn cũ.
+import "./design/theme.css";
 import "./styles.css";
 
 const container = document.getElementById("root");
