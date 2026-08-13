@@ -110,6 +110,18 @@ Ba lớp bảo vệ dữ liệu giữ nguyên trên Android: ghi nguyên tử (`
 tên), sao lưu hằng ngày 30 bản, tự cứu hộ từ bản sao lưu khi `data.json` hỏng.
 Chặn đường dẫn vượt thư mục cho file đính kèm cũng giữ nguyên, và có kiểm thử.
 
+**Icon và ảnh khởi động** sinh từ đúng file `src/assets/mark.svg` mà bản Windows
+dùng, nên hai bên không bao giờ lệch nhau:
+
+```bash
+python3 scripts/tao-icon-android.py   # 26 file icon + ảnh khởi động, 16 thư mục
+```
+
+Icon Android 8 trở lên gồm hai lớp chồng nhau, mỗi lớp 108dp, rồi hệ điều hành
+tự cắt theo hình của hãng máy — tròn, vuông bo, giọt nước. Chỉ **72dp ở giữa**
+là chắc chắn nhìn thấy, nên nhân vật được thu vào vùng đó, riêng vạt áo cố ý kéo
+dài quá đáy để cắt kiểu gì cũng không hở một khoảng trống dưới chân.
+
 ```bash
 npm run android:sync    # build giao diện rồi chép sang dự án Android
 npm run android:apk     # đóng gói APK (máy phải có Android SDK)
@@ -340,6 +352,7 @@ scripts/
   nap-con-thieu.py con-thieu.csv → đáp án + tiêu đề + số sao
   sua-danh-muc.py  vá kỳ thi / số câu / link cho danh mục
   nap-tieng-viet.py Excel → bản dịch tên bài (nameVi) cho danh mục
+  tao-icon-android.py mark.svg → icon hai lớp + ảnh khởi động cho Android
 docs/
   DONG-BO-GITHUB.md      bật đồng bộ tự động, từng bước
   SAO-LUU-VA-DONG-BO.md  phương án sao lưu và đồng bộ Android
