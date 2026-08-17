@@ -65,11 +65,13 @@ jobs:
         run: rm -f android/denken.keystore
 
       - name: Đặt tên file theo phiên bản
+        id: ten
         run: |
           VERSION=$(node -p "require('./package.json').version")
           mkdir -p out
           cp android/app/build/outputs/apk/debug/app-debug.apk \
              "out/Denken-3-shuu-$VERSION.apk"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
       # APK chỉ 6 MB nên vẫn giữ cho từng commit — cài thử trên máy là việc làm
       # hằng ngày. Nhưng cắt hạn xuống 5 ngày, và luồng "Dọn kho bản build" chạy
@@ -125,9 +127,18 @@ jobs:
             echo "rồi làm theo \`docs/KHOA-KY-ANDROID.md\`."
           } >> "$GITHUB_STEP_SUMMARY"
 
-      # Đẩy tag v* thì đính APK vào bản phát hành, cạnh file .exe của Windows.
+      # Đính APK vào bản phát hành. Hai lối vào:
+      #
+      #   - Đẩy tag `v*` — cách chính thức, đi cùng file .exe của Windows.
+      #   - Bấm Run workflow — tạo/cập nhật bản phát hành `v<phiên bản>` ngay.
+      #
+      # Có lối thứ hai vì Releases nằm ở kho RIÊNG, không tính vào hạn mức 0,5 GB
+      # của kho bản build. Nên lúc kho bản build đầy — và nó tính lại chậm 6–12
+      # tiếng sau khi dọn — đây là đường duy nhất còn lấy được file về máy.
       - name: Đính vào bản phát hành
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.ten.outputs.version }}
+          name: Denken 3-shuu v${{ steps.ten.outputs.version }}
           files: out/*.apk
