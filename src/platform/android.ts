@@ -1,16 +1,15 @@
 /**
  * Nền tảng Android.
  *
- * Giữ đúng ba lớp bảo vệ dữ liệu như bản Windows, vì đó là cam kết xuyên suốt
- * dự án chứ không phải tính năng riêng của Windows:
+ * File này chỉ còn phần **nối vào Capacitor**: gọi plugin, bắt sự kiện của hệ
+ * điều hành, chọn file, chia sẻ ra ngoài. Toàn bộ lý lẽ ghi/đọc/cứu hộ dữ liệu
+ * nằm ở `kho-android.ts` — tách ra để kiểm thử được ngoài điện thoại, sau khi
+ * một lỗi mất sạch dữ liệu nằm im ở đây suốt nhiều bản mà không ai đo được.
  *
- *   1. Ghi nguyên tử   — ghi ra `.tmp` rồi mới đổi tên đè lên file thật.
- *   2. Sao lưu hằng ngày — mỗi ngày mở app giữ lại một bản trong `backups/`.
- *   3. Tự cứu hộ       — `data.json` hỏng thì lấy bản sao lưu mới nhất còn đọc
- *                        được, file hỏng cất sang `corrupt/` để soi lại.
- *
- * Dữ liệu nằm trong thư mục riêng của app (`Directory.Data`): gỡ app mới mất,
- * cập nhật app thì không đụng tới — giống hệt `%APPDATA%` bên Windows.
+ * Dữ liệu nằm trong thư mục riêng của app (`Directory.Data`): cập nhật app thì
+ * không đụng tới — giống `%APPDATA%` bên Windows. Nhưng **gỡ app là mất hết**,
+ * mà APK ký bằng khoá khác nhau thì Android bắt gỡ mới cài được; xem
+ * `docs/KHOA-KY-ANDROID.md`.
  */
 
 import { App } from "@capacitor/app";
@@ -20,18 +19,14 @@ import { LocalNotifications } from "@capacitor/local-notifications";
 import { Share } from "@capacitor/share";
 import { StatusBar, Style } from "@capacitor/status-bar";
 
-import { emptyAppData } from "../lib/defaults";
 import type { Attachment, AttachmentKind, OpResult } from "../lib/types";
+import type { TepAndroid } from "./kho-android";
+import { BACKUPS, FILE, taoKhoAndroid } from "./kho-android";
 import type { Platform } from "./types";
 import { sideName, unsupported } from "./types";
 
 const DIR = Directory.Data;
-const FILE = "data.json";
-const TMP = "data.json.tmp";
-const BACKUPS = "backups";
-const CORRUPT = "corrupt";
 const ATTACHMENTS = "attachments";
-const KEEP_BACKUPS = 30;
 /** Chặn ảnh quá lớn, giống bản Windows. */
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
 
@@ -60,26 +55,6 @@ async function readText(path: string): Promise<string | null> {
   }
 }
 
-/**
- * Ghi nguyên tử: ra file tạm trước, xong xuôi mới đổi tên đè lên file thật.
- * Hết pin giữa chừng thì cùng lắm mất file tạm, `data.json` vẫn nguyên vẹn.
- */
-async function writeAtomic(path: string, text: string): Promise<void> {
-  await Filesystem.writeFile({
-    path: TMP,
-    directory: DIR,
-    data: text,
-    encoding: Encoding.UTF8,
-    recursive: true,
-  });
-  try {
-    await Filesystem.deleteFile({ path, directory: DIR });
-  } catch {
-    // Lần ghi đầu tiên thì chưa có file để xoá.
-  }
-  await Filesystem.rename({ from: TMP, to: path, directory: DIR, toDirectory: DIR });
-}
-
 async function listDir(path: string): Promise<string[]> {
   try {
     const result = await Filesystem.readdir({ path, directory: DIR });
@@ -90,70 +65,39 @@ async function listDir(path: string): Promise<string[]> {
 }
 
 /* ------------------------------------------------------------------ */
-/* Sao lưu và cứu hộ                                                   */
+/* Kho dữ liệu                                                         */
 /* ------------------------------------------------------------------ */
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-/** Mỗi ngày một bản, giữ 30 bản gần nhất. */
-async function backupDaily(text: string): Promise<void> {
-  await ensureDir(BACKUPS);
-  const name = `${BACKUPS}/data-${today()}.json`;
-  const names = await listDir(BACKUPS);
-  if (names.includes(`data-${today()}.json`)) return;
-
-  await Filesystem.writeFile({
-    path: name,
-    directory: DIR,
-    data: text,
-    encoding: Encoding.UTF8,
-    recursive: true,
-  });
-
-  const old = names.filter((n) => n.endsWith(".json")).sort();
-  for (const stale of old.slice(0, Math.max(0, old.length - KEEP_BACKUPS + 1))) {
-    try {
-      await Filesystem.deleteFile({ path: `${BACKUPS}/${stale}`, directory: DIR });
-    } catch {
-      // Xoá không được thì thôi, không đáng để hỏng cả lần ghi.
-    }
-  }
-}
-
-/** Bản sao lưu mới nhất còn đọc được. */
-async function newestUsableBackup(): Promise<ReturnType<typeof emptyAppData> | null> {
-  const names = (await listDir(BACKUPS))
-    .filter((n) => n.endsWith(".json"))
-    .sort()
-    .reverse();
-  for (const name of names) {
-    const text = await readText(`${BACKUPS}/${name}`);
-    if (!text) continue;
-    try {
-      return JSON.parse(text) as ReturnType<typeof emptyAppData>;
-    } catch {
-      continue; // bản này hỏng, thử bản cũ hơn
-    }
-  }
-  return null;
-}
-
-/** Cất file hỏng sang `corrupt/` để còn soi lại, chứ không xoá thẳng. */
-async function quarantine(text: string): Promise<void> {
-  await ensureDir(CORRUPT);
-  const stamp = new Date().toISOString().replace(/[:.]/g, "-");
-  try {
+/**
+ * Nối Capacitor vào kho.
+ *
+ * Toàn bộ lý lẽ ghi/đọc/cứu hộ nằm trong `kho-android.ts` và chạy được ngoài
+ * điện thoại, nên kiểm thử được. Ở đây chỉ còn đúng sáu thao tác đĩa.
+ */
+const tep: TepAndroid = {
+  doc: readText,
+  async ghi(path, text) {
     await Filesystem.writeFile({
-      path: `${CORRUPT}/data-${stamp}.json`,
+      path,
       directory: DIR,
       data: text,
       encoding: Encoding.UTF8,
       recursive: true,
     });
-  } catch {
-    // Cứu được dữ liệu quan trọng hơn là giữ được file hỏng.
-  }
-}
+  },
+  async xoa(path) {
+    await Filesystem.deleteFile({ path, directory: DIR });
+  },
+  async doiTen(from, to) {
+    await Filesystem.rename({ from, to, directory: DIR, toDirectory: DIR });
+  },
+  liet: listDir,
+  taoThuMuc: ensureDir,
+};
+
+const kho = taoKhoAndroid(tep);
 
 /* ------------------------------------------------------------------ */
 /* Chuyển đổi nhị phân                                                 */
@@ -277,29 +221,11 @@ export const android: Platform = {
 
   async load() {
     await ensureDir(ATTACHMENTS);
-    const text = await readText(FILE);
-
-    // Lần chạy đầu: chưa có file thì mở sổ trắng.
-    if (text === null) return emptyAppData();
-
-    try {
-      const data = JSON.parse(text) as ReturnType<typeof emptyAppData>;
-      await backupDaily(text);
-      return data;
-    } catch {
-      // data.json hỏng — cứu từ bản sao lưu mới nhất còn đọc được.
-      await quarantine(text);
-      return (await newestUsableBackup()) ?? emptyAppData();
-    }
+    return kho.load();
   },
 
-  async save(data) {
-    try {
-      await writeAtomic(FILE, JSON.stringify(data));
-      return { ok: true, path: FILE };
-    } catch (cause) {
-      return { ok: false, error: (cause as Error).message };
-    }
+  save(data) {
+    return kho.save(data);
   },
 
   async info() {
@@ -410,6 +336,24 @@ export const android: Platform = {
 
   exitApp() {
     void App.exitApp();
+  },
+
+  onPause(handler) {
+    // Hai nguồn tin, cố ý nghe cả hai. `appStateChange` là tin chuẩn của
+    // Capacitor nhưng nó chạy qua cầu nối native nên có độ trễ; `visibilitychange`
+    // do chính WebView phát, tới sớm hơn. App bị giết gấp thì vài mili giây ấy
+    // là khoảng cách giữa còn dữ liệu và mất dữ liệu.
+    const anDi = () => {
+      if (document.hidden) handler();
+    };
+    document.addEventListener("visibilitychange", anDi);
+    const dangKy = App.addListener("appStateChange", ({ isActive }) => {
+      if (!isActive) handler();
+    });
+    return () => {
+      document.removeEventListener("visibilitychange", anDi);
+      void dangKy.then((moc) => moc.remove());
+    };
   },
 
   async notifyAt(id, at, title, body) {

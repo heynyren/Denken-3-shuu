@@ -1,6 +1,6 @@
 {
   "name": "denken-3-shuu",
-  "version": "1.17.1",
+  "version": "1.18.0",
   "description": "App ôn thi 電験三種 - theo dõi KPI, ôn tập giãn cách và tiến bộ hằng ngày",
   "author": "heynyren",
   "license": "MIT",
@@ -20,7 +20,8 @@
     "soat:lop": "node scripts/soat-trung-lop.mjs",
     "test:sync": "esbuild scripts/kiem-thu-gop.ts --bundle --platform=node --format=cjs --outfile=dist/kiem-thu-gop.cjs --log-level=error && node dist/kiem-thu-gop.cjs",
     "android:sync": "npm run build:renderer && cap sync android",
-    "android:apk": "npm run android:sync && node scripts/build-apk.mjs"
+    "android:apk": "npm run android:sync && node scripts/build-apk.mjs",
+    "android:khoa-ky": "node scripts/tao-khoa-ky.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^7.6.8",

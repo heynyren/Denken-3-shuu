@@ -43,13 +43,23 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Bản cài Windows nặng 110 MB, mà kho bản build của tài khoản miễn phí chỉ
+      # có 0,5 GB. Đẩy commit năm lần là hết chỗ — rồi mọi luồng build đỏ hết,
+      # không phải vì mã nguồn hỏng mà vì không tải lên được nữa.
+      #
+      # Nên mặc định KHÔNG giữ bản cài của từng commit. Cần bản cài thì có hai
+      # đường, cả hai đều không tích luỹ:
+      #   - Vào tab Actions bấm "Run workflow" — giữ 2 ngày, đủ để tải về.
+      #   - Đẩy tag `v*` — bản cài đính vào Releases, giữ mãi, kho riêng.
+      # Commit thường vẫn build đủ, để biết mã nguồn có hỏng hay không.
       - name: Tải lên bản cài đặt
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
           name: Denken-3-shuu-Setup
           path: release/*.exe
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 2
 
       # Đẩy tay một tag dạng v1.0.1 là tự có bản phát hành tải về được.
       - name: Tạo bản phát hành

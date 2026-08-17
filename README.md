@@ -337,9 +337,22 @@ cộng — thà thiếu còn hơn thổi phồng, vì con số thổi phồng l�
 liên tiếp lẫn mọi biểu đồ. Bấm nhầm hai lần liên tiếp cũng không sao, lần thứ
 hai ra y nguyên.
 
+### Không có mạng thì sao
+
+Ghi xuống đĩa và đồng bộ là **hai tầng tách rời**. Mọi thao tác đều ghi thẳng
+vào `data.json` trên máy, không hỏi han gì tới mạng; đồng bộ là tầng chạy trên
+đó. Nên rút mạng ra vẫn học bình thường, chỉ là chưa đẩy lên được — dưới nút
+đồng bộ hiện câu báo lỗi, dữ liệu thì nguyên vẹn.
+
+Có mạng lại thì nhịp 5 phút tự chạy tiếp, không phải bấm gì. Vì gộp ba chiều so
+với bản chụp `sync-base.json` chứ không phải "bên nào mới hơn thì đè", nên phần
+học lúc offline và phần máy kia học trong cùng khoảng đó **cộng vào nhau**, chứ
+không bên nào mất.
+
 Cả hai đường đều có kiểm thử chạy trong `npm run build` (`npm run test:sync`):
-90 phép kiểm, gồm ca "đổi vai hai máy phải ra cùng một kết quả", ca máy thứ ba
-ghi chen vào giữa, và ca file trên mạng hỏng thì phải dừng chứ không ghi đè.
+149 phép kiểm, gồm ca "đổi vai hai máy phải ra cùng một kết quả", ca máy thứ ba
+ghi chen vào giữa, ca file trên mạng hỏng thì phải dừng chứ không ghi đè, và ca
+mất mạng giữa chừng rồi nối lại.
 
 Nút **⚠️ Khôi phục từ bản sao lưu** thì ngược lại — nó *thay thế* toàn bộ. Chỉ
 dùng khi dữ liệu máy này hỏng, đừng dùng để đồng bộ.
@@ -374,8 +387,9 @@ src/
   lib/weakness.ts  xếp hạng chủ đề yếu từ ôn tập + thi thử
   lib/history.ts   lịch sử chấm bài ba ngày gần nhất
   lib/vi.ts        tên chủ đề tiếng Việt, bỏ dấu, từ điển Việt–Nhật cho tìm kiếm
-  state/           tầng trạng thái, tự lưu sau 600ms
+  state/           tầng trạng thái, tự lưu sau 600ms, ghi nốt khi app lui về nền
   state/useSync.ts hẹn nhịp đồng bộ nền
+  platform/kho-android.ts  ghi/đọc/cứu hộ data.json trên Android — kiểm thử được
   views/           5 màn hình
   data/catalog.json  danh mục 1609 bài
 scripts/
@@ -387,8 +401,10 @@ scripts/
   sua-danh-muc.py  vá kỳ thi / số câu / link cho danh mục
   nap-tieng-viet.py Excel → bản dịch tên bài (nameVi) cho danh mục
   tao-icon-android.py mark.svg → icon hai lớp + ảnh khởi động cho Android
+  tao-khoa-ky.mjs  tạo khoá ký cố định cho APK (chạy một lần)
 docs/
   DONG-BO-GITHUB.md      bật đồng bộ tự động, từng bước
+  KHOA-KY-ANDROID.md     vì sao APK bắt gỡ app đi cài lại, và cách sửa hẳn
   SAO-LUU-VA-DONG-BO.md  phương án sao lưu và đồng bộ Android
 ```
 

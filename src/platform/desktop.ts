@@ -60,6 +60,24 @@ export const desktop: Platform = {
   onBack: () => () => undefined,
   exitApp: () => undefined,
 
+  /**
+   * Chuyển sang cửa sổ khác cũng tính là "lui về nền".
+   *
+   * Không bắt buộc như bên Android — đóng app trên Windows còn có `beforeunload`
+   * đỡ. Nhưng ghi sớm thì không mất gì: `flush()` không có việc thì trả về ngay.
+   */
+  onPause(handler) {
+    const roiDi = () => {
+      if (document.hidden) handler();
+    };
+    document.addEventListener("visibilitychange", roiDi);
+    window.addEventListener("blur", handler);
+    return () => {
+      document.removeEventListener("visibilitychange", roiDi);
+      window.removeEventListener("blur", handler);
+    };
+  },
+
   async notifyAt(id, at, title, body): Promise<OpResult> {
     clearTimer(id);
     const wait = at - Date.now();

@@ -71,11 +71,34 @@ jobs:
           cp android/app/build/outputs/apk/debug/app-debug.apk \
              "out/Denken-3-shuu-$VERSION.apk"
 
+      # APK chỉ 6 MB nên vẫn giữ cho từng commit — cài thử trên máy là việc làm
+      # hằng ngày. Nhưng cắt hạn xuống 5 ngày, và luồng "Dọn kho bản build" chạy
+      # ngay sau đây sẽ xoá các bản cũ, chỉ giữ bản mới nhất.
       - uses: actions/upload-artifact@v4
         with:
           name: Denken-3-shuu-APK
           path: out/*.apk
           if-no-files-found: error
+          retention-days: 5
+
+      # Chưa có khoá ký cố định thì phải nói thẳng ra ngay tại trang build, chứ
+      # không để người tải về tự vấp. Xem docs/KHOA-KY-ANDROID.md.
+      - name: Nhắc về khoá ký
+        if: env.HAS_KEYSTORE != 'true'
+        run: |
+          {
+            echo "## ⚠️ APK này KHÔNG cập nhật đè lên bản cũ được"
+            echo
+            echo "Repo chưa cấu hình khoá ký cố định, nên mỗi lần build máy chạy"
+            echo "lại tự sinh một khoá gỡ lỗi mới. Android coi hai bản ký bằng hai"
+            echo "khoá khác nhau là hai app khác nhau và **từ chối cập nhật đè**."
+            echo
+            echo "Hậu quả: mỗi lần vá phải gỡ app rồi cài lại — mà gỡ app là"
+            echo "**xoá sạch dữ liệu học** trong máy."
+            echo
+            echo "Cách sửa một lần cho xong: \`npm run android:khoa-ky\`,"
+            echo "rồi làm theo \`docs/KHOA-KY-ANDROID.md\`."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # Đẩy tag v* thì đính APK vào bản phát hành, cạnh file .exe của Windows.
       - name: Đính vào bản phát hành

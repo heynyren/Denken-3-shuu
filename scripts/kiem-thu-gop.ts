@@ -9,6 +9,8 @@ import { highlight, matchesQuery, trichDoan } from "../src/lib/vi";
 import { mergeData } from "../src/lib/sync";
 import type { AppData, ItemProgress } from "../src/lib/types";
 import { safeName } from "../src/platform/android";
+import type { TepAndroid } from "../src/platform/kho-android";
+import { taoKhoAndroid } from "../src/platform/kho-android";
 import { sideName } from "../src/platform/types";
 
 let pass = 0;
@@ -569,6 +571,314 @@ async function kiemThuDongBo(): Promise<void> {
   }
 }
 
+/* ------------------------------------------------------------------ *
+ * 13c. Kho Android: dữ liệu phải còn sau khi tắt app
+ *
+ * Người dùng báo "chạy app Android không bật đồng bộ thì dữ liệu không lưu".
+ * Đọc mã thì đường ghi trông hợp lý, nên phải đo chứ không đoán: dựng một hệ
+ * file giả trong bộ nhớ, bắt nó hỏng đúng những kiểu mà máy Android hay hỏng,
+ * rồi xem mở app lần sau còn dữ liệu không.
+ * ------------------------------------------------------------------ */
+
+/**
+ * Hệ file giả.
+ *
+ * `doiTenHong` là công tắc quan trọng nhất: `Filesystem.rename` của Capacitor
+ * không chạy trên mọi máy Android, mà app thì không có cách nào biết trước.
+ */
+function fakeFs(tuyChon: { doiTenHong?: boolean; doiTenKenDich?: boolean } = {}) {
+  const dia = new Map<string, string>();
+  const thuMuc = new Set<string>();
+  const nhatKy: string[] = [];
+
+  const fs: TepAndroid = {
+    async doc(path) {
+      nhatKy.push(`doc ${path}`);
+      return dia.get(path) ?? null;
+    },
+    async ghi(path, text) {
+      nhatKy.push(`ghi ${path}`);
+      dia.set(path, text);
+    },
+    async xoa(path) {
+      nhatKy.push(`xoa ${path}`);
+      if (!dia.has(path)) throw new Error("Không có file để xoá.");
+      dia.delete(path);
+    },
+    async doiTen(from, to) {
+      nhatKy.push(`doiTen ${from} -> ${to}`);
+      if (tuyChon.doiTenHong) throw new Error("rename không dùng được trên máy này");
+      if (tuyChon.doiTenKenDich && dia.has(to)) throw new Error("đích đã có sẵn");
+      const text = dia.get(from);
+      if (text === undefined) throw new Error("Không có file nguồn.");
+      dia.set(to, text);
+      dia.delete(from);
+    },
+    async liet(path) {
+      const tien = `${path}/`;
+      return [...dia.keys()]
+        .filter((k) => k.startsWith(tien))
+        .map((k) => k.slice(tien.length));
+    },
+    async taoThuMuc(path) {
+      thuMuc.add(path);
+    },
+  };
+
+  return { fs, dia, nhatKy };
+}
+
+function soTay(ghiChu: string): AppData {
+  const d = blank();
+  d.progress["dien-h22-11"] = prog("correct", "2026-08-17T09:00:00Z");
+  d.progress["dien-h22-11"].notes = [
+    { id: "n1", text: ghiChu, createdAt: "2026-08-17T09:00:00Z", attachments: [] },
+  ];
+  return d;
+}
+
+/* ------------------------------------------------------------------ *
+ * 13d. Mất mạng: học offline rồi có mạng lại thì đẩy lên đủ
+ *
+ * Hai tầng cố ý tách rời nhau: `data.json` ghi thẳng xuống đĩa, không hỏi han
+ * mạng miếc gì; đồng bộ là một tầng riêng chạy trên đó. Nên mất mạng thì app
+ * vẫn dùng bình thường, chỉ là chưa đẩy lên được.
+ *
+ * Điều phải chứng minh: lần đồng bộ hỏng KHÔNG được làm hỏng dữ liệu tại chỗ,
+ * và khi có mạng lại thì mọi thứ học lúc offline phải lên đủ, kể cả khi trong
+ * lúc đó máy kia cũng có sửa.
+ * ------------------------------------------------------------------ */
+async function kiemThuOffline(): Promise<void> {
+  const gh = fakeGithub();
+  const kho = khoPhu();
+
+  // Lần đầu, có mạng: đẩy sổ ban đầu lên.
+  const dau = blank();
+  dau.progress["bai-1"] = prog("correct", "2026-08-17T01:00:00Z");
+  const kq1 = await syncOnce({
+    config: cauHinh(), local: dau, ...kho, doFetch: gh.doFetch, device: "máy tính",
+  });
+  check(kq1.pushed, "offline: lần đầu có mạng thì đẩy lên được");
+
+  // Rút mạng. Học tiếp ba bài — đây là phần chỉ có trên đĩa máy này.
+  const hoc = clone(kq1.data);
+  hoc.progress["bai-2"] = prog("correct", "2026-08-17T02:00:00Z");
+  hoc.progress["bai-3"] = prog("wrong", "2026-08-17T03:00:00Z");
+  hoc.dailyLog["2026-08-17"] = { reviewed: 3, correct: 2, wrong: 1, bySubject: {} };
+
+  const mangDut: FetchLike = async () => {
+    throw new TypeError("Failed to fetch");
+  };
+  let batDuoc = "";
+  try {
+    await syncOnce({ config: cauHinh(), local: hoc, ...kho, doFetch: mangDut, device: "máy tính" });
+  } catch (loi) {
+    batDuoc = (loi as Error).message;
+  }
+  check(batDuoc !== "", "offline: mất mạng thì đồng bộ báo lỗi ra ngoài để app hiện lên");
+
+  // Quan trọng nhất: lần đồng bộ hỏng không được đụng vào dữ liệu tại chỗ.
+  check(
+    Object.keys(hoc.progress).length === 3 && hoc.progress["bai-3"] !== undefined,
+    "offline: đồng bộ hỏng nhưng dữ liệu học lúc offline còn nguyên",
+  );
+
+  // Trong lúc mình offline, điện thoại vẫn học và đẩy lên.
+  const dt = clone(kq1.data);
+  dt.progress["bai-9"] = prog("correct", "2026-08-17T04:00:00Z");
+  gh.mayKiaGhi(JSON.stringify(dt));
+
+  // Có mạng lại — nhịp 5 phút tự chạy tiếp, không cần bấm gì.
+  const kq2 = await syncOnce({
+    config: cauHinh(), local: hoc, ...kho, doFetch: gh.doFetch, device: "máy tính",
+  });
+  check(kq2.pushed, "offline: có mạng lại thì tự đẩy phần học offline lên");
+
+  const tren = JSON.parse(gh.noiDung ?? "{}") as AppData;
+  check(
+    !!tren.progress["bai-2"] && !!tren.progress["bai-3"],
+    "offline: bài học lúc mất mạng lên đủ trên kho chung",
+  );
+  check(
+    !!tren.progress["bai-9"],
+    "offline: và không đè mất bài điện thoại đã học trong lúc đó",
+  );
+  check(
+    !!kq2.data.progress["bai-9"],
+    "offline: máy tính cũng nhận về bài của điện thoại",
+  );
+}
+
+async function kiemThuKhoAndroid(): Promise<void> {
+  /* --- 13c-1. Đường bình thường: ghi rồi mở lại vẫn còn --- */
+  {
+    const { fs, dia } = fakeFs();
+    const kho = taoKhoAndroid(fs);
+    await kho.load(); // lần đầu: sổ trắng
+    const kq = await kho.save(soTay("ghi chú thứ nhất"));
+    check(kq.ok, "Android: lưu lần đầu báo thành công");
+    check(dia.has("data.json"), "Android: có file data.json thật trên đĩa");
+    check(!dia.has("data.json.tmp"), "Android: không để lại rác bản tạm");
+
+    // "Tắt app rồi mở lại" = dựng kho mới trên cùng đĩa đó.
+    const lai = await taoKhoAndroid(fs).load();
+    check(
+      lai.progress["dien-h22-11"]?.notes[0]?.text === "ghi chú thứ nhất",
+      "Android: mở lại app vẫn còn ghi chú",
+    );
+  }
+
+  /* --- 13c-2. Máy đổi tên file KHÔNG ĐƯỢC — đây là lỗi người dùng gặp ---
+     Đường ghi cũ: ghi bản tạm, XOÁ data.json, rồi đổi tên. Đổi tên hỏng là
+     data.json đã xoá mất, bản tạm thì vẫn mang tên tạm — mở lại app trắng trơn. */
+  {
+    const { fs, dia } = fakeFs({ doiTenHong: true });
+    const kho = taoKhoAndroid(fs);
+    await kho.load();
+    const kq = await kho.save(soTay("máy này rename hỏng"));
+    check(kq.ok, "Android: máy không đổi tên được thì vẫn lưu xong");
+    check(dia.has("data.json"), "Android: và data.json vẫn nằm đó, không bị xoá trắng");
+    check(kho.cachGhi() === "ghi-thang", "Android: nhớ luôn là máy này phải ghi thẳng");
+
+    const lai = await taoKhoAndroid(fs).load();
+    check(
+      lai.progress["dien-h22-11"]?.notes[0]?.text === "máy này rename hỏng",
+      "Android: mở lại app vẫn còn nguyên dữ liệu — đúng chỗ trước đây mất sạch",
+    );
+  }
+
+  /* --- 13c-3. Ghi nhiều lần liên tiếp trên máy rename hỏng --- */
+  {
+    const { fs } = fakeFs({ doiTenHong: true });
+    const kho = taoKhoAndroid(fs);
+    await kho.load();
+    for (let i = 1; i <= 5; i += 1) await kho.save(soTay(`lần ${i}`));
+    const lai = await taoKhoAndroid(fs).load();
+    check(
+      lai.progress["dien-h22-11"]?.notes[0]?.text === "lần 5",
+      "Android: ghi liên tiếp 5 lần, lần cuối là thứ đọc được",
+    );
+  }
+
+  /* --- 13c-4. Máy đòi đích phải trống mới đổi tên được --- */
+  {
+    const { fs, dia } = fakeFs({ doiTenKenDich: true });
+    const kho = taoKhoAndroid(fs);
+    await kho.load();
+    await kho.save(soTay("lần đầu"));
+    await kho.save(soTay("lần hai"));
+    check(kho.cachGhi() === "xoa-roi-doi-ten", "Android: chuyển sang kiểu xoá rồi đổi tên");
+    check(dia.get("data.json")?.includes("lần hai") === true,
+      "Android: nội dung mới đè lên được");
+  }
+
+  /* --- 13c-5. Mất data.json nhưng còn bản tạm: phải cứu, không được coi là máy mới ---
+     Đây đúng là hiện trường mà lỗi cũ để lại trên máy người dùng. Bản vá phải
+     đọc được cả những máy đã dính lỗi rồi, chứ không chỉ ngăn lỗi về sau. */
+  {
+    const { fs, dia } = fakeFs();
+    dia.set("data.json.tmp", JSON.stringify(soTay("bản tạm còn sót")));
+    const lai = await taoKhoAndroid(fs).load();
+    check(
+      lai.progress["dien-h22-11"]?.notes[0]?.text === "bản tạm còn sót",
+      "Android: máy đã dính lỗi cũ vẫn cứu lại được từ bản tạm",
+    );
+    check(dia.has("data.json"), "Android: và dựng lại data.json luôn, khỏi cứu lần nữa");
+  }
+
+  /* --- 13c-6. Mất cả data.json lẫn bản tạm: lùi về bản sao lưu hằng ngày --- */
+  {
+    const { fs, dia } = fakeFs();
+    dia.set("backups/data-2026-08-16.json", JSON.stringify(soTay("bản hôm qua")));
+    dia.set("backups/data-2026-08-15.json", JSON.stringify(soTay("bản hôm kia")));
+    const lai = await taoKhoAndroid(fs).load();
+    check(
+      lai.progress["dien-h22-11"]?.notes[0]?.text === "bản hôm qua",
+      "Android: mất file chính thì lấy bản sao lưu MỚI NHẤT",
+    );
+  }
+
+  /* --- 13c-7. Bản sao lưu mới nhất cũng hỏng: lùi tiếp bản cũ hơn --- */
+  {
+    const { fs, dia } = fakeFs();
+    dia.set("backups/data-2026-08-16.json", "{ cụt đuôi vì mất điện");
+    dia.set("backups/data-2026-08-15.json", JSON.stringify(soTay("bản hôm kia")));
+    const lai = await taoKhoAndroid(fs).load();
+    check(
+      lai.progress["dien-h22-11"]?.notes[0]?.text === "bản hôm kia",
+      "Android: bản sao lưu hỏng thì lùi thêm một ngày nữa",
+    );
+  }
+
+  /* --- 13c-8. Máy mới thật sự: không dấu vết gì thì mới mở sổ trắng --- */
+  {
+    const { fs } = fakeFs();
+    const lai = await taoKhoAndroid(fs).load();
+    check(
+      Object.keys(lai.progress).length === 0,
+      "Android: máy mới cài thật thì mở sổ trắng, đúng như trước",
+    );
+  }
+
+  /* --- 13c-9. data.json hỏng: cách ly rồi cứu từ bản sao lưu --- */
+  {
+    const { fs, dia } = fakeFs();
+    dia.set("data.json", "{ hỏng nặng");
+    dia.set("backups/data-2026-08-16.json", JSON.stringify(soTay("bản lành")));
+    const lai = await taoKhoAndroid(fs).load();
+    check(
+      lai.progress["dien-h22-11"]?.notes[0]?.text === "bản lành",
+      "Android: data.json hỏng thì cứu từ bản sao lưu",
+    );
+    check(
+      [...dia.keys()].some((k) => k.startsWith("corrupt/")),
+      "Android: file hỏng được cất sang corrupt/ để còn soi lại",
+    );
+  }
+
+  /* --- 13c-10. Ghi ra đĩa không đủ byte: KHÔNG được đè lên bản cũ ---
+     Bộ nhớ đầy là chuyện thường trên điện thoại. Ghi báo xong nhưng đọc lại
+     thiếu — nếu tin lời báo thì bản tốt đã bị thay bằng bản cụt. */
+  {
+    const { fs, dia } = fakeFs();
+    const kho = taoKhoAndroid(fs);
+    await kho.load();
+    await kho.save(soTay("bản tốt"));
+
+    const ghiThat = fs.ghi;
+    fs.ghi = async (path, text) => {
+      // Giả cảnh đĩa đầy: chỉ ghi được một nửa.
+      await ghiThat(path, text.slice(0, Math.floor(text.length / 2)));
+    };
+    const kq = await kho.save(soTay("bản sẽ bị cụt"));
+    fs.ghi = ghiThat;
+
+    check(!kq.ok, "Android: ghi ra không đủ thì báo hỏng, không báo thành công giả");
+    check(dia.get("data.json")?.includes("bản tốt") === true,
+      "Android: bản tốt còn nguyên, không bị bản cụt đè lên");
+
+    const lai = await taoKhoAndroid(fs).load();
+    check(
+      lai.progress["dien-h22-11"]?.notes[0]?.text === "bản tốt",
+      "Android: mở lại vẫn ra bản tốt",
+    );
+  }
+
+  /* --- 13c-11. Sao lưu hằng ngày vẫn chạy khi lưu --- */
+  {
+    const { fs, dia } = fakeFs();
+    const kho = taoKhoAndroid(fs);
+    await kho.load();
+    await kho.save(soTay("hôm nay"));
+    check(await kho.demSaoLuu() === 1, "Android: lưu xong có đúng một bản sao lưu trong ngày");
+    await kho.save(soTay("sửa thêm"));
+    check(await kho.demSaoLuu() === 1, "Android: lưu lần nữa trong ngày không đẻ thêm bản");
+    const ten = [...dia.keys()].find((k) => k.startsWith("backups/"));
+    check(ten?.includes(new Date().toISOString().slice(0, 10)) === true,
+      "Android: bản sao lưu mang tên ngày hôm nay");
+  }
+}
+
 /* ---- 13b. Tô sáng từ khoá trong kết quả tìm kiếm ---- */
 {
   const noi = (text: string, q: string) =>
@@ -687,6 +997,8 @@ async function kiemThuDongBo(): Promise<void> {
 
   void (async () => {
     await kiemThuDongBo();
+    await kiemThuKhoAndroid();
+    await kiemThuOffline();
 
     const qua = await desktop.notifyAt(1, Date.now() - 1000, "cũ", "rồi");
     check(!qua.ok, "hẹn vào mốc đã qua thì từ chối, không nhắc ngay lập tức");

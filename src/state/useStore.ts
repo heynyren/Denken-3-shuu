@@ -175,13 +175,32 @@ export function useStore(): Store {
     void reload();
   }, [reload]);
 
-  // Đóng cửa sổ khi còn thay đổi chưa ghi thì ghi nốt.
+  /**
+   * Ghi nốt trước khi app biến mất.
+   *
+   * Ba đường vào, vì mỗi nền tảng chết một kiểu:
+   *
+   *   - `beforeunload` — đóng cửa sổ trên Windows.
+   *   - `pagehide`     — WebView bị dọn; trên di động đây thường là tin cuối cùng
+   *                      nhận được, `beforeunload` nhiều khi không nổ.
+   *   - `platform.onPause` — app lui về chạy nền trên Android, lúc hệ điều hành
+   *                      còn có thể giết nó bất cứ lúc nào mà không báo gì thêm.
+   *
+   * Thiếu đường thứ ba là bug người dùng đã gặp: chấm một bài rồi vuốt app ra
+   * khỏi danh sách gần đây trong vòng 600ms, bài đó không bao giờ xuống đĩa.
+   */
   useEffect(() => {
-    const onLeave = () => {
+    const ghiNot = () => {
       if (pending.current) void writeNow();
     };
-    window.addEventListener("beforeunload", onLeave);
-    return () => window.removeEventListener("beforeunload", onLeave);
+    window.addEventListener("beforeunload", ghiNot);
+    window.addEventListener("pagehide", ghiNot);
+    const thoi = platform.onPause(ghiNot);
+    return () => {
+      window.removeEventListener("beforeunload", ghiNot);
+      window.removeEventListener("pagehide", ghiNot);
+      thoi();
+    };
   }, [writeNow]);
 
   /* ---------------- các hành động ---------------- */

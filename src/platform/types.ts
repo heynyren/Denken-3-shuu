@@ -100,6 +100,20 @@ export interface Platform {
   /** Thoát app. Chỉ Android mới làm được, và chỉ khi đang ở màn gốc. */
   exitApp(): void;
 
+  /**
+   * App sắp lui về chạy nền. Đây là lúc cuối cùng còn ghi được xuống đĩa.
+   *
+   * Trên Windows, đóng cửa sổ thì `beforeunload` nổ và ta ghi nốt phần đang
+   * chờ. Trên Android **không có sự kiện nào như vậy**: vuốt app ra khỏi danh
+   * sách gần đây, hay hệ điều hành thu hồi bộ nhớ khi app nằm nền, thì WebView
+   * chết ngay lập tức, không báo trước. Mọi thay đổi còn nằm trong nhịp chờ
+   * 600ms của `useStore` biến mất theo — chấm đúng một bài rồi tắt app là mất
+   * bài đó, và người dùng thấy đúng như "app không lưu gì cả".
+   *
+   * Nên phải bám vào lúc app chuyển sang nền, ghi ngay tại đó. Trả về hàm huỷ.
+   */
+  onPause(handler: () => void): () => void;
+
   /* --- lời nhắc hết giờ --- */
   /**
    * Hẹn một lời nhắc nổ vào đúng mốc `at` (mili giây kiểu `Date.now()`).
