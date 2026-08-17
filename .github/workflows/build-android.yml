@@ -31,7 +31,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: 21
@@ -74,12 +74,37 @@ jobs:
       # APK chỉ 6 MB nên vẫn giữ cho từng commit — cài thử trên máy là việc làm
       # hằng ngày. Nhưng cắt hạn xuống 5 ngày, và luồng "Dọn kho bản build" chạy
       # ngay sau đây sẽ xoá các bản cũ, chỉ giữ bản mới nhất.
-      - uses: actions/upload-artifact@v4
+      #
+      # `continue-on-error` cố ý: kho đầy là chuyện của cái kho, không phải lỗi
+      # của mã nguồn. Trước đây hết chỗ là bước này đỏ, kéo cả luồng đỏ theo, và
+      # nhìn vào chỉ thấy "build hỏng" — trong khi APK đã đóng gói xong xuôi rồi.
+      # Tệ hơn nữa: bước đính vào Releases nằm SAU đây nên cũng không chạy, mất
+      # nốt đường lấy file duy nhất còn lại. Kho GitHub tính lại dung lượng mỗi
+      # 6–12 tiếng, nên xoá xong vẫn còn kẹt một lúc; đừng để cái đó chặn build.
+      - id: tai_len
+        uses: actions/upload-artifact@v4
+        continue-on-error: true
         with:
           name: Denken-3-shuu-APK
           path: out/*.apk
           if-no-files-found: error
           retention-days: 5
+
+      - name: Báo khi kho đầy
+        if: steps.tai_len.outcome == 'failure'
+        run: |
+          {
+            echo "## 📦 APK đóng gói xong nhưng chưa tải lên được"
+            echo
+            echo "Kho bản build của tài khoản đã đầy. Bản thân APK **không sao** —"
+            echo "mã nguồn build sạch, chỉ là không có chỗ để cất file."
+            echo
+            echo "Hai đường lấy file:"
+            echo "- Chạy luồng **Dọn kho bản build** rồi bấm Re-run. Lưu ý GitHub"
+            echo "  tính lại dung lượng mỗi 6–12 tiếng, xoá xong vẫn phải chờ."
+            echo "- Hoặc đẩy một tag \`v*\` — APK sẽ vào Releases, kho riêng,"
+            echo "  không đụng tới hạn mức này. Đây là đường chắc ăn."
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # Chưa có khoá ký cố định thì phải nói thẳng ra ngay tại trang build, chứ
       # không để người tải về tự vấp. Xem docs/KHOA-KY-ANDROID.md.

@@ -52,8 +52,11 @@ jobs:
       #   - Vào tab Actions bấm "Run workflow" — giữ 2 ngày, đủ để tải về.
       #   - Đẩy tag `v*` — bản cài đính vào Releases, giữ mãi, kho riêng.
       # Commit thường vẫn build đủ, để biết mã nguồn có hỏng hay không.
+      # `continue-on-error`: kho đầy là chuyện của cái kho, không phải lỗi của mã
+      # nguồn — đừng để nó làm đỏ cả luồng và chặn luôn bước tạo bản phát hành.
       - name: Tải lên bản cài đặt
         if: github.event_name == 'workflow_dispatch'
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: Denken-3-shuu-Setup
