@@ -56,11 +56,57 @@ if (existsSync(dich)) {
   process.exit(1);
 }
 
+/**
+ * Tìm `keytool`.
+ *
+ * Nó đi kèm JDK. Nhưng máy nào có Android Studio thì đã có sẵn một JDK nằm
+ * trong thư mục cài đặt của Android Studio (`jbr/`) — chỉ là không nằm trong
+ * PATH, nên gõ `keytool` trơn sẽ báo không tìm thấy dù máy có đủ đồ. Bắt người
+ * ta đi cài thêm JDK trong tình huống đó là bắt làm việc thừa.
+ */
+function timKeytool() {
+  const ten = process.platform === "win32" ? "keytool.exe" : "keytool";
+
+  // Có sẵn trong PATH là tốt nhất.
+  const thu = spawnSync(ten, ["-help"], { stdio: "ignore" });
+  if (!thu.error) return ten;
+
+  const noiCoThe = [
+    process.env.JAVA_HOME && path.join(process.env.JAVA_HOME, "bin", ten),
+    process.env.ANDROID_STUDIO_JDK && path.join(process.env.ANDROID_STUDIO_JDK, "bin", ten),
+    // Android Studio, các chỗ cài mặc định.
+    "C:/Program Files/Android/Android Studio/jbr/bin/keytool.exe",
+    "C:/Program Files/Android/Android Studio/jre/bin/keytool.exe",
+    `${process.env.LOCALAPPDATA ?? ""}/Programs/Android Studio/jbr/bin/keytool.exe`,
+    "/Applications/Android Studio.app/Contents/jbr/Contents/Home/bin/keytool",
+    "/Applications/Android Studio.app/Contents/jre/Contents/Home/bin/keytool",
+  ].filter(Boolean);
+
+  for (const noi of noiCoThe) {
+    if (existsSync(noi)) return noi;
+  }
+  return null;
+}
+
+const KEYTOOL = timKeytool();
+if (!KEYTOOL) {
+  console.error(
+    "Không tìm thấy keytool trên máy này.\n\n" +
+      "keytool đi kèm JDK. Ba cách, chọn cách nào cũng được:\n" +
+      "  1. Máy có Android Studio thì keytool nằm trong thư mục cài đặt của nó;\n" +
+      "     đặt biến JAVA_HOME trỏ vào thư mục `jbr` bên trong rồi chạy lại.\n" +
+      "  2. Cài JDK 17 trở lên (adoptium.net), mở lại cửa sổ dòng lệnh.\n" +
+      "  3. Hoặc dùng luôn khoá gỡ lỗi sẵn có của Android Studio — xem phần\n" +
+      "     'Đường tắt' trong docs/KHOA-KY-ANDROID.md.",
+  );
+  process.exit(1);
+}
+
 /** Mật khẩu ngẫu nhiên: không ai phải nhớ, chỉ dán vào GitHub Secrets. */
 const matKhau = randomBytes(24).toString("base64url");
 
 const keytool = spawnSync(
-  "keytool",
+  KEYTOOL,
   [
     "-genkeypair",
     "-v",
@@ -89,7 +135,7 @@ const b64 = readFileSync(dich).toString("base64");
 
 // Vân tay để đối chiếu về sau, và để khai báo với Google nếu có ngày dùng OAuth.
 const vanTay = spawnSync(
-  "keytool",
+  KEYTOOL,
   ["-list", "-v", "-keystore", dich, "-alias", ALIAS, "-storepass", matKhau],
   { encoding: "utf8" },
 );

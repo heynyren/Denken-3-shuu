@@ -35,11 +35,29 @@ nhân còn lại nằm ở đường ghi file, đã sửa trong `src/platform/kh
 
 ## Cách sửa — làm một lần, xong hẳn
 
-Chạy trên máy bạn (cần cài Java/JDK 17 trở lên):
+Chạy trên máy bạn, **trong thư mục dự án**:
 
-```bash
-npm run android:khoa-ky
+```powershell
+cd C:\duong\dan\toi\denken-3-shuu
+node scripts\tao-khoa-ky.mjs
 ```
+
+> **Đừng gõ `npm run ...` trong PowerShell nếu nó báo lỗi đỏ.** Trên Windows,
+> `npm` thật ra là một file `npm.ps1`, mà PowerShell mặc định từ chối chạy mọi
+> file `.ps1` chưa được ký số:
+>
+> ```
+> npm : File C:\Program Files\nodejs\npm.ps1 cannot be loaded.
+> The file ... is not digitally signed.
+> ```
+>
+> Không phải lỗi của dự án này, và không cần đổi chính sách bảo mật của máy làm
+> gì. Gọi thẳng `node` như trên là xong, vì `node.exe` là chương trình chứ không
+> phải script. Muốn dùng `npm` thì gõ `npm.cmd run android:khoa-ky`, hoặc mở
+> Command Prompt thay vì PowerShell.
+
+Script tự tìm `keytool` trong PATH, trong `JAVA_HOME`, và trong JDK đi kèm
+Android Studio — máy có Android Studio thì thường không phải cài thêm gì.
 
 Lệnh này tạo một khoá ký cố định, hạn 100 năm, mật khẩu ngẫu nhiên, rồi in ra
 bốn giá trị. Vào GitHub:
@@ -63,6 +81,40 @@ npm run android:khoa-ky -- --xoa
 
 Từ lần build sau, luồng `build-android.yml` tự lấy khoá từ Secrets ra ký. Mọi
 APK về sau cùng một chữ ký, cập nhật đè bình thường, dữ liệu còn nguyên.
+
+## Đường tắt: dùng luôn khoá gỡ lỗi của Android Studio
+
+Nếu máy bạn từng cài Android Studio thì đã có sẵn một khoá cố định:
+
+```
+Windows:  %USERPROFILE%\.android\debug.keystore
+macOS:    ~/.android/debug.keystore
+```
+
+Đây chính là khoá mà Android Studio vẫn ký cho bạn bấy lâu nay — cũng là lý do
+gửi bản vá từ Android Studio sang điện thoại thì cập nhật đè được. Dùng nó thì
+APK build trên GitHub **cùng chữ ký với bản Android Studio build**, cài đè qua
+lại giữa hai bên đều được.
+
+Mật khẩu của nó là cố định và ai cũng biết:
+
+| Secret | Nội dung |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | kết quả của lệnh bên dưới |
+| `ANDROID_STORE_PASSWORD` | `android` |
+| `ANDROID_KEY_ALIAS` | `androiddebugkey` |
+| `ANDROID_KEY_PASSWORD` | `android` |
+
+Lấy chuỗi base64:
+
+```powershell
+node -e "console.log(require('fs').readFileSync(process.env.USERPROFILE+'/.android/debug.keystore').toString('base64'))"
+```
+
+**Đánh đổi:** mật khẩu công khai nghĩa là ai lấy được file khoá cũng ký được
+app giả mạo cài đè lên app của bạn. Với một app học riêng, để trong repo riêng
+tư, không phát hành lên Play Store thì rủi ro coi như không có. Muốn chặt chẽ
+hơn thì dùng khoá riêng ở phần trên — chỉ tốn thêm một lệnh.
 
 ## Hai điều phải nhớ
 
