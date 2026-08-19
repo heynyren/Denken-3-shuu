@@ -44,6 +44,7 @@ import { platform } from "../platform";
 import { ALARM_EXAM } from "../platform/types";
 import type { Store } from "../state/useStore";
 
+import { t, t2 } from "../lib/chu";
 const ANSWERS = (answersFile as { answers: AnswerKey }).answers;
 
 /**
@@ -151,8 +152,8 @@ export default function Exam({
     void platform.notifyAt(
       ALARM_EXAM,
       at,
-      `Hết giờ ${subjectViName(paper.subject)}`,
-      "Bài đã tự nộp. Mở app xem điểm nhé.",
+      t2("Hết giờ {mon}", { mon: t(subjectViName(paper.subject)) }),
+      t("Bài đã tự nộp. Mở app xem điểm nhé."),
     );
     setStage("running");
   };
@@ -214,15 +215,15 @@ export default function Exam({
         <div className="card">
           <div className="card-head">
             <div className="card-title">
-              <Ic i={SquarePen} /> Thi thử
+              <Ic i={SquarePen} /> {t("Thi thử")}
               <div className="card-sub">
-                Làm nguyên một kỳ thi thật, có bấm giờ và chấm điểm
+                {t("Làm nguyên một kỳ thi thật, có bấm giờ và chấm điểm")}
               </div>
             </div>
           </div>
 
           <div className="field" style={{ marginBottom: 16 }}>
-            <span className="field-label">Chọn kỳ thi</span>
+            <span className="field-label">{t("Chọn kỳ thi")}</span>
             <select
               className="select"
               value={exam}
@@ -235,7 +236,7 @@ export default function Exam({
                 );
                 return (
                   <option key={entry.exam} value={entry.exam}>
-                    {entry.exam} — {count} câu, {Object.keys(entry.papers).length} môn
+                    {entry.exam} {t2("— {cau} câu, {mon} môn", { cau: count, mon: Object.keys(entry.papers).length })}
                   </option>
                 );
               })}
@@ -243,7 +244,7 @@ export default function Exam({
           </div>
 
           <div className="field-label" style={{ marginBottom: 8 }}>
-            Chọn môn thi
+            {t("Chọn môn thi")}
           </div>
           <div className="exam-subjects">
             {subjects.map((subject) => {
@@ -265,9 +266,9 @@ export default function Exam({
                   <div className="ja exam-subject-name">{subject.name}</div>
                   <div className="small dim">{subject.viName}</div>
                   <div className="small muted" style={{ marginTop: 6 }}>
-                    {paper ? `${paper.questions.length} câu` : "không có đề"}
+                    {paper ? t2("{n} câu", { n: paper.questions.length }) : t("không có đề")}
                   </div>
-                  <div className="small dim">{EXAM_MINUTES[subject.key]} phút</div>
+                  <div className="small dim">{t2("{n} phút", { n: EXAM_MINUTES[subject.key] })}</div>
                 </button>
               );
             })}
@@ -278,30 +279,29 @@ export default function Exam({
               className="btn sm"
               onClick={() => setChosen(subjects.map((s) => s.key))}
             >
-              Chọn cả 4 môn
+              {t("Chọn cả 4 môn")}
             </button>
             <button className="btn sm ghost" onClick={() => setChosen([])}>
-              Bỏ chọn hết
+              {t("Bỏ chọn hết")}
             </button>
           </div>
 
           {papers.length > 0 && (
             <div className="callout" style={{ marginTop: 16 }}>
-              Thi <strong>lần lượt từng môn</strong>, xong môn này mới sang môn kia:
+              Thi <strong>{t("lần lượt từng môn")}</strong>{t(", xong môn này mới sang môn kia:")}
               <div className="exam-order">
                 {papers.map((paper, index) => (
                   <span className="exam-order-step" key={paper.subject}>
                     {index > 0 && <span className="dim">→</span>}
                     <span className="ja">{subjectName(paper.subject)}</span>
                     <span className="small dim">
-                      {EXAM_MINUTES[paper.subject]} phút
+                      {t2("{n} phút", { n: EXAM_MINUTES[paper.subject] })}
                     </span>
                   </span>
                 ))}
               </div>
-              Mỗi môn có đồng hồ riêng, <strong>không cộng dồn thời gian</strong> — hết
-              giờ môn nào là nộp môn đó. Điểm đạt là <strong>{PASS_MARK}/100</strong>{" "}
-              mỗi môn.
+              {t("Mỗi môn có đồng hồ riêng,")} <strong>{t("không cộng dồn thời gian")}</strong> {t("— hết giờ môn nào là nộp môn đó. Điểm đạt là")} <strong>{PASS_MARK}/100</strong>{" "}
+              {t("mỗi môn.")}
             </div>
           )}
 
@@ -313,15 +313,12 @@ export default function Exam({
             >
               {gradedRatio === 0 ? (
                 <>
-                  <strong>Đề này chưa có đáp án nên chưa chấm được.</strong> Bạn vẫn thi
-                  và bấm giờ bình thường, nhưng phần chấm điểm sẽ để trống. Nạp đáp án
-                  bằng <span className="mono">scripts/build-answers.py</span>.
+                  <strong>{t("Đề này chưa có đáp án nên chưa chấm được.")}</strong> {t("Bạn vẫn thi và bấm giờ bình thường, nhưng phần chấm điểm sẽ để trống. Nạp đáp án bằng")} <span className="mono">scripts/build-answers.py</span>.
                 </>
               ) : (
                 <>
-                  Mới có đáp án cho <strong>{coverage.graded}/{coverage.total}</strong>{" "}
-                  ý (B問題 mỗi câu 2 ý). Điểm sẽ được quy về thang 100 trên phần chấm được, số câu còn
-                  lại không tính là sai.
+                  {t("Mới có đáp án cho")} <strong>{coverage.graded}/{coverage.total}</strong>{" "}
+                  {t("ý (B問題 mỗi câu 2 ý). Điểm sẽ được quy về thang 100 trên phần chấm được, số câu còn lại không tính là sai.")}
                 </>
               )}
             </div>
@@ -333,7 +330,7 @@ export default function Exam({
             disabled={papers.length === 0}
             onClick={begin}
           >
-            Bắt đầu thi →
+            {t("Bắt đầu thi →")}
           </button>
         </div>
 
@@ -374,20 +371,20 @@ export default function Exam({
               {papers.length > 1 && (
                 <span className="small dim">
                   {" "}
-                  (môn {step + 1}/{papers.length})
+                  {t2("(môn {i}/{tong})", { i: step + 1, tong: papers.length })}
                 </span>
               )}
             </div>
             <div className="small muted">
-              Đã trả lời {answered}/{needCount} ý
-              {left <= 300 && " · sắp hết giờ!"}
+              {t2("Đã trả lời {da}/{can} ý", { da: answered, can: needCount })}
+              {left <= 300 && t(" · sắp hết giờ!")}
             </div>
           </div>
           <button className="btn success" onClick={submitPaper}>
-            {next ? "Nộp môn này" : "Nộp bài"}
+            {next ? t("Nộp môn này") : t("Nộp bài")}
           </button>
           <button className="btn ghost sm" onClick={quit}>
-            Thoát
+            {t("Thoát")}
           </button>
         </div>
 
@@ -411,16 +408,16 @@ export default function Exam({
           <button className="btn success lg" onClick={submitPaper}>
             {next ? (
               <>
-                Nộp <span className="ja">{subjectName(current.subject)}</span> và sang{" "}
+                {t("Nộp")} <span className="ja">{subjectName(current.subject)}</span> {t("và sang")}{" "}
                 <span className="ja">{subjectName(next.subject)}</span> →
               </>
             ) : (
-              "Nộp bài và xem điểm"
+              t("Nộp bài và xem điểm")
             )}
           </button>
           {next && (
             <div className="small dim" style={{ marginTop: 10 }}>
-              Nộp rồi là không quay lại sửa được, giống phòng thi thật.
+              {t("Nộp rồi là không quay lại sửa được, giống phòng thi thật.")}
             </div>
           )}
         </div>
@@ -439,11 +436,10 @@ export default function Exam({
             <Coffee className="h-9 w-9" strokeWidth={1.25} />
           </div>
           <div className="exam-break-title">
-            Xong <span className="ja">{justDone && subjectName(justDone.subject)}</span>
+            {t("Xong")} <span className="ja">{justDone && subjectName(justDone.subject)}</span>
           </div>
           <p className="muted">
-            Nghỉ một chút rồi thi tiếp. Môn sau có đồng hồ riêng, bấm nút mới bắt đầu
-            tính giờ — thời gian nghỉ không bị trừ vào bài.
+            {t("Nghỉ một chút rồi thi tiếp. Môn sau có đồng hồ riêng, bấm nút mới bắt đầu tính giờ — thời gian nghỉ không bị trừ vào bài.")}
           </p>
 
           <div className="exam-order" style={{ justifyContent: "center" }}>
@@ -457,7 +453,7 @@ export default function Exam({
                 {index > 0 && <span className="dim">→</span>}
                 <span className="ja">{subjectName(paper.subject)}</span>
                 <span className="small dim">
-                  {index < step + 1 ? "đã nộp" : `${EXAM_MINUTES[paper.subject]} phút`}
+                  {index < step + 1 ? t("đã nộp") : t2("{n} phút", { n: EXAM_MINUTES[paper.subject] })}
                 </span>
               </span>
             ))}
@@ -465,8 +461,8 @@ export default function Exam({
 
           <div className="btn-row" style={{ justifyContent: "center", marginTop: 18 }}>
             <button className="btn primary lg" onClick={() => startPaper(step + 1)}>
-              Bắt đầu <span className="ja">{subjectName(next.subject)}</span> —{" "}
-              {EXAM_MINUTES[next.subject]} phút →
+              {t("Bắt đầu")} <span className="ja">{subjectName(next.subject)}</span> —{" "}
+              {t2("{n} phút →", { n: EXAM_MINUTES[next.subject] })}
             </button>
             <button
               className="btn ghost"
@@ -475,7 +471,7 @@ export default function Exam({
                 setStage("result");
               }}
             >
-              Dừng ở đây, xem điểm
+              {t("Dừng ở đây, xem điểm")}
             </button>
           </div>
         </div>
@@ -542,14 +538,14 @@ function PaperSheet({
           <span className="ja">{subjectName(paper.subject)}</span>{" "}
           <span className="card-sub">{subjectViName(paper.subject)}</span>
         </div>
-        <span className="small muted">{EXAM_MINUTES[paper.subject]} phút</span>
+        <span className="small muted">{t2("{n} phút", { n: EXAM_MINUTES[paper.subject] })}</span>
       </div>
 
       {paper.hasChoice && (
         <div className="callout warn" style={{ marginBottom: 14 }}>
-          <strong>Chọn một trong hai câu cuối.</strong> Môn này chỉ được làm{" "}
-          <span className="mono">問{CHOICE_PAIR[0]}</span> <em>hoặc</em>{" "}
-          <span className="mono">問{CHOICE_PAIR[1]}</span>, không làm cả hai.
+          <strong>{t("Chọn một trong hai câu cuối.")}</strong> {t("Môn này chỉ được làm")}{" "}
+          <span className="mono">問{CHOICE_PAIR[0]}</span> <em>{t("hoặc")}</em>{" "}
+          <span className="mono">問{CHOICE_PAIR[1]}</span>{t(", không làm cả hai.")}
           <div className="chip-row" style={{ marginTop: 10 }}>
             {CHOICE_PAIR.map((number) => (
               <button
@@ -557,7 +553,7 @@ function PaperSheet({
                 className={`chip${choice === number ? " on" : ""}`}
                 onClick={() => onChoice(number)}
               >
-                Làm 問{number}
+                {t2("Làm 問{so}", { so: number })}
               </button>
             ))}
           </div>
@@ -579,7 +575,7 @@ function PaperSheet({
                 <Stars count={item.stars} />
                 <button
                   className="icon-btn"
-                  title="Mở đề bài trên denken-ou.com"
+                  title={t("Mở đề bài trên denken-ou.com")}
                   onClick={() => openLink(item.url)}
                 >
                   ↗
@@ -587,7 +583,7 @@ function PaperSheet({
               </div>
 
               {off ? (
-                <div className="small dim">Không làm câu này</div>
+                <div className="small dim">{t("Không làm câu này")}</div>
               ) : (
                 // B問題 hai ý, mỗi ý một hàng lựa chọn riêng.
                 Array.from({ length: subAnswerCount(item) }, (_, index) => (
@@ -650,15 +646,15 @@ function ExamResult({
         <div>
           <div className="exam-verdict-title">
             {gradable.length === 0
-              ? "Chưa chấm được"
+              ? t("Chưa chấm được")
               : allPassed
-                ? "Đạt!"
-                : "Chưa đạt"}
+                ? t("Đạt!")
+                : t("Chưa đạt")}
           </div>
           <div className="muted">
             {gradable.length === 0
-              ? "Đề này chưa có đáp án trong app nên không tính điểm được."
-              : `Kỳ ${exam} · điểm đạt là ${PASS_MARK}/100 mỗi môn`}
+              ? t("Đề này chưa có đáp án trong app nên không tính điểm được.")
+              : t2("Kỳ {ky} · điểm đạt là {diem}/100 mỗi môn", { ky: exam, diem: PASS_MARK })}
           </div>
         </div>
       </div>
@@ -672,7 +668,7 @@ function ExamResult({
               </span>
               {score.correct + score.wrong + score.blank > 0 && (
                 <span className={`pill ${score.passed ? "correct" : "wrong"}`}>
-                  {score.passed ? "Đạt" : "Chưa đạt"}
+                  {score.passed ? t("Đạt") : t("Chưa đạt")}
                 </span>
               )}
             </div>
@@ -684,22 +680,22 @@ function ExamResult({
               <span style={{ fontSize: 14, fontWeight: 600 }}> /100</span>
             </div>
             <div className="small muted" style={{ marginTop: 8, lineHeight: 1.8 }}>
-              <Ic i={Check} className="h-3.5 w-3.5" /> Đúng {score.correct} ·{" "}
+              <Ic i={Check} className="h-3.5 w-3.5" /> {t2("Đúng {n}", { n: score.correct })} ·{" "}
                   <Ic i={X} className="h-3.5 w-3.5" /> Sai {score.wrong}
               {score.blank > 0 && (
                     <>
                       {" · "}
-                      <Ic i={CircleDashed} className="h-3.5 w-3.5" /> Bỏ trống{" "}
+                      <Ic i={CircleDashed} className="h-3.5 w-3.5" /> {t("Bỏ trống")}{" "}
                       {score.blank}
                     </>
                   )}
               <br />
-              <span className="dim">tính theo ý — B問題 mỗi câu 2 ý</span>
+              <span className="dim">{t("tính theo ý — B問題 mỗi câu 2 ý")}</span>
               {score.ungraded > 0 && (
                 <>
                   <br />
                   <span className="dim">
-                    {score.ungraded} ý chưa có đáp án, không tính điểm
+                    {t2("{n} ý chưa có đáp án, không tính điểm", { n: score.ungraded })}
                   </span>
                 </>
               )}
@@ -713,9 +709,9 @@ function ExamResult({
         <div className="card" key={score.subject}>
           <div className="card-head">
             <div className="card-title">
-              <span className="ja">{subjectName(score.subject)}</span> — phân tích
+              <span className="ja">{subjectName(score.subject)}</span> {t("— phân tích")}
               <div className="card-sub">
-                Đúng bao nhiêu phần trăm ở từng chủ đề vừa ra trong đề này
+                {t("Đúng bao nhiêu phần trăm ở từng chủ đề vừa ra trong đề này")}
               </div>
             </div>
           </div>
@@ -723,7 +719,7 @@ function ExamResult({
           <TopicTable records={score.answers} onOpenTopic={onOpenTopic} />
 
           <div className="small dim" style={{ margin: "16px 0 6px" }}>
-            Từng câu — bạn chọn gì, đáp án đúng là gì
+            {t("Từng câu — bạn chọn gì, đáp án đúng là gì")}
           </div>
           <QuestionTable records={score.answers} />
         </div>
@@ -732,10 +728,10 @@ function ExamResult({
       <div className="card center">
         <div className="btn-row" style={{ justifyContent: "center" }}>
           <button className="btn primary" onClick={onSave}>
-            <Ic i={Save} /> Lưu kết quả và quay lại
+            <Ic i={Save} /> {t("Lưu kết quả và quay lại")}
           </button>
           <button className="btn ghost" onClick={onAgain}>
-            Không lưu, thi lại
+            {t("Không lưu, thi lại")}
           </button>
         </div>
       </div>
@@ -763,9 +759,9 @@ function ExamHistory({
     <div className="card">
       <div className="card-head">
         <div className="card-title">
-          Lịch sử thi thử
+          {t("Lịch sử thi thử")}
           <div className="card-sub">
-            {results.length} lần · bấm vào một lượt để xem phân tích từng câu
+            {t2("{n} lần · bấm vào một lượt để xem phân tích từng câu", { n: results.length })}
           </div>
         </div>
       </div>
@@ -801,7 +797,7 @@ function ExamHistory({
                       <span
                         key={score.subject}
                         className={`pill ${score.passed ? "correct" : "wrong"}`}
-                        title={`${score.correct}/${score.total} ý đúng`}
+                        title={t2("{dung}/{tong} ý đúng", { dung: score.correct, tong: score.total })}
                       >
                         <span className="ja">{subjectName(score.subject)}</span>{" "}
                         {score.score}
@@ -810,7 +806,7 @@ function ExamHistory({
                   </div>
                   <button
                     className="icon-btn"
-                    title="Xoá lần thi này"
+                    title={t("Xoá lần thi này")}
                     onClick={(event) => {
                       event.stopPropagation();
                       store.removeExamResult(result.id);

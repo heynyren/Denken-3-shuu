@@ -10,6 +10,7 @@ import { useEffect } from "react";
 
 import { BADGES } from "../lib/badges";
 
+import { t, t2 } from "../lib/chu";
 export default function BadgeCelebration({
   earned,
   onClose,
@@ -56,7 +57,9 @@ export default function BadgeCelebration({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="celebrate-kicker">
-          {badges.length > 1 ? `Mở khoá ${badges.length} huy hiệu!` : "Mở khoá huy hiệu!"}
+          {badges.length > 1
+            ? t2("Mở khoá {n} huy hiệu!", { n: badges.length })
+            : t("Mở khoá huy hiệu!")}
         </div>
 
         <div className="celebrate-badges">
@@ -69,14 +72,14 @@ export default function BadgeCelebration({
               <div className="celebrate-icon">
                 <badge.icon strokeWidth={1.25} />
               </div>
-              <div className="celebrate-name">{badge.name}</div>
-              <div className="celebrate-desc">{badge.description}</div>
+              <div className="celebrate-name">{t(badge.name)}</div>
+              <div className="celebrate-desc">{t(badge.description)}</div>
             </div>
           ))}
         </div>
 
         <button className="btn primary lg" onClick={onClose} autoFocus>
-          Tuyệt vời, học tiếp thôi!
+          {t("Tuyệt vời, học tiếp thôi!")}
         </button>
       </div>
     </div>

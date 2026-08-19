@@ -13,6 +13,7 @@ import { SUB_LABELS, subState, topicBreakdown } from "../lib/exam";
 import type { ExamAnswerRecord, ExamResult, SubjectKey } from "../lib/types";
 import { Bar, openLink } from "./ui";
 
+import { t, t2 } from "../lib/chu";
 const STATE_MARK = {
   right: Check,
   wrong: X,
@@ -49,13 +50,13 @@ export function TopicTable({
           <span className="topic-name ja" title={row.topic}>
             {row.topic}
           </span>
-          <span className="small dim nowrap">{row.questions} câu</span>
+          <span className="small dim nowrap">{t2("{n} câu", { n: row.questions })}</span>
           {row.graded === 0 ? (
             <>
               <span className="topic-bar-cell">
                 <Bar ratio={0} color="var(--muted)" />
               </span>
-              <span className="small dim nowrap">chưa có đáp án</span>
+              <span className="small dim nowrap">{t("chưa có đáp án")}</span>
             </>
           ) : (
             <>
@@ -69,7 +70,7 @@ export function TopicTable({
                 {Math.round(row.ratio * 100)}%
               </span>
               <span className="small muted nowrap">
-                {row.correct}/{row.graded} ý
+                {t2("{dung}/{cham} ý", { dung: row.correct, cham: row.graded })}
               </span>
             </>
           )}
@@ -77,9 +78,9 @@ export function TopicTable({
             <button
               className="btn ghost xs"
               onClick={() => onOpenTopic(row.subject, row.topic)}
-              title="Ôn lại toàn bộ chủ đề này"
+              title={t("Ôn lại toàn bộ chủ đề này")}
             >
-              Ôn lại →
+              {t("Ôn lại →")}
             </button>
           )}
         </div>
@@ -115,8 +116,8 @@ export function QuestionTable({ records }: { records: ExamAnswerRecord[] }) {
               </span>
               <span className="small dim">
                 {state === "unknown"
-                  ? "chưa có đáp án"
-                  : `bạn chọn ${picked ?? "—"} · đúng là ${truth}`}
+                  ? t("chưa có đáp án")
+                  : t2("bạn chọn {chon} · đúng là {dung}", { chon: picked ?? "—", dung: truth ?? "—" })}
               </span>
               {item && (
                 <span className="exam-review-topic ja" title={item.name}>
@@ -127,7 +128,7 @@ export function QuestionTable({ records }: { records: ExamAnswerRecord[] }) {
               {item && (
                 <button
                   className="icon-btn"
-                  title="Mở lời giải trên denken-ou.com"
+                  title={t("Mở lời giải trên denken-ou.com")}
                   onClick={() => openLink(item.url)}
                 >
                   ↗
@@ -161,8 +162,7 @@ export function AttemptAnalysis({
   if (detailed.length === 0) {
     return (
       <div className="callout" style={{ marginTop: 10 }}>
-        Lượt thi này được lưu bằng bản app cũ nên chỉ có điểm, không có bài làm
-        từng câu. Những lượt thi từ giờ trở đi đều có bảng phân tích đầy đủ.
+        {t("Lượt thi này được lưu bằng bản app cũ nên chỉ có điểm, không có bài làm từng câu. Những lượt thi từ giờ trở đi đều có bảng phân tích đầy đủ.")}
       </div>
     );
   }
@@ -180,21 +180,21 @@ export function AttemptAnalysis({
             </div>
             <div className="row" style={{ gap: 8 }}>
               <span className={`pill ${score.passed ? "correct" : "wrong"}`}>
-                {score.score}/100 · {score.passed ? "Đạt" : "Chưa đạt"}
+                {score.score}/100 · {score.passed ? t("Đạt") : t("Chưa đạt")}
               </span>
               <span className="small muted nowrap">
-                đúng {score.correct}/{score.total} ý
+                {t2("đúng {dung}/{tong} ý", { dung: score.correct, tong: score.total })}
               </span>
             </div>
           </div>
 
           <div className="small dim" style={{ marginBottom: 6 }}>
-            Đúng bao nhiêu phần trăm ở từng chủ đề ra trong đề này
+            {t("Đúng bao nhiêu phần trăm ở từng chủ đề ra trong đề này")}
           </div>
           <TopicTable records={score.answers ?? []} onOpenTopic={onOpenTopic} />
 
           <div className="small dim" style={{ margin: "14px 0 6px" }}>
-            Từng câu
+            {t("Từng câu")}
           </div>
           <QuestionTable records={score.answers ?? []} />
         </div>

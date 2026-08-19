@@ -144,6 +144,14 @@ export interface Settings {
   examDate: string;
   /** Số ngày tối đa giữ bản sao lưu tự động. */
   backupsToKeep: number;
+  /**
+   * Thứ tiếng của CHỮ TRÊN MÀN HÌNH: "vi" | "en" | "ja".
+   *
+   * Chỉ đổi chữ của app. Tên bài, đề bài và ghi chú của bạn vẫn nguyên như bạn
+   * đã viết — đổi ngôn ngữ giao diện mà làm chữ của người dùng biến dạng thì
+   * còn tệ hơn là không có nút này.
+   */
+  uiLang?: "vi" | "en" | "ja";
 }
 
 /**

@@ -35,6 +35,7 @@ import type { Store } from "../state/useStore";
 import { platform } from "../platform";
 import { topicVi } from "../lib/vi";
 
+import { t, t2 } from "../lib/chu";
 type Mode = "due" | "wrong" | "fresh" | "starred" | "topic";
 
 /** Yêu cầu mở thẳng một chủ đề, gửi từ trang Hôm nay hoặc từ bảng phân tích bài thi. */
@@ -223,35 +224,35 @@ export default function Review({
               className={`chip${mode === "due" ? " on" : ""}`}
               onClick={() => setMode("due")}
             >
-              <Ic i={Target} /> Đến hạn hôm nay ({view.dueToday})
+              <Ic i={Target} /> {t2("Đến hạn hôm nay ({n})", { n: view.dueToday })}
             </button>
             <button
               className={`chip${mode === "wrong" ? " on" : ""}`}
               onClick={() => setMode("wrong")}
             >
-              <Ic i={XCircle} /> Đang làm sai ({view.counts.wrong})
+              <Ic i={XCircle} /> {t2("Đang làm sai ({n})", { n: view.counts.wrong })}
             </button>
             <button
               className={`chip${mode === "fresh" ? " on" : ""}`}
               onClick={() => setMode("fresh")}
             >
-              <Ic i={Sparkles} /> Bài chưa làm ({view.counts.todo})
+              <Ic i={Sparkles} /> {t2("Bài chưa làm ({n})", { n: view.counts.todo })}
             </button>
             <button
               className={`chip${mode === "starred" ? " on" : ""}`}
               onClick={() => setMode("starred")}
-              title="Những bài bạn tự đánh dấu là đáng chú ý"
+              title={t("Những bài bạn tự đánh dấu là đáng chú ý")}
             >
               <Star
                 className="h-3.5 w-3.5 shrink-0"
                 strokeWidth={0}
                 fill="currentColor"
               />{" "}
-              Đánh dấu sao ({soSao})
+              {t2("Đánh dấu sao ({n})", { n: soSao })}
             </button>
           </div>
           <div className="small muted nowrap">
-            Đã ôn hôm nay: <strong>{view.today.reviewed}</strong>/{view.today.goal}
+            {t("Đã ôn hôm nay:")} <strong>{view.today.reviewed}</strong>/{view.today.goal}
           </div>
         </div>
 
@@ -259,14 +260,14 @@ export default function Review({
           <div className="callout" style={{ marginTop: 12 }}>
             <div className="row between wrap" style={{ gap: 10 }}>
               <div style={{ minWidth: 0 }}>
-                Đang ôn lại cả chủ đề <strong className="ja">{topic}</strong>{" "}
+                {t("Đang ôn lại cả chủ đề")} <strong className="ja">{topic}</strong>{" "}
                 <span className="small dim">
-                  ({subject !== "all" && subjectName(subject)} · {queue.length} bài,
-                  còn {pending} bài chưa xử lý)
+                  ({subject !== "all" && subjectName(subject)}{" "}
+                  {t2("· {tong} bài, còn {con} bài chưa xử lý)", { tong: queue.length, con: pending })}
                 </span>
               </div>
               <button className="btn ghost sm" onClick={() => setMode("due")}>
-                <Ic i={X} /> Thoát chế độ chủ đề
+                <Ic i={X} /> {t("Thoát chế độ chủ đề")}
               </button>
             </div>
           </div>
@@ -282,7 +283,7 @@ export default function Review({
                     setTopic("all");
                   }}
                 >
-                  <span className={entry.key === "all" ? "" : "ja"}>{entry.label}</span>
+                  <span className={entry.key === "all" ? "" : "ja"}>{t(entry.label)}</span>
                 </button>
               ))}
             </div>
@@ -295,7 +296,7 @@ export default function Review({
                   onChange={(event) => setTopic(event.target.value)}
                 >
                   <option value="all">
-                    Tất cả chủ đề ({topicsBySubject[subject].length})
+                    {t2("Tất cả chủ đề ({n})", { n: topicsBySubject[subject].length })}
                   </option>
                   {topicsBySubject[subject].map((name) => (
                     <option key={name} value={name}>
@@ -307,13 +308,13 @@ export default function Review({
             )}
 
             <div className="chip-row" style={{ marginTop: 10 }}>
-              <span className="small dim">Độ khó:</span>
+              <span className="small dim">{t("Độ khó:")}</span>
               {[1, 2, 3, 4, 5].map((value) => (
                 <button
                   key={value}
                   className={`chip star-chip${stars.has(value) ? " on" : ""}`}
                   onClick={() => toggleStar(value)}
-                  title={`Chỉ ôn bài ${value} sao`}
+                  title={t2("Chỉ ôn bài {n} sao", { n: value })}
                 >
                   {[1, 2, 3, 4, 5].map((level) => (
                     <Star
@@ -327,7 +328,7 @@ export default function Review({
               ))}
               {stars.size > 0 && (
                 <button className="chip" onClick={() => setStars(new Set())}>
-                  <Ic i={X} /> Bỏ lọc
+                  <Ic i={X} /> {t("Bỏ lọc")}
                 </button>
               )}
             </div>
@@ -336,20 +337,20 @@ export default function Review({
 
         {done > 0 && (
           <div className="queue-progress" style={{ marginTop: 14 }}>
-            <span className="nowrap">Phiên này: {done} lượt</span>
+            <span className="nowrap">{t2("Phiên này: {n} lượt", { n: done })}</span>
             <Bar
               ratio={view.today.ratio}
               color={view.today.metGoal ? "var(--green)" : "var(--blue)"}
             />
             <span className="nowrap">
-              {view.today.metGoal ? "Đạt mục tiêu" : `còn ${view.today.remaining}`}
+              {view.today.metGoal ? t("Đạt mục tiêu") : t2("còn {n}", { n: view.today.remaining })}
             </span>
             <button
               className="btn ghost xs"
               onClick={() => setRebuild((n) => n + 1)}
-              title="Bỏ những bài đã xử lý xong khỏi danh sách rồi dựng lại từ đầu"
+              title={t("Bỏ những bài đã xử lý xong khỏi danh sách rồi dựng lại từ đầu")}
             >
-              <Ic i={RotateCcw} /> Dựng lại danh sách
+              <Ic i={RotateCcw} /> {t("Dựng lại danh sách")}
             </button>
           </div>
         )}
@@ -358,32 +359,31 @@ export default function Review({
       {!item ? (
         <div className="card">
           {mode === "topic" ? (
-            <Empty icon={Search} title="Chủ đề này chưa có bài nào">
+            <Empty icon={Search} title={t("Chủ đề này chưa có bài nào")}>
               <p className="muted">
-                Có thể tên chủ đề đã đổi ở bản danh mục mới. Thử tìm trong Danh sách bài.
+                {t("Có thể tên chủ đề đã đổi ở bản danh mục mới. Thử tìm trong Danh sách bài.")}
               </p>
             </Empty>
           ) : mode === "wrong" ? (
-            <Empty icon={PartyPopper} title="Không còn bài nào đang sai">
+            <Empty icon={PartyPopper} title={t("Không còn bài nào đang sai")}>
               <p className="muted">
                 {stars.size > 0 || subject !== "all" || topic !== "all"
-                  ? "Không có bài sai nào khớp bộ lọc."
-                  : "Mọi bài từng sai đều đã được sửa thành đúng. Quá tốt!"}
+                  ? t("Không có bài sai nào khớp bộ lọc.")
+                  : t("Mọi bài từng sai đều đã được sửa thành đúng. Quá tốt!")}
               </p>
             </Empty>
           ) : mode === "starred" ? (
-            <Empty icon={Star} title="Chưa đánh dấu bài nào">
+            <Empty icon={Star} title={t("Chưa đánh dấu bài nào")}>
               <p>
-                Gặp bài hay hoặc bài dễ nhầm thì bấm ngôi sao ở góc thẻ bài. Sát
-                ngày thi, đây là danh sách đáng lật lại nhất.
+                {t("Gặp bài hay hoặc bài dễ nhầm thì bấm ngôi sao ở góc thẻ bài. Sát ngày thi, đây là danh sách đáng lật lại nhất.")}
               </p>
             </Empty>
           ) : mode === "due" ? (
-            <Empty icon={CalendarCheck} title="Không còn bài nào đến hạn">
+            <Empty icon={CalendarCheck} title={t("Không còn bài nào đến hạn")}>
               <p className="muted">
                 {stars.size > 0 || subject !== "all" || topic !== "all"
-                  ? "Không có bài nào khớp bộ lọc. Thử bỏ bớt điều kiện xem sao."
-                  : "Bàn học sạch sẽ. Muốn học thêm thì chuyển sang “Bài chưa làm”."}
+                  ? t("Không có bài nào khớp bộ lọc. Thử bỏ bớt điều kiện xem sao.")
+                  : t("Bàn học sạch sẽ. Muốn học thêm thì chuyển sang “Bài chưa làm”.")}
               </p>
               {view.counts.todo > 0 && (
                 <button
@@ -391,14 +391,14 @@ export default function Review({
                   style={{ marginTop: 12 }}
                   onClick={() => setMode("fresh")}
                 >
-                  Học bài mới ({view.counts.todo} bài)
+                  {t2("Học bài mới ({n} bài)", { n: view.counts.todo })}
                 </button>
               )}
             </Empty>
           ) : (
-            <Empty icon={Trophy} title="Đã đụng tới toàn bộ giáo trình">
+            <Empty icon={Trophy} title={t("Đã đụng tới toàn bộ giáo trình")}>
               <p className="muted">
-                Không còn bài nào chưa làm khớp bộ lọc. Quay lại ôn theo lịch nhé.
+                {t("Không còn bài nào chưa làm khớp bộ lọc. Quay lại ôn theo lịch nhé.")}
               </p>
             </Empty>
           )}
@@ -418,15 +418,15 @@ export default function Review({
               </span>
               <Stars count={item.stars} />
               <StatusPill status={progress?.status ?? "todo"} />
-              {late > 0 && <span className="pill overdue">Quá hạn {late} ngày</span>}
+              {late > 0 && <span className="pill overdue">{t2("Quá hạn {n} ngày", { n: late })}</span>}
               <span className="spacer" />
               <button
                 className={`star-toggle${progress?.starred ? " on" : ""}`}
                 onClick={() => store.toggleStar(item.id)}
                 title={
                   progress?.starred
-                    ? "Bỏ đánh dấu bài này"
-                    : "Đánh dấu bài này là đáng chú ý"
+                    ? t("Bỏ đánh dấu bài này")
+                    : t("Đánh dấu bài này là đáng chú ý")
                 }
                 aria-pressed={progress?.starred ?? false}
               >
@@ -455,21 +455,20 @@ export default function Review({
                 className={`btn success${justGraded === "correct" ? " chosen" : ""}`}
                 onClick={() => grade("correct")}
               >
-                <Ic i={CheckCircle2} /> Làm đúng <span className="small dim">1</span>
+                <Ic i={CheckCircle2} /> {t("Làm đúng")} <span className="small dim">1</span>
               </button>
               <button
                 className={`btn danger${justGraded === "wrong" ? " chosen" : ""}`}
                 onClick={() => grade("wrong")}
               >
-                <Ic i={XCircle} /> Làm sai <span className="small dim">2</span>
+                <Ic i={XCircle} /> {t("Làm sai")} <span className="small dim">2</span>
               </button>
             </div>
 
             {justGraded && (
               <div className="graded-note">
-                Đã ghi nhận <strong>{justGraded === "correct" ? "đúng" : "sai"}</strong>{" "}
-                và xếp lịch ôn lại. Vẫn đang ở bài này — cứ ghi chú thoải mái, chuyển
-                bài lúc nào là quyền của bạn. Bấm nhầm thì chấm lại bằng nút kia.
+                {t("Đã ghi nhận")} <strong>{justGraded === "correct" ? t("đúng") : t("sai")}</strong>{" "}
+                {t("và xếp lịch ôn lại. Vẫn đang ở bài này — cứ ghi chú thoải mái, chuyển bài lúc nào là quyền của bạn. Bấm nhầm thì chấm lại bằng nút kia.")}
               </div>
             )}
 
@@ -482,24 +481,24 @@ export default function Review({
                 className="btn ghost sm"
                 onClick={() => go(-1)}
                 disabled={cursor === 0}
-                title="Phím ←"
+                title={t("Phím ←")}
               >
-                ← Bài trước
+                {t("← Bài trước")}
               </button>
               <button
                 className={`btn sm${justGraded ? " primary" : " ghost"}`}
                 onClick={() => go(1)}
                 disabled={cursor >= queue.length - 1}
-                title="Phím →"
+                title={t("Phím →")}
               >
-                Bài sau →
+                {t("Bài sau →")}
               </button>
               <span className="spacer" />
               <button className="btn ghost sm" onClick={() => store.snooze(item.id, 1)}>
-                <Ic i={Moon} /> Hoãn 1 ngày
+                <Ic i={Moon} /> {t("Hoãn 1 ngày")}
               </button>
               <button className="btn ghost sm" onClick={() => store.snooze(item.id, 7)}>
-                Hoãn 1 tuần
+                {t("Hoãn 1 tuần")}
               </button>
             </div>
           </div>
@@ -515,11 +514,10 @@ export default function Review({
           </div>
 
           <div className="callout">
-            <strong>Phím tắt:</strong> <span className="mono">1</span> làm đúng ·{" "}
-            <span className="mono">2</span> làm sai ·{" "}
-            <span className="mono">Space</span> mở bài và bắt đầu tính giờ ·{" "}
-            <span className="mono">←</span> <span className="mono">→</span> chuyển bài.
-            Chấm xong app không tự nhảy bài — bạn tự chuyển khi đã ghi chú xong.
+            <strong>{t("Phím tắt:")}</strong> <span className="mono">1</span> {t("làm đúng")} ·{" "}
+            <span className="mono">2</span> {t("làm sai")} ·{" "}
+            <span className="mono">Space</span> {t("mở bài và bắt đầu tính giờ")} ·{" "}
+            <span className="mono">←</span> <span className="mono">→</span> {t("chuyển bài. Chấm xong app không tự nhảy bài — bạn tự chuyển khi đã ghi chú xong.")}
           </div>
         </>
       )}
