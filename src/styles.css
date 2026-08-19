@@ -2156,6 +2156,17 @@ mark.hit {
    trang Hôm nay rồi, còn nút giới thiệu chuyển sang màn Cài đặt.
    ========================================================================== */
 
+/* Khối ghi công tác giả ở cuối màn Cài đặt. */
+.about-credit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.about-credit-name {
+  font-weight: 650;
+  font-size: 15px;
+}
+
 .only-mobile {
   display: none;
 }

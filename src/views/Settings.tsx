@@ -17,6 +17,7 @@ import {
   Target,
 } from "lucide-react";
 import { Ic } from "../components/ui/icon";
+import { VietnamFlag } from "../components/About";
 import { useState } from "react";
 
 import { emptyAppData } from "../lib/defaults";
@@ -526,10 +527,27 @@ export default function Settings({
           ))}
         </div>
       </div>
-    <div className="card center only-mobile">
-        <button className="btn" onClick={onAbout}>
-          🇻🇳 Về tác giả — Nyren Phạm
-        </button>
+      {/* Ghi công tác giả, đặt ở cuối Cài đặt và hiện trên MỌI cỡ màn hình.
+          Trước đây khối này mang class only-mobile nên bản máy tính không thấy
+          — ở đó nó chỉ là một nút nhỏ nép cuối thanh bên. */}
+      <div className="card">
+        <div className="card-head">
+          <div className="card-title">Về tác giả</div>
+        </div>
+        <div className="about-credit">
+          <VietnamFlag size={26} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="about-credit-name">Nyren Phạm</div>
+            <div className="small dim">Ninh Bình, Việt Nam</div>
+          </div>
+          <button className="btn" onClick={onAbout}>
+            Xem thêm
+          </button>
+        </div>
+        <p className="muted small" style={{ marginTop: 10 }}>
+          Cựu sinh viên khoa Tự động hoá, Đại học Bách Khoa Hà Nội. Làm công cụ này
+          để việc ôn <span className="ja">電験三種</span> đỡ vất vả hơn.
+        </p>
       </div>
 
     </div>
