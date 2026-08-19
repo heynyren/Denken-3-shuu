@@ -142,3 +142,28 @@ jobs:
           tag_name: v${{ steps.ten.outputs.version }}
           name: Denken 3-shuu v${{ steps.ten.outputs.version }}
           files: out/*.apk
+
+      # Bản build của từng commit trên main cũng phải có chỗ tải.
+      #
+      # Trước đây chỉ tag `v*` mới vào Releases, còn commit thường thì trông cả
+      # vào kho bản build. Kho đầy thì bước tải lên bỏ qua (cố ý), luồng vẫn
+      # xanh — nhưng mở lần chạy ra thì KHÔNG CÓ GÌ ĐỂ TẢI. Xanh mà tay trắng
+      # là kiểu hỏng khó chịu nhất: nhìn vào tưởng xong rồi.
+      #
+      # Nên đẩy thêm vào một bản phát hành thử lăn theo main. Ghi đè lên chính
+      # nó mỗi lần, nên không phình; và Releases nằm ở kho riêng, không tính vào
+      # hạn mức 0,5 GB.
+      - name: Đính vào bản thử mới nhất
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ban-thu-moi-nhat
+          name: Denken 3-shuu — bản thử mới nhất
+          body: |
+            APK tự build từ commit mới nhất trên `main`
+            (phiên bản ${{ steps.ten.outputs.version }}).
+
+            Đây là bản THỬ, ghi đè mỗi lần build. Bản chính thức nằm ở các
+            phát hành `v*` bên dưới.
+          prerelease: true
+          files: out/*.apk
