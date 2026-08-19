@@ -24,6 +24,7 @@ import type { CatalogItem, ItemStatus, SubjectKey } from "../lib/types";
 import type { Store } from "../state/useStore";
 import { haystackOf, highlight, matchesQuery, topicVi, trichDoan } from "../lib/vi";
 
+import { t, t2 } from "../lib/chu";
 /** Chiều cao cố định mỗi dòng — cần cho phép tính cuộn ảo. */
 /**
  * Chiều cao một dòng, KHOÁ CỨNG.
@@ -160,13 +161,13 @@ export default function Browse({
             </span>
             <input
               className="input"
-              placeholder="Tìm theo tên bài, chủ đề, kỳ thi, hoặc trong ghi chú…"
+              placeholder={t("Tìm theo tên bài, chủ đề, kỳ thi, hoặc trong ghi chú…")}
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
           </div>
           <div className="small muted nowrap">
-            <strong>{filtered.length}</strong> / {items.length} bài
+            <strong>{filtered.length}</strong> {t2("/ {tong} bài", { tong: items.length })}
           </div>
         </div>
 
@@ -178,7 +179,7 @@ export default function Browse({
               setTopic("all");
             }}
           >
-            Tất cả môn
+            {t("Tất cả môn")}
           </button>
           {subjects.map((entry) => (
             <button
@@ -201,7 +202,7 @@ export default function Browse({
               value={topic}
               onChange={(event) => setTopic(event.target.value)}
             >
-              <option value="all">Tất cả chủ đề ({topics.length})</option>
+              <option value="all">{t2("Tất cả chủ đề ({n})", { n: topics.length })}</option>
               {topics.map((name) => (
                 <option key={name} value={name}>
                   {name}
@@ -219,19 +220,19 @@ export default function Browse({
               onClick={() => setStatus(entry.key)}
             >
               {entry.icon && <Ic i={entry.icon} className="h-3.5 w-3.5" />}
-              {entry.label}
+              {t(entry.label)}
             </button>
           ))}
         </div>
 
         <div className="chip-row">
-          <span className="small dim">Độ khó:</span>
+          <span className="small dim">{t("Độ khó:")}</span>
           {[1, 2, 3, 4, 5].map((value) => (
             <button
               key={value}
               className={`chip star-chip${stars.has(value) ? " on" : ""}`}
               onClick={() => toggleStar(value)}
-              title={`Bài ${value} sao`}
+              title={t2("Bài {n} sao", { n: value })}
             >
               {[1, 2, 3, 4, 5].map((level) => (
                 <Star
@@ -245,7 +246,7 @@ export default function Browse({
           ))}
           {stars.size > 0 && (
             <button className="chip" onClick={() => setStars(new Set())}>
-              <Ic i={X} /> Bỏ lọc sao
+              <Ic i={X} /> {t("Bỏ lọc sao")}
             </button>
           )}
         </div>
@@ -254,8 +255,8 @@ export default function Browse({
       {/* Danh sách */}
       <div className="card flush">
         {filtered.length === 0 ? (
-          <Empty icon={Search} title="Không có bài nào khớp">
-            <p className="muted">Thử bỏ bớt bộ lọc hoặc đổi từ khoá tìm kiếm.</p>
+          <Empty icon={Search} title={t("Không có bài nào khớp")}>
+            <p className="muted">{t("Thử bỏ bớt bộ lọc hoặc đổi từ khoá tìm kiếm.")}</p>
           </Empty>
         ) : (
           <div
@@ -300,7 +301,7 @@ export default function Browse({
                 <div className="review-title-vi">{selectedItem.nameVi}</div>
               )}
             </div>
-            <button className="icon-btn" onClick={() => setSelected(null)} title="Đóng">
+            <button className="icon-btn" onClick={() => setSelected(null)} title={t("Đóng")}>
               <Ic i={X} />
             </button>
           </div>
@@ -327,21 +328,21 @@ export default function Browse({
               className="btn success sm"
               onClick={() => store.review(selectedItem.id, "correct")}
             >
-              <Ic i={Check} /> Ghi nhận làm đúng
+              <Ic i={Check} /> {t("Ghi nhận làm đúng")}
             </button>
             <button
               className="btn danger sm"
               onClick={() => store.review(selectedItem.id, "wrong")}
             >
-              <Ic i={XCircle} /> Ghi nhận làm sai
+              <Ic i={XCircle} /> {t("Ghi nhận làm sai")}
             </button>
             <span className="spacer" />
             <button
               className="btn ghost sm"
               onClick={() => store.resetItem(selectedItem.id)}
-              title="Xoá trạng thái và lịch ôn, giữ nguyên ghi chú và link tham khảo"
+              title={t("Xoá trạng thái và lịch ôn, giữ nguyên ghi chú và link tham khảo")}
             >
-              <Ic i={RotateCcw} /> Đặt lại tiến độ
+              <Ic i={RotateCcw} /> {t("Đặt lại tiến độ")}
             </button>
           </div>
         </div>
@@ -408,7 +409,7 @@ function Row({
       <div className="item-main">
         <div className="item-title ja">
           {progress?.starred && (
-            <span className="item-star" title="Bạn đã đánh dấu bài này">
+            <span className="item-star" title={t("Bạn đã đánh dấu bài này")}>
               <Star className="h-3.5 w-3.5" strokeWidth={0} fill="currentColor" />
             </span>
           )}
@@ -438,19 +439,19 @@ function Row({
             {item.exam} {item.question}
           </span>
           {(progress?.notes.length ?? 0) > 0 && (
-            <span title={`${progress!.notes.length} ghi chú`}>
+            <span title={t2("{n} ghi chú", { n: progress!.notes.length })}>
               <Ic i={StickyNote} className="h-3.5 w-3.5" />
                   {progress!.notes.length > 1 && progress!.notes.length}
             </span>
           )}
           {(progress?.links.length ?? 0) > 0 && (
-            <span title={`${progress!.links.length} link tham khảo`}>
+            <span title={t2("{n} link tham khảo", { n: progress!.links.length })}>
               <Ic i={Link2} className="h-3.5 w-3.5" />
                   {progress!.links.length > 1 && progress!.links.length}
             </span>
           )}
           {(progress?.notes.some((n) => n.attachments.length > 0) ?? false) && (
-            <span title="Có file đính kèm">
+            <span title={t("Có file đính kèm")}>
                   <Ic i={Paperclip} className="h-3.5 w-3.5" />
                 </span>
           )}
@@ -459,7 +460,7 @@ function Row({
 
       {due && (
         <span className={`pill ${late > 0 ? "overdue" : "due"}`}>
-          {late > 0 ? `quá hạn ${late}n` : "đến hạn"}
+          {late > 0 ? t2("quá hạn {n}n", { n: late }) : t("đến hạn")}
         </span>
       )}
       <StatusPill status={progress?.status ?? "todo"} />
@@ -468,7 +469,7 @@ function Row({
         <button
           className={`icon-btn${progress?.starred ? " starred" : ""}`}
           title={
-            progress?.starred ? "Bỏ đánh dấu bài này" : "Đánh dấu bài này là đáng chú ý"
+            progress?.starred ? t("Bỏ đánh dấu bài này") : t("Đánh dấu bài này là đáng chú ý")
           }
           aria-pressed={progress?.starred ?? false}
           onClick={() => store.toggleStar(item.id)}
@@ -481,7 +482,7 @@ function Row({
         </button>
         <button
           className="icon-btn"
-          title="Mở bài trên denken-ou.com"
+          title={t("Mở bài trên denken-ou.com")}
           onClick={() => openLink(item.url)}
         >
           <Ic i={ArrowUpRight} />
@@ -489,7 +490,7 @@ function Row({
         {progress?.links.length === 1 && (
           <button
             className="icon-btn on"
-            title={`Mở link tham khảo: ${progress.links[0]!.url}`}
+            title={t2("Mở link tham khảo: {url}", { url: progress.links[0]!.url })}
             onClick={() => openLink(progress.links[0]!.url)}
           >
             <Ic i={Bookmark} />

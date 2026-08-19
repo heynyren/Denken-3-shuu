@@ -24,6 +24,7 @@ import type { Store } from "../state/useStore";
 import { Stars, StatusPill, openLink } from "./ui";
 import { platform } from "../platform";
 
+import { t, t2 } from "../lib/chu";
 const TYPING_PAUSE_MS = 400;
 
 /** Ô nhập tự đồng bộ: gõ mượt ở cục bộ, đẩy lên store khi ngừng gõ. */
@@ -116,14 +117,14 @@ function AttachmentChip({
           <div className="attach-image-loading">
           {failed ? (
             <>
-              <Ic i={AlertTriangle} /> mất file
+              <Ic i={AlertTriangle} /> {t("mất file")}
             </>
           ) : (
             "…"
           )}
         </div>
         )}
-        <button className="attach-remove" onClick={onRemove} title="Gỡ file này">
+        <button className="attach-remove" onClick={onRemove} title={t("Gỡ file này")}>
           <Ic i={X} />
         </button>
         <div className="attach-caption">{attachment.name}</div>
@@ -137,7 +138,7 @@ function AttachmentChip({
         className="attach-file-main"
         role="button"
         tabIndex={0}
-        title={`Mở ${attachment.name}`}
+        title={t2("Mở {ten}", { ten: attachment.name })}
         onClick={() => void platform.attachOpen(attachment.file)}
         onKeyDown={(event) => {
           if (event.key === "Enter") void platform.attachOpen(attachment.file);
@@ -151,7 +152,7 @@ function AttachmentChip({
           <span className="attach-file-size">{prettySize(attachment.size)}</span>
         </span>
       </span>
-      <button className="icon-btn" onClick={onRemove} title="Gỡ file này">
+      <button className="icon-btn" onClick={onRemove} title={t("Gỡ file này")}>
         <Ic i={Trash2} />
       </button>
     </div>
@@ -216,7 +217,7 @@ function NoteCard({
       if (result.ok && result.attachment) {
         store.addAttachments(itemId, note.id, [result.attachment]);
       } else {
-        onError(result.error ?? "Không lưu được ảnh dán vào.");
+        onError(result.error ?? t("Không lưu được ảnh dán vào."));
       }
     }
     setBusy(false);
@@ -228,12 +229,12 @@ function NoteCard({
   return (
     <div className="note-card">
       <div className="note-head">
-        <span className="small dim">Ghi chú {index + 1}</span>
+        <span className="small dim">{t2("Ghi chú {so}", { so: index + 1 })}</span>
         <span className="spacer" />
         <button
           className="icon-btn"
           onClick={() => store.removeNote(itemId, note.id)}
-          title="Xoá ghi chú này"
+          title={t("Xoá ghi chú này")}
         >
           <Ic i={Trash2} />
         </button>
@@ -242,7 +243,7 @@ function NoteCard({
       <textarea
         ref={box}
         className="textarea"
-        placeholder="Cách giải, chỗ hay nhầm, công thức cần nhớ… (dán ảnh chụp màn hình thẳng vào đây được)"
+        placeholder={t("Cách giải, chỗ hay nhầm, công thức cần nhớ… (dán ảnh chụp màn hình thẳng vào đây được)")}
         value={field.draft}
         onChange={(event) => field.onChange(event.target.value)}
         onBlur={field.onBlur}
@@ -275,9 +276,9 @@ function NoteCard({
 
       <div className="note-foot">
         <button className="btn sm" onClick={() => void pick()} disabled={busy}>
-          <Ic i={Paperclip} /> {busy ? "Đang thêm…" : "Đính kèm file"}
+          <Ic i={Paperclip} /> {busy ? t("Đang thêm…") : t("Đính kèm file")}
         </button>
-        <span className="field-hint">Ảnh, PDF, Word — hoặc dán ảnh vào ô trên.</span>
+        <span className="field-hint">{t("Ảnh, PDF, Word — hoặc dán ảnh vào ô trên.")}</span>
       </div>
     </div>
   );
@@ -308,7 +309,7 @@ function LinkRow({
     <div className="link-row">
       <input
         className="input link-label"
-        placeholder="Tên gợi nhớ"
+        placeholder={t("Tên gợi nhớ")}
         value={label.draft}
         onChange={(event) => label.onChange(event.target.value)}
         onBlur={label.onBlur}
@@ -324,15 +325,15 @@ function LinkRow({
       <button
         className="btn sm"
         disabled={!openable}
-        title={openable ? `Mở ${url.draft}` : "Link phải bắt đầu bằng http"}
+        title={openable ? t2("Mở {duong}", { duong: url.draft }) : t("Link phải bắt đầu bằng http")}
         onClick={() => openLink(url.draft.trim())}
       >
-        ↗ Mở
+        {t("↗ Mở")}
       </button>
       <button
         className="icon-btn"
         onClick={() => store.removeLink(itemId, link.id)}
-        title="Xoá link này"
+        title={t("Xoá link này")}
       >
         <Ic i={Trash2} />
       </button>
@@ -372,11 +373,11 @@ export default function ItemDetail({
           <span className="small dim">{levelLabel(progress?.srsLevel ?? 0)}</span>
           {progress?.nextReview && (
             <span className={`pill ${late > 0 ? "overdue" : "due"}`}>
-              {late > 0 ? `Quá hạn ${late} ngày` : `Ôn lại ${progress.nextReview}`}
+              {late > 0 ? t2("Quá hạn {n} ngày", { n: late }) : t2("Ôn lại {ngay}", { ngay: progress.nextReview })}
             </span>
           )}
           {progress?.doneDate && (
-            <span className="small dim">Làm gần nhất {progress.doneDate}</span>
+            <span className="small dim">{t2("Làm gần nhất {ngay}", { ngay: progress.doneDate })}</span>
           )}
         </div>
       )}
@@ -386,7 +387,7 @@ export default function ItemDetail({
           className="btn primary"
           onClick={() => (onOpenExercise ? onOpenExercise() : openLink(item.url))}
         >
-          ↗ Mở bài trên denken-ou.com
+          {t("↗ Mở bài trên denken-ou.com")}
         </button>
       </div>
 
@@ -394,19 +395,19 @@ export default function ItemDetail({
       <div>
         <div className="row between" style={{ marginBottom: 8 }}>
           <span className="field-label">
-            <Ic i={StickyNote} /> Ghi chú {notes.length > 0 && <span className="dim">({notes.length})</span>}
+            <Ic i={StickyNote} /> {t("Ghi chú")} {notes.length > 0 && <span className="dim">({notes.length})</span>}
           </span>
           <button
             className="btn sm"
             onClick={() => setFocusNote(store.addNote(item.id))}
           >
-            + Thêm ghi chú
+            {t("+ Thêm ghi chú")}
           </button>
         </div>
 
         {notes.length === 0 ? (
           <div className="field-hint" style={{ padding: "6px 0" }}>
-            Chưa có ghi chú nào. Bấm “Thêm ghi chú” để viết cách giải hoặc chỗ hay nhầm.
+            {t("Chưa có ghi chú nào. Bấm “Thêm ghi chú” để viết cách giải hoặc chỗ hay nhầm.")}
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -429,17 +430,17 @@ export default function ItemDetail({
       <div>
         <div className="row between" style={{ marginBottom: 8 }}>
           <span className="field-label">
-            <Ic i={Link2} /> Link tham khảo của bạn{" "}
+            <Ic i={Link2} /> {t("Link tham khảo của bạn")}{" "}
             {links.length > 0 && <span className="dim">({links.length})</span>}
           </span>
           <button className="btn sm" onClick={() => store.addLink(item.id)}>
-            + Thêm link
+            {t("+ Thêm link")}
           </button>
         </div>
 
         {links.length === 0 ? (
           <div className="field-hint" style={{ padding: "6px 0" }}>
-            Chưa có link nào. Dán link Gemini, YouTube, blog… mà bạn dùng cho bài này.
+            {t("Chưa có link nào. Dán link Gemini, YouTube, blog… mà bạn dùng cho bài này.")}
           </div>
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -450,8 +451,7 @@ export default function ItemDetail({
         )}
 
         <div className="field-hint" style={{ marginTop: 8 }}>
-          Link bài tập đi kèm app, còn ghi chú và link tham khảo là của riêng bạn —
-          cập nhật app không làm mất phần này.
+          {t("Link bài tập đi kèm app, còn ghi chú và link tham khảo là của riêng bạn — cập nhật app không làm mất phần này.")}
         </div>
       </div>
 
@@ -463,7 +463,7 @@ export default function ItemDetail({
             style={{ marginLeft: 10 }}
             onClick={() => setError(null)}
           >
-            Đóng
+            {t("Đóng")}
           </button>
         </div>
       )}

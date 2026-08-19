@@ -8,6 +8,7 @@ import { fromISO } from "../lib/srs";
 import type { ItemStatus } from "../lib/types";
 import { platform } from "../platform";
 
+import { t, t2 } from "../lib/chu";
 /* ------------------------------------------------------------------ */
 /* Nhãn trạng thái                                                     */
 /* ------------------------------------------------------------------ */
@@ -38,7 +39,7 @@ export function StatusPill({ status }: { status: ItemStatus }) {
   return (
     <span className={`pill ${status}`}>
       <Ic i={STATUS_ICON[status]} className="h-3 w-3" strokeWidth={2.5} />
-      {STATUS_TEXT[status]}
+      {t(STATUS_TEXT[status])}
     </span>
   );
 }
@@ -53,7 +54,7 @@ export function StatusPill({ status }: { status: ItemStatus }) {
  */
 export function Stars({ count, title }: { count: number; title?: string }) {
   return (
-    <span className="stars" title={title ?? `Độ khó ${count}/5`}>
+    <span className="stars" title={title ?? t2("Độ khó {n}/5", { n: count })}>
       {[1, 2, 3, 4, 5].map((level) => (
         <Star
           key={level}
@@ -163,7 +164,7 @@ export function StatusStack({
             width: `${(counts[status] / total) * 100}%`,
             background: STATUS_COLOR[status],
           }}
-          title={`${STATUS_TEXT[status]}: ${counts[status]}`}
+          title={t2("{trang}: {n}", { trang: t(STATUS_TEXT[status]), n: counts[status] })}
         />
       ))}
     </div>
@@ -221,7 +222,7 @@ export function Heatmap({
                 key={day.date}
                 className="heat-cell"
                 style={{ background: heatColor(day.reviewed, goal) }}
-                title={`${day.date}: ${day.reviewed} bài`}
+                title={t2("{ngay}: {n} bài", { ngay: day.date, n: day.reviewed })}
               />
             ) : (
               <div
@@ -259,7 +260,7 @@ export function BarChart({
             <div
               className="chart-bar"
               key={index}
-              title={`${point.label} — đúng ${point.correct}, sai ${point.wrong}`}
+              title={t2("{nhan} — đúng {dung}, sai {sai}", { nhan: point.label, dung: point.correct, sai: point.wrong })}
             >
               <div
                 className="chart-bar-fill"

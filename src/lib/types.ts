@@ -121,6 +121,20 @@ export interface ItemProgress {
   starred: boolean;
   /** 0 = chưa vào chu kỳ ôn; 1..6 ứng với 1/3/7/14/30/90 ngày. */
   srsLevel: number;
+  /**
+   * Mốc của lần CHẤM BÀI gần nhất, đủ chính xác tới giây.
+   *
+   * Khác `updatedAt` ở chỗ: `updatedAt` nhảy theo MỌI lần sửa, kể cả lúc bạn
+   * chỉ ghi thêm một dòng ghi chú. Đồng bộ hai máy cần biết bên nào CHẤM sau,
+   * chứ không phải bên nào SỬA sau — xem `gopOnTap` trong lib/sync.ts.
+   *
+   * `doneDate` không thay được vai này vì nó chỉ tới ngày: chấm bài buổi sáng
+   * rồi ghi chú buổi chiều là cùng một ngày.
+   *
+   * Không bắt buộc: sổ ghi bằng bản cũ chưa có trường này, lúc đó lùi về
+   * `doneDate` rồi tới `updatedAt` như cũ.
+   */
+  reviewedAt?: string;
   nextReview: string | null;
   history: ReviewEvent[];
 }
@@ -144,6 +158,14 @@ export interface Settings {
   examDate: string;
   /** Số ngày tối đa giữ bản sao lưu tự động. */
   backupsToKeep: number;
+  /**
+   * Thứ tiếng của CHỮ TRÊN MÀN HÌNH: "vi" | "en" | "ja".
+   *
+   * Chỉ đổi chữ của app. Tên bài, đề bài và ghi chú của bạn vẫn nguyên như bạn
+   * đã viết — đổi ngôn ngữ giao diện mà làm chữ của người dùng biến dạng thì
+   * còn tệ hơn là không có nút này.
+   */
+  uiLang?: "vi" | "en" | "ja";
 }
 
 /**

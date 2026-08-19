@@ -201,6 +201,10 @@ export function normalise(input: unknown, fallback: AppData): AppData {
       // v5 -> v6: sổ cũ chưa có dấu sao, mặc định là chưa đánh.
       starred: entry.starred === true,
       srsLevel: Number.isFinite(entry.srsLevel) ? Number(entry.srsLevel) : 0,
+      // Chỉ đặt khi sổ THẬT SỰ có. Thêm một trường vào mọi bản ghi là mọi sổ cũ
+      // đều "khác" bản trên máy chủ ở lần đồng bộ kế tiếp, rồi hai bên ghi qua
+      // ghi lại một vòng chẳng để làm gì.
+      ...(typeof entry.reviewedAt === "string" ? { reviewedAt: entry.reviewedAt } : {}),
       nextReview: entry.nextReview ?? null,
       history: Array.isArray(entry.history) ? entry.history : [],
     };

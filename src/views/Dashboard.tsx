@@ -53,6 +53,7 @@ import { Ic } from "../components/ui/icon";
 import { Panel, PanelHead } from "../components/ui/panel";
 import { Badge, Button, Dial, Meter, Row } from "../components/ui/primitives";
 
+import { t, t2 } from "../lib/chu";
 /* ------------------------------------------------------------------ */
 /* Màu theo trạng thái — dùng bộ màu hệ thống của macOS, trầm hơn bản cũ */
 /* ------------------------------------------------------------------ */
@@ -76,22 +77,22 @@ const STATUS_ORDER: ItemStatus[] = ["correct", "relearned", "wrong", "todo"];
 /** Câu chào đổi theo giờ trong ngày, cho đỡ khô khan. */
 function greeting(): string {
   const hour = new Date().getHours();
-  if (hour < 5) return "Khuya rồi, cố lên";
-  if (hour < 11) return "Chào buổi sáng";
-  if (hour < 14) return "Chào buổi trưa";
-  if (hour < 18) return "Chào buổi chiều";
-  return "Chào buổi tối";
+  if (hour < 5) return t("Khuya rồi, cố lên");
+  if (hour < 11) return t("Chào buổi sáng");
+  if (hour < 14) return t("Chào buổi trưa");
+  if (hour < 18) return t("Chào buổi chiều");
+  return t("Chào buổi tối");
 }
 
 /** Một câu động viên chọn theo tình hình hôm nay. */
 function encouragement(view: Overview): string {
-  if (view.today.metGoal) return "Xong mục tiêu hôm nay rồi. Nghỉ ngơi thôi!";
+  if (view.today.metGoal) return t("Xong mục tiêu hôm nay rồi. Nghỉ ngơi thôi!");
   if (view.today.reviewed === 0 && view.dueToday > 0)
-    return `Có ${view.dueToday} bài đang chờ. Bắt đầu từ bài đầu tiên nhé.`;
-  if (view.today.reviewed === 0) return "Hôm nay chưa làm bài nào. Mở màn thôi!";
+    return t2("Có {n} bài đang chờ. Bắt đầu từ bài đầu tiên nhé.", { n: view.dueToday });
+  if (view.today.reviewed === 0) return t("Hôm nay chưa làm bài nào. Mở màn thôi!");
   if (view.today.remaining <= 5)
-    return `Sát rồi, chỉ còn ${view.today.remaining} bài nữa là đạt mục tiêu.`;
-  return `Còn ${view.today.remaining} bài nữa là đạt mục tiêu hôm nay.`;
+    return t2("Sát rồi, chỉ còn {n} bài nữa là đạt mục tiêu.", { n: view.today.remaining });
+  return t2("Còn {n} bài nữa là đạt mục tiêu hôm nay.", { n: view.today.remaining });
 }
 
 /* ------------------------------------------------------------------ */
@@ -107,7 +108,7 @@ function StatusBar({ counts }: { counts: Record<ItemStatus, number> }) {
       {STATUS_ORDER.map((status) => (
         <span
           key={status}
-          title={`${STATUS_LABEL[status]}: ${counts[status]}`}
+          title={t2("{trang}: {n}", { trang: t(STATUS_LABEL[status]), n: counts[status] })}
           style={{
             width: `${(counts[status] / total) * 100}%`,
             background: STATUS_TONE[status],
@@ -248,21 +249,23 @@ export default function Dashboard({
       {isFresh && (
         <Panel>
           <div className="text-title font-semibold">
-            Chào mừng bạn đến với sổ ôn thi <span className="ja">電験三種</span>
+            {t("Chào mừng bạn đến với sổ ôn thi")} <span className="ja">電験三種</span>
           </div>
           <p className="mt-2 max-w-[640px] text-small text-ink-2">
-            App đã có sẵn đầy đủ <strong className="text-ink">{view.total} bài</strong>{" "}
-            của cả bốn môn, kèm link tới denken-ou.com và độ khó từng bài. Cứ làm bài,
-            app sẽ tự xếp lịch ôn lại đúng lúc bạn sắp quên.
+            {t("App đã có sẵn đầy đủ")}{" "}
+            <strong className="text-ink">{t2("{n} bài", { n: view.total })}</strong>{" "}
+            {t(
+              "của cả bốn môn, kèm link tới denken-ou.com và độ khó từng bài. Cứ làm bài, app sẽ tự xếp lịch ôn lại đúng lúc bạn sắp quên.",
+            )}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-4">
             <Button tone="accent" onClick={onStartReview}>
-              Học bài đầu tiên →
+              {t("Học bài đầu tiên →")}
             </Button>
             {/* Lối nhập Excel để nhỏ: chỉ người chuyển từ file theo dõi cũ mới cần. */}
             {platform.can.excelImport && (
               <span className="text-small text-ink-3">
-                Đã có file Excel theo dõi từ trước?{" "}
+                {t("Đã có file Excel theo dõi từ trước?")}{" "}
                 <button
                   className="dx-btn text-accent underline underline-offset-2 hover:text-accent-dim"
                   onClick={async () => {
@@ -270,7 +273,7 @@ export default function Dashboard({
                     if (result.ok && result.data) store.replaceAll(result.data);
                   }}
                 >
-                  Nhập vào đây
+                  {t("Nhập vào đây")}
                 </button>
               </span>
             )}
@@ -297,13 +300,13 @@ export default function Dashboard({
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
                 <Target className="h-3.5 w-3.5 text-ink-4" strokeWidth={2} />
-                <span className="dx-eyebrow">Hôm nay</span>
+                <span className="dx-eyebrow">{t("Hôm nay")}</span>
               </div>
               <div className="mt-1 text-lead font-semibold">{greeting()}!</div>
               <p className="mt-1 text-small text-ink-2">{encouragement(view)}</p>
               {view.today.reviewed > 0 && (
                 <div className="mt-2 flex gap-2">
-                  <Badge tone="good">Đúng {view.today.correct}</Badge>
+                  <Badge tone="good">{t2("Đúng {n}", { n: view.today.correct })}</Badge>
                   <Badge tone="bad">Sai {view.today.wrong}</Badge>
                 </div>
               )}
@@ -319,21 +322,21 @@ export default function Dashboard({
               strokeWidth={1.5}
             />
             <div className="min-w-0">
-              <div className="dx-eyebrow">Chuỗi ngày</div>
+              <div className="dx-eyebrow">{t("Chuỗi ngày")}</div>
               <div className="mt-1 text-hero font-semibold tabular-nums leading-none">
                 {view.streak.current}
               </div>
               <div className="mt-1.5 text-tiny text-ink-3">
-                ngày liên tiếp đạt mục tiêu
+                {t("ngày liên tiếp đạt mục tiêu")}
               </div>
               {view.streak.atRisk ? (
                 <Badge tone="warn" className="mt-2">
                   <AlertTriangle className="h-3 w-3" strokeWidth={2.25} />
-                  Học hôm nay để giữ chuỗi
+                  {t("Học hôm nay để giữ chuỗi")}
                 </Badge>
               ) : (
                 <div className="mt-2 text-tiny text-ink-4">
-                  Kỷ lục {view.streak.longest} ngày
+                  {t2("Kỷ lục {n} ngày", { n: view.streak.longest })}
                 </div>
               )}
             </div>
@@ -343,7 +346,7 @@ export default function Dashboard({
           <div className="border-t-[0.5px] border-hairline p-4 lg:border-t-0 lg:border-l-[0.5px]">
             <div className="flex items-center gap-1.5">
               <CalendarClock className="h-3.5 w-3.5 text-ink-4" strokeWidth={2} />
-              <span className="dx-eyebrow">Còn lại tới kỳ thi</span>
+              <span className="dx-eyebrow">{t("Còn lại tới kỳ thi")}</span>
             </div>
             <div className="mt-1 flex items-baseline gap-1.5">
               <span
@@ -353,14 +356,18 @@ export default function Dashboard({
               >
                 {view.daysToExam > 0 ? view.daysToExam : 0}
               </span>
-              <span className="text-small text-ink-3">ngày</span>
+              <span className="text-small text-ink-3">{t("ngày")}</span>
             </div>
-            <div className="mt-1.5 text-tiny text-ink-4">Ngày thi {view.examDate}</div>
+            <div className="mt-1.5 text-tiny text-ink-4">{t2("Ngày thi {ngay}", { ngay: view.examDate })}</div>
             {view.remaining > 0 && view.daysToExam > 0 && (
               <p className="mt-2.5 text-tiny text-ink-2">
-                Cần <strong className="text-ink">{view.paceNeeded} bài/ngày</strong> để
-                xử lý hết {view.remaining} bài còn nợ ({view.counts.todo} chưa làm +{" "}
-                {view.counts.wrong} đang sai).
+                {t("Cần")}{" "}
+                <strong className="text-ink">{t2("{n} bài/ngày", { n: view.paceNeeded })}</strong>{" "}
+                {t2("để xử lý hết {con} bài còn nợ ({chua} chưa làm + {sai} đang sai).", {
+                  con: view.remaining,
+                  chua: view.counts.todo,
+                  sai: view.counts.wrong,
+                })}
               </p>
             )}
           </div>
@@ -373,17 +380,17 @@ export default function Dashboard({
           <div className="min-w-0 flex-1">
             <div className="text-lead font-semibold">
               {view.dueToday > 0
-                ? `${view.dueToday} bài đến hạn ôn hôm nay`
-                : "Không còn bài nào đến hạn"}
+                ? t2("{n} bài đến hạn ôn hôm nay", { n: view.dueToday })
+                : t("Không còn bài nào đến hạn")}
             </div>
             <p className="mt-1 text-small text-ink-2">
               {view.overdue > 0
-                ? `Trong đó ${view.overdue} bài đã quá hạn — nên ưu tiên làm trước.`
-                : "Ôn đúng lịch giúp nhớ lâu hơn nhiều so với học dồn."}
+                ? t2("Trong đó {n} bài đã quá hạn — nên ưu tiên làm trước.", { n: view.overdue })
+                : t("Ôn đúng lịch giúp nhớ lâu hơn nhiều so với học dồn.")}
             </p>
           </div>
           <Button tone="accent" onClick={onStartReview}>
-            {view.dueToday > 0 ? "Bắt đầu ôn →" : "Học bài mới →"}
+            {view.dueToday > 0 ? t("Bắt đầu ôn →") : t("Học bài mới →")}
           </Button>
         </div>
       </Panel>
@@ -392,30 +399,30 @@ export default function Dashboard({
       <div className="dx-grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Stat
           icon={BookOpen}
-          label="Đã làm"
+          label={t("Đã làm")}
           value={view.attempted}
-          foot={`trên ${view.total} bài · ${Math.round(view.progress * 100)}%`}
+          foot={t2("trên {tong} bài · {pt}%", { tong: view.total, pt: Math.round(view.progress * 100) })}
         />
         <Stat
           icon={Brain}
-          label="Nhớ lâu"
+          label={t("Nhớ lâu")}
           value={view.mastered}
           tone="text-good"
-          foot="đạt chu kỳ ôn từ 14 ngày trở lên"
+          foot={t("đạt chu kỳ ôn từ 14 ngày trở lên")}
         />
         <Stat
           icon={XCircle}
-          label="Đang sai"
+          label={t("Đang sai")}
           value={view.counts.wrong}
           tone="text-bad"
-          foot="cần quay lại xử lý"
+          foot={t("cần quay lại xử lý")}
         />
         <Stat
           icon={Circle}
-          label="Chưa làm"
+          label={t("Chưa làm")}
           value={view.counts.todo}
           tone="text-ink-2"
-          foot="còn lại trong giáo trình"
+          foot={t("còn lại trong giáo trình")}
         />
       </div>
 
@@ -423,13 +430,13 @@ export default function Dashboard({
       <Panel>
         <PanelHead
           icon={Layers}
-          eyebrow="Bốn môn"
-          title="Tiến độ từng môn"
+          eyebrow={t("Bốn môn")}
+          title={t("Tiến độ từng môn")}
           right={
             <Legend
               items={STATUS_ORDER.map((status) => ({
                 tone: STATUS_TONE[status],
-                text: STATUS_LABEL[status],
+                text: t(STATUS_LABEL[status]),
               }))}
             />
           }
@@ -446,7 +453,7 @@ export default function Dashboard({
                 </button>
                 <span className="text-tiny text-ink-3">{subject.viName}</span>
                 {subject.due > 0 && (
-                  <Badge tone="accent">{subject.due} đến hạn</Badge>
+                  <Badge tone="accent">{t2("{n} đến hạn", { n: subject.due })}</Badge>
                 )}
                 <span className="ml-auto shrink-0 text-tiny tabular-nums text-ink-3">
                   {subject.attempted}/{subject.total} ·{" "}
@@ -463,14 +470,14 @@ export default function Dashboard({
       <Panel>
         <PanelHead
           icon={History}
-          eyebrow="Ba ngày gần nhất"
-          title="Đã làm gần đây"
-          hint="Bài làm sai xếp lên trước — đó là thứ cần nhìn lại."
+          eyebrow={t("Ba ngày gần nhất")}
+          title={t("Đã làm gần đây")}
+          hint={t("Bài làm sai xếp lên trước — đó là thứ cần nhìn lại.")}
         />
 
         {activity.length === 0 ? (
           <p className="rounded-row bg-sunken px-3 py-6 text-center text-small text-ink-3">
-            Chưa chấm bài nào trong ba ngày qua. Làm vài bài là hiện ngay ở đây.
+            {t("Chưa chấm bài nào trong ba ngày qua. Làm vài bài là hiện ngay ở đây.")}
           </p>
         ) : (
           activity.map((day) => (
@@ -518,7 +525,7 @@ export default function Dashboard({
                   </span>
                   <span className="shrink-0 text-micro tabular-nums text-ink-4">
                     {entry.item.exam} {entry.item.question}
-                    {entry.times > 1 && ` · chấm ${entry.times} lần`}
+                    {entry.times > 1 && t2(" · chấm {n} lần", { n: entry.times })}
                   </span>
                 </Row>
               ))}
@@ -531,16 +538,17 @@ export default function Dashboard({
       <Panel>
         <PanelHead
           icon={Stethoscope}
-          eyebrow="Top 5 mỗi môn"
-          title="Đang yếu ở đâu"
-          hint="Tính gộp cả lượt ôn tập lẫn từng ý trong đề thi thử. Bấm một chủ đề để ôn lại cả chủ đề đó."
+          eyebrow={t("Top 5 mỗi môn")}
+          title={t("Đang yếu ở đâu")}
+          hint={t("Tính gộp cả lượt ôn tập lẫn từng ý trong đề thi thử. Bấm một chủ đề để ôn lại cả chủ đề đó.")}
         />
 
         {weakSubjects.length === 0 ? (
           <p className="rounded-row bg-sunken px-3 py-6 text-center text-small text-ink-3">
-            Chưa đủ dữ liệu để kết luận chỗ nào yếu. Một chủ đề phải có ít nhất{" "}
-            {MIN_ATTEMPTS} lượt chấm mới được xếp hạng — làm đúng một bài rồi sai một
-            bài thì con số 50% chẳng nói lên điều gì.
+            {t2(
+              "Chưa đủ dữ liệu để kết luận chỗ nào yếu. Một chủ đề phải có ít nhất {n} lượt chấm mới được xếp hạng — làm đúng một bài rồi sai một bài thì con số 50% chẳng nói lên điều gì.",
+              { n: MIN_ATTEMPTS },
+            )}
           </p>
         ) : (
           <div className="dx-grid grid-cols-1 gap-x-6 gap-y-5 xl:grid-cols-2">
@@ -574,7 +582,7 @@ export default function Dashboard({
                     </span>
                     <span className="shrink-0 text-right text-micro tabular-nums text-ink-4">
                       sai {row.wrong}/{row.attempts}
-                      {row.fromExam > 0 && ` · ${row.fromExam} ý từ thi thử`}
+                      {row.fromExam > 0 && t2(" · {n} ý từ thi thử", { n: row.fromExam })}
                     </span>
                   </Row>
                 ))}
@@ -587,7 +595,7 @@ export default function Dashboard({
       {/* ---- Hai biểu đồ ---- */}
       <div className="dx-grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel>
-          <PanelHead icon={TrendingUp} eyebrow="12 tuần" title="Số lượt ôn mỗi tuần" />
+          <PanelHead icon={TrendingUp} eyebrow={t("12 tuần")} title={t("Số lượt ôn mỗi tuần")} />
           {weeks.some((week) => week.reviewed > 0) ? (
             <>
               <Columns
@@ -600,21 +608,21 @@ export default function Dashboard({
               <div className="mt-3">
                 <Legend
                   items={[
-                    { tone: "var(--color-good)", text: "Đúng" },
-                    { tone: "var(--color-bad)", text: "Sai" },
+                    { tone: "var(--color-good)", text: t("Đúng") },
+                    { tone: "var(--color-bad)", text: t("Sai") },
                   ]}
                 />
               </div>
             </>
           ) : (
             <p className="rounded-row bg-sunken px-3 py-6 text-center text-small text-ink-3">
-              Chưa có dữ liệu. Ôn vài bài là biểu đồ hiện lên ngay.
+              {t("Chưa có dữ liệu. Ôn vài bài là biểu đồ hiện lên ngay.")}
             </p>
           )}
         </Panel>
 
         <Panel>
-          <PanelHead icon={CalendarDays} eyebrow="14 ngày tới" title="Lịch ôn sắp tới" />
+          <PanelHead icon={CalendarDays} eyebrow={t("14 ngày tới")} title={t("Lịch ôn sắp tới")} />
           <Columns
             bars={upcoming.map((day, index) => [
               {
@@ -627,7 +635,7 @@ export default function Dashboard({
             )}
           />
           <p className="mt-3 text-tiny text-ink-4">
-            Biết trước ngày nào nặng để sắp xếp thời gian.
+            {t("Biết trước ngày nào nặng để sắp xếp thời gian.")}
           </p>
         </Panel>
       </div>
@@ -636,9 +644,9 @@ export default function Dashboard({
       <Panel>
         <PanelHead
           icon={CalendarClock}
-          eyebrow="17 tuần qua"
-          title="Nhịp học"
-          hint="Ô càng sáng là ngày đó học càng nhiều."
+          eyebrow={t("17 tuần qua")}
+          title={t("Nhịp học")}
+          hint={t("Ô càng sáng là ngày đó học càng nhiều.")}
         />
         {/* Ghim cả bề rộng cột lẫn chiều cao hàng. Chỉ đặt số hàng thôi thì lưới
             giãn cột ra cho đầy khối, mỗi ô thành một hình vuông to tướng. */}
@@ -655,7 +663,7 @@ export default function Dashboard({
             return (
               <span
                 key={day.date}
-                title={`${day.date}: ${day.reviewed} bài`}
+                title={t2("{ngay}: {n} bài", { ngay: day.date, n: day.reviewed })}
                 className="h-[11px] w-[11px] rounded-[2px]"
                 style={{
                   background:
@@ -668,7 +676,7 @@ export default function Dashboard({
           })}
         </div>
         <div className="mt-3 flex items-center gap-1.5 text-micro text-ink-4">
-          <span>Ít</span>
+          <span>{t("Ít")}</span>
           {[0, 1, 2, 3, 4].map((level) => (
             <i
               key={level}
@@ -681,7 +689,7 @@ export default function Dashboard({
               }}
             />
           ))}
-          <span>Nhiều</span>
+          <span>{t("Nhiều")}</span>
         </div>
       </Panel>
 
@@ -689,21 +697,21 @@ export default function Dashboard({
       <Panel>
         <PanelHead
           icon={Award}
-          eyebrow="Thành tích"
-          title="Huy hiệu đã đạt"
+          eyebrow={t("Thành tích")}
+          title={t("Huy hiệu đã đạt")}
           hint={
             earned.length === 0
-              ? "Chưa có huy hiệu nào — cứ học đều, tự khắc mở khoá."
-              : `${earned.length} huy hiệu${
-                  earnedToday.length > 0 ? ` · ${earnedToday.length} mở hôm nay` : ""
-                }`
+              ? t("Chưa có huy hiệu nào — cứ học đều, tự khắc mở khoá.")
+              : t2("{n} huy hiệu", { n: earned.length }) +
+                (earnedToday.length > 0
+                  ? t2(" · {n} mở hôm nay", { n: earnedToday.length })
+                  : "")
           }
         />
 
         {earned.length === 0 ? (
           <p className="rounded-row bg-sunken px-3 py-6 text-center text-small text-ink-3">
-            Huy hiệu được giữ kín cho tới lúc bạn chạm mốc. Đang học mà đạt được thì
-            app sẽ báo ngay.
+            {t("Huy hiệu được giữ kín cho tới lúc bạn chạm mốc. Đang học mà đạt được thì app sẽ báo ngay.")}
           </p>
         ) : (
           <div className="dx-grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
@@ -713,24 +721,24 @@ export default function Dashboard({
               return (
                 <div
                   key={badge.id}
-                  title={badge.description}
+                  title={t(badge.description)}
                   className={`relative rounded-row bg-sunken p-3 text-center ring-[0.5px] ${
                     isToday ? "ring-accent" : "ring-hairline"
                   }`}
                 >
                   {isToday && (
                     <span className="absolute right-1.5 top-1.5 rounded-[3px] bg-accent px-1 text-[9px] font-bold text-white">
-                      MỚI
+                      {t("MỚI")}
                     </span>
                   )}
                   <div className="dx-grid place-items-center text-accent">
                     <badge.icon className="h-6 w-6" strokeWidth={1.5} />
                   </div>
                   <div className="mt-1.5 truncate text-tiny font-medium">
-                    {badge.name}
+                    {t(badge.name)}
                   </div>
                   <div className="text-micro text-ink-4">
-                    {isToday ? "hôm nay" : day}
+                    {isToday ? t("hôm nay") : day}
                   </div>
                 </div>
               );

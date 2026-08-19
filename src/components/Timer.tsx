@@ -20,6 +20,7 @@ import { platform } from "../platform";
 import { ALARM_REVIEW } from "../platform/types";
 import { Ring } from "./ui";
 
+import { t } from "../lib/chu";
 export interface TimerHandle {
   start(): void;
   stop(): void;
@@ -47,8 +48,8 @@ export function useCountdown(item: CatalogItem | undefined) {
     void platform.notifyAt(
       ALARM_REVIEW,
       at,
-      "Hết giờ làm bài",
-      "Chốt đáp án rồi chấm đúng/sai nhé.",
+      t("Hết giờ làm bài"),
+      t("Chốt đáp án rồi chấm đúng/sai nhé."),
     );
   }, []);
 
@@ -162,10 +163,10 @@ export default function Timer({
           <Ic i={TimerIcon} className="h-3.5 w-3.5" /> {partLabel(item)}
         </span>
         <button className="btn sm" onClick={clock.start}>
-          Bắt đầu tính giờ
+          {t("Bắt đầu tính giờ")}
         </button>
         <span className="field-hint">
-          Bấm <span className="mono">Space</span> để mở bài là đồng hồ tự chạy.
+          {t("Bấm")} <span className="mono">Space</span> {t("để mở bài là đồng hồ tự chạy.")}
         </span>
       </div>
     );
@@ -184,35 +185,35 @@ export default function Timer({
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 700 }}>
           {clock.expired
-            ? "Hết giờ rồi!"
+            ? t("Hết giờ rồi!")
             : clock.paused
-              ? "Đang tạm dừng"
-              : "Đang tính giờ"}
+              ? t("Đang tạm dừng")
+              : t("Đang tính giờ")}
         </div>
         <div className="small muted" style={{ marginTop: 2 }}>
           {partLabel(item)}
-          {clock.expired && " — chốt đáp án và chấm kết quả nhé"}
+          {clock.expired && t(" — chốt đáp án và chấm kết quả nhé")}
         </div>
 
         <div className="btn-row" style={{ marginTop: 10 }}>
           {clock.expired ? (
             <button className="btn danger" onClick={clock.dismiss}>
-              <Ic i={BellOff} /> Tắt chuông
+              <Ic i={BellOff} /> {t("Tắt chuông")}
             </button>
           ) : clock.paused ? (
             <button className="btn sm primary" onClick={clock.resume}>
-              <Ic i={Play} /> Tiếp tục
+              <Ic i={Play} /> {t("Tiếp tục")}
             </button>
           ) : (
             <button className="btn sm" onClick={clock.pause}>
-              <Ic i={Pause} /> Tạm dừng
+              <Ic i={Pause} /> {t("Tạm dừng")}
             </button>
           )}
           <button className="btn sm ghost" onClick={clock.start}>
-            <Ic i={RotateCcw} /> Bắt đầu lại
+            <Ic i={RotateCcw} /> {t("Bắt đầu lại")}
           </button>
           <button className="btn sm ghost" onClick={clock.stop}>
-            <Ic i={X} /> Bỏ đồng hồ
+            <Ic i={X} /> {t("Bỏ đồng hồ")}
           </button>
         </div>
       </div>

@@ -29,6 +29,7 @@ import Settings from "./views/Settings";
 import type { TopicFocus } from "./views/Review";
 import type { SubjectKey } from "./lib/types";
 
+import { datNgon, t, t2 } from "./lib/chu";
 type Tab = "dashboard" | "review" | "browse" | "exam" | "rules" | "settings";
 
 /**
@@ -63,6 +64,16 @@ const SAVE_TEXT: Record<string, string> = {
 export default function App() {
   const store = useStore();
   const sync = useSync(store);
+
+  /*
+   * Đặt thứ tiếng NGAY TRONG lượt vẽ này, trước khi các màn con vẽ.
+   *
+   * `t()` được gọi ở hàng trăm chỗ, kể cả ngoài component (bảng huy hiệu, tên
+   * môn…), nên nó đọc một biến của module chứ không phải state của React. Chỗ
+   * duy nhất đặt được biến đó cho kịp cả cây là ở đây — cài đặt nằm trong dữ
+   * liệu, mà đổi dữ liệu thì cả cây vẽ lại sẵn rồi.
+   */
+  datNgon(store.data?.settings.uiLang);
   const [tab, setTabState] = useState<Tab>("dashboard");
 
   /**
@@ -141,7 +152,7 @@ export default function App() {
       <div className="loading">
         <div>
           <div className="spinner" />
-          Đang mở sổ ôn thi…
+          {t("Đang mở sổ ôn thi…")}
         </div>
       </div>
     );
@@ -164,27 +175,27 @@ export default function App() {
           <img src={mark} alt="" />
           <div className="brand-text">
             <div className="brand-title ja">電験三種</div>
-            <div className="brand-sub">Sổ ôn thi</div>
+            <div className="brand-sub">{t("Sổ ôn thi")}</div>
           </div>
         </div>
 
         <div className="header-spacer" />
 
-        <div className="header-stat" title="Chuỗi ngày liên tiếp đạt mục tiêu">
+        <div className="header-stat" title={t("Chuỗi ngày liên tiếp đạt mục tiêu")}>
           <Flame className="h-3.5 w-3.5" strokeWidth={2} /> {view.streak.current}
-          <span className="label">ngày</span>
+          <span className="label">{t("ngày")}</span>
         </div>
-        <div className="header-stat" title="Số bài đã ôn hôm nay trên mục tiêu">
+        <div className="header-stat" title={t("Số bài đã ôn hôm nay trên mục tiêu")}>
           {view.today.reviewed}/{view.today.goal}
-          <span className="label">hôm nay</span>
+          <span className="label">{t("hôm nay")}</span>
         </div>
-        <div className="header-stat" title={`Ngày thi ${view.examDate}`}>
+        <div className="header-stat" title={t2("Ngày thi {ngay}", { ngay: view.examDate })}>
           <CalendarClock className="h-3.5 w-3.5" strokeWidth={2} /> {view.daysToExam}
-          <span className="label">ngày tới kỳ thi</span>
+          <span className="label">{t("ngày tới kỳ thi")}</span>
         </div>
-        <div className="header-stat" title={SAVE_TEXT[store.saveState]}>
+        <div className="header-stat" title={t(SAVE_TEXT[store.saveState] ?? "")}>
           <span className={`save-dot ${store.saveState}`} />
-          <span className="label">{SAVE_TEXT[store.saveState]}</span>
+          <span className="label">{t(SAVE_TEXT[store.saveState] ?? "")}</span>
         </div>
       </header>
 
@@ -201,7 +212,7 @@ export default function App() {
             <span className="nav-icon">
               <entry.icon className="h-[18px] w-[18px]" strokeWidth={1.75} />
             </span>
-            <span className="nav-label">{entry.label}</span>
+            <span className="nav-label">{t(entry.label)}</span>
             {entry.key === "review" && view.dueToday > 0 && (
               <span className="nav-badge">{view.dueToday}</span>
             )}
@@ -211,13 +222,13 @@ export default function App() {
 
         <div className="nav-extra">
         <div className="sidebar-divider" />
-        <div className="sidebar-section">Bốn môn</div>
+        <div className="sidebar-section">{t("Bốn môn")}</div>
         {view.bySubject.map((subject) => (
           <button
             key={subject.key}
             className="nav-item"
             onClick={() => goSubject(subject.key)}
-            title={`${subject.attempted}/${subject.total} bài đã làm`}
+            title={t2("{da}/{tong} bài đã làm", { da: subject.attempted, tong: subject.total })}
           >
             <span className="subject-row" style={{ flex: 1, padding: 0 }}>
               <span className="ja">{subject.name}</span>
@@ -228,10 +239,10 @@ export default function App() {
         ))}
 
         <div className="sidebar-divider" />
-        <div className="sidebar-section">Tổng tiến độ</div>
+        <div className="sidebar-section">{t("Tổng tiến độ")}</div>
         <div style={{ padding: "4px 12px 12px" }}>
           <div className="row between small muted" style={{ marginBottom: 6 }}>
-            <span>{view.attempted} / {view.total} bài</span>
+            <span>{t2("{da} / {tong} bài", { da: view.attempted, tong: view.total })}</span>
             <span>{Math.round(view.progress * 100)}%</span>
           </div>
           <div className="bar thin">
