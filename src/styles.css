@@ -1393,27 +1393,6 @@ mark.hit {
   border-top: 1px solid var(--divider);
 }
 
-/* Nút giới thiệu ở cuối thanh bên */
-.about-btn {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  margin-top: auto;
-  padding: 10px 12px;
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--text-2);
-  font-size: 13px;
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.12s, color 0.12s;
-}
-.about-btn:hover {
-  background: var(--surface-2);
-  color: var(--text);
-}
 
 /* ==========================================================================
    Ghi chú, file đính kèm, link tham khảo

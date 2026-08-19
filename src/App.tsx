@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 
 import mark from "./assets/mark.svg";
-import About, { VietnamFlag } from "./components/About";
+import About from "./components/About";
 import BadgeCelebration from "./components/BadgeCelebration";
 import { computeOverview } from "./lib/stats";
 import { useStore } from "./state/useStore";
@@ -242,14 +242,6 @@ export default function App() {
           </div>
         </div>
 
-        <button
-          className="about-btn"
-          onClick={() => setShowAbout(true)}
-          title="Giới thiệu tác giả"
-        >
-          <VietnamFlag size={18} />
-          <span>Về tác giả — Nyren Phạm</span>
-        </button>
         </div>
       </nav>
 
