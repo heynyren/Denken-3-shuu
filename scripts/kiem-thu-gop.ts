@@ -40,7 +40,7 @@ function prog(status: ItemProgress["status"], updatedAt: string, level = 1): Ite
   // bên khác nhau về hình dạng, và phép so "hai bên đã giống nhau" báo sai.
   return {
     status, notes: [], links: [], updatedAt,
-    doneDate: updatedAt.slice(0, 10), starred: false, srsLevel: level,
+    doneDate: updatedAt.slice(0, 10), reviewedAt: updatedAt, starred: false, srsLevel: level,
     nextReview: "2026-08-20", history: [{ date: updatedAt.slice(0, 10), result: "correct", level }],
   };
 }
@@ -192,6 +192,60 @@ const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
   const { data } = mergeData(base, pc, phone);
   check(data.progress["x"]?.notes[0]?.text === "cách giải hay", "ghi chú không bị mất khi gộp");
   check(data.progress["x"]?.links[0]?.url === "https://gemini.example/x", "link tham khảo không bị mất");
+}
+
+/* ---- 8b. Chấm bài ở máy này, chỉ THÊM GHI CHÚ ở máy kia ---- */
+/*
+ * Cùng một bài, hai máy sửa hai thứ khác nhau. Máy tính chấm bài xong lên cấp 5;
+ * điện thoại chỉ mở bài đó ra ghi thêm một dòng, không chấm gì cả — nhưng lượt
+ * ghi chú xảy ra SAU nên bản của điện thoại mới hơn.
+ *
+ * Lấy trọn bản mới hơn thì mất cấp 5, mà mất im lặng: nhìn vào sổ chỉ thấy bài
+ * đó ở cấp 1, không có dấu vết nào cho biết nó từng lên tới cấp 5.
+ */
+{
+  const base = blank();
+  base.progress["x"] = prog("correct", "2026-08-12T08:00:00Z", 1);
+
+  const pc = clone(base);
+  pc.progress["x"] = {
+    ...prog("correct", "2026-08-12T10:00:00Z", 5),
+    doneDate: "2026-08-12",
+    nextReview: "2026-09-11",
+  };
+
+  // Điện thoại KHÔNG chấm bài, chỉ ghi thêm một dòng — nên `updatedAt` mới hơn
+  // nhưng mốc chấm bài của nó vẫn là mốc cũ từ 08:00.
+  const phone = clone(base);
+  phone.progress["x"] = {
+    ...clone(base.progress["x"]!),
+    updatedAt: "2026-08-12T11:00:00Z",
+    notes: [{ id: "n1", text: "chỗ hay nhầm", createdAt: "2026-08-12T11:00:00Z", attachments: [] }],
+  };
+
+  const { data } = mergeData(base, pc, phone);
+  check(data.progress["x"]?.notes[0]?.text === "chỗ hay nhầm",
+    "ghi chú vừa thêm ở điện thoại vẫn còn");
+  check(data.progress["x"]?.srsLevel === 5,
+    `chấm bài ở máy kia không bị lượt ghi chú kéo tụt cấp (đang là ${data.progress["x"]?.srsLevel})`);
+  check(data.progress["x"]?.nextReview === "2026-09-11",
+    "và ngày ôn lại đi cùng cấp đó, không lẫn sang lịch cũ");
+}
+
+/* ---- 8c. Hai máy cùng chấm: lần chấm MỚI HƠN phải thắng ---- */
+{
+  const base = blank();
+  base.progress["y"] = prog("correct", "2026-08-10T08:00:00Z", 2);
+
+  const pc = clone(base);
+  pc.progress["y"] = { ...prog("correct", "2026-08-11T10:00:00Z", 5), doneDate: "2026-08-11" };
+
+  const phone = clone(base);
+  phone.progress["y"] = { ...prog("wrong", "2026-08-12T09:00:00Z", 1), doneDate: "2026-08-12" };
+
+  const { data } = mergeData(base, pc, phone);
+  check(data.progress["y"]?.srsLevel === 1 && data.progress["y"]?.status === "wrong",
+    "làm sai ở máy kia hôm sau thì bài phải tụt về cấp 1, không giữ cấp cũ");
 }
 
 /* ---- 9. Gộp phải giao hoán: đổi vai hai máy vẫn ra cùng số liệu ---- */

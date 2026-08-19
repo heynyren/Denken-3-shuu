@@ -66,12 +66,55 @@ function newer(a: string | undefined, b: string | undefined): boolean {
 /* ------------------------------------------------------------------ */
 
 /**
- * Mỗi bài là một đơn vị: bên nào có `updatedAt` mới hơn thì lấy trọn bản ghi
- * của bên đó.
+ * Những trường do việc CHẤM BÀI sinh ra. Luôn đi thành MỘT KHỐI.
  *
- * Không trộn lẫn từng trường bên trong một bài. Trạng thái, cấp độ ôn và ngày
- * ôn lại phải khớp với nhau — lấy trạng thái của máy này ghép với ngày ôn lại
- * của máy kia là ra một bản ghi không bao giờ tồn tại trên máy nào cả.
+ * Trạng thái, cấp độ ôn, ngày ôn lại và lịch sử phải khớp với nhau — lấy trạng
+ * thái của máy này ghép với ngày ôn lại của máy kia là ra một bản ghi không bao
+ * giờ tồn tại trên máy nào cả.
+ */
+function khoiOnTap(p: ItemProgress) {
+  return {
+    status: p.status,
+    srsLevel: p.srsLevel,
+    nextReview: p.nextReview,
+    doneDate: p.doneDate,
+    reviewedAt: p.reviewedAt,
+    history: p.history,
+  };
+}
+
+/**
+ * Đồng hồ của riêng việc ôn: lần chấm bài gần nhất.
+ *
+ * Sổ ghi bằng bản cũ chưa có `reviewedAt` thì lùi về `doneDate` — thô hơn (chỉ
+ * tới ngày) nhưng vẫn đúng hướng, và không làm hỏng gì so với trước.
+ */
+function mocOn(p: ItemProgress): string {
+  return p.reviewedAt ?? (p.doneDate ? p.doneDate + "T00:00:00.000Z" : "");
+}
+
+/**
+ * Gộp phần ÔN TẬP của hai bản cùng một bài, tách khỏi phép gộp cả bài.
+ *
+ * Vì sao phải tách: phép gộp thường lấy trọn bản có `updatedAt` mới hơn. Với
+ * ghi chú và link thì đúng — bản viết sau là ý mới nhất của bạn. Nhưng tiến độ
+ * ôn không phải thứ bạn gõ ra, nó do app ghi lại lúc bạn chấm bài, và hai máy
+ * chấm vào hai lúc khác nhau. Chấm bài trên máy tính lên cấp 5, rồi mở bài đó
+ * trên điện thoại chỉ để ghi thêm một dòng — bản của điện thoại mới hơn nên
+ * thắng trọn, và cấp 5 tụt về cấp 1. Nhìn vào sổ chỉ thấy cấp 1, không có dấu
+ * vết nào cho biết nó từng lên tới cấp 5.
+ *
+ * Nên so riêng bằng đồng hồ của chính việc ôn: `reviewedAt`. Bên nào CHẤM sau
+ * thì cả KHỐI ôn tập của bên đó thắng — vẫn không trộn lẫn từng trường.
+ */
+function gopOnTap(win: ItemProgress, lose: ItemProgress): ItemProgress {
+  if (mocOn(lose) <= mocOn(win)) return win;
+  return { ...win, ...khoiOnTap(lose) };
+}
+
+/**
+ * Mỗi bài là một đơn vị: bên nào có `updatedAt` mới hơn thì lấy trọn bản ghi
+ * của bên đó — trừ khối ôn tập, xem `gopOnTap`.
  */
 function mergeProgress(
   base: Record<string, ItemProgress>,
@@ -109,10 +152,10 @@ function mergeProgress(
     }
 
     if (newer(here.updatedAt, there.updatedAt)) {
-      out[id] = here;
+      out[id] = gopOnTap(here, there);
       report.progressLocal += 1;
     } else {
-      out[id] = there;
+      out[id] = gopOnTap(there, here);
       report.progressRemote += 1;
     }
   }

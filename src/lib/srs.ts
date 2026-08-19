@@ -82,6 +82,8 @@ export function applyReview(
   current: ItemProgress | undefined,
   result: "correct" | "wrong",
   today: string = todayISO(),
+  /** Mốc chính xác của lượt chấm này. Tách khỏi `today` để bài thử đặt được. */
+  nowIso: string = new Date().toISOString(),
 ): ItemProgress {
   const base = current ?? emptyProgress();
   const level =
@@ -92,6 +94,7 @@ export function applyReview(
     ...base,
     status: nextStatus(base.status, result),
     srsLevel: level,
+    reviewedAt: nowIso,
     doneDate: today,
     nextReview: addDays(today, interval),
     // Giữ 50 lần gần nhất là đủ vẽ biểu đồ mà không phình file.
