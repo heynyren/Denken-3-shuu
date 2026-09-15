@@ -1,6 +1,6 @@
 {
   "name": "denken-3-shuu",
-  "version": "1.18.0",
+  "version": "1.19.0",
   "description": "App ôn thi 電験三種 - theo dõi KPI, ôn tập giãn cách và tiến bộ hằng ngày",
   "author": "heynyren",
   "license": "MIT",
@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit",
     "convert": "python3 scripts/convert-excel.py scripts/source.xlsx",
     "pack:win": "npm run build && electron-builder --win --publish never",
+    "pack:mac": "npm run build && electron-builder --mac --publish never",
     "pack:dir": "npm run build && electron-builder --dir --publish never",
     "soat:lop": "node scripts/soat-trung-lop.mjs",
     "test:sync": "esbuild scripts/kiem-thu-gop.ts --bundle --platform=node --format=cjs --outfile=dist/kiem-thu-gop.cjs --log-level=error && node dist/kiem-thu-gop.cjs",

@@ -8,6 +8,8 @@ import { parseBackup } from "../src/lib/normalise";
 import { highlight, matchesQuery, trichDoan } from "../src/lib/vi";
 import { mergeData } from "../src/lib/sync";
 import type { AppData, ItemProgress } from "../src/lib/types";
+import { items as catalogItems } from "../src/lib/catalog";
+import { subAnswerCount } from "../src/lib/exam";
 import { safeName } from "../src/platform/android";
 import type { TepAndroid } from "../src/platform/kho-android";
 import { taoKhoAndroid } from "../src/platform/kho-android";
@@ -931,6 +933,71 @@ async function kiemThuKhoAndroid(): Promise<void> {
     check(ten?.includes(new Date().toISOString().slice(0, 10)) === true,
       "Android: bản sao lưu mang tên ngày hôm nay");
   }
+}
+
+
+/* ------------------------------------------------------------------ *
+ * 13e. Danh mục bài: link phải khớp với số câu
+ *
+ * Mỗi kỳ thi mới là 66 dòng thêm tay, mà link thì suy ra theo công thức
+ * `{môn}{kỳ}-{số câu}`. Suy sai một chỗ thì bấm vào bài ra đề của bài khác —
+ * thứ người học chỉ phát hiện khi đã ngồi làm nhầm đề xong.
+ *
+ * Nên ràng công thức đó lại thành phép kiểm chạy mỗi lần build, soát TOÀN BỘ
+ * danh mục chứ không riêng kỳ vừa thêm.
+ * ------------------------------------------------------------------ */
+{
+  const lech: string[] = [];
+  const trung = new Map<string, number>();
+
+  for (const bai of catalogItems) {
+    trung.set(bai.id, (trung.get(bai.id) ?? 0) + 1);
+
+    const duoiLink = /-(\d+)\/?$/.exec(bai.url)?.[1];
+    const soCau = /(\d+)/.exec(bai.question ?? "")?.[1];
+    if (duoiLink && soCau && duoiLink !== soCau) {
+      lech.push(`${bai.exam} ${bai.subject} ${bai.question} -> ${bai.url}`);
+    }
+  }
+
+  check(lech.length === 0, `mọi link khớp số câu (${lech.length} lệch${lech[0] ? ": " + lech[0] : ""})`);
+  check(
+    [...trung.values()].every((n) => n === 1),
+    "không bài nào trùng id — id là khoá giữ tiến độ học, trùng là mất lịch sử",
+  );
+
+  // Số câu của đề thật. Thiếu câu thì đề thi thử ra ngắn hơn đề thật mà không
+  // báo gì; thừa câu thì có bài không tồn tại.
+  const CHUAN: Record<string, number> = { riron: 18, denryoku: 17, kikai: 18, houki: 13 };
+  const r8 = catalogItems.filter((b) => b.exam === "R08上");
+  check(r8.length === 66, `kỳ R08上 có đủ 66 bài (${r8.length})`);
+  for (const [mon, can] of Object.entries(CHUAN)) {
+    const co = r8.filter((b) => b.subject === mon).length;
+    check(co === can, `R08上 ${mon}: ${co}/${can} câu`);
+  }
+
+  // Chủ đề phải nằm trong bộ chủ đề sẵn có, nếu không thì bộ lọc chủ đề bên
+  // màn Ôn tập hiện ra một mục lạ chỉ có đúng một bài.
+  const chuDeCu = new Set(
+    catalogItems.filter((b) => b.exam !== "R08上").map((b) => `${b.subject}|${b.topic}`),
+  );
+  const la = r8.filter((b) => !chuDeCu.has(`${b.subject}|${b.topic}`));
+  check(la.length === 0, `R08上 không đẻ ra chủ đề lạ (${la.length})`);
+
+  // Bài chưa biết độ khó mang 0 sao. Phải là 0 chứ không phải 1: 1 sao nghĩa là
+  // "đã biết, và là bài dễ nhất" — xếp nhầm cả 66 bài vào mức dễ.
+  check(
+    r8.every((b) => b.stars === 0),
+    "R08上 để 0 sao — chưa biết độ khó thì đừng xếp vào mức nào",
+  );
+  check(
+    catalogItems.filter((b) => b.exam !== "R08上").every((b) => b.stars >= 1),
+    "các kỳ cũ vẫn đủ sao, không bị script làm rơi mất",
+  );
+
+  // Ý B問題 đếm 2, A問題 đếm 1 — dùng để biết phải đi tìm bao nhiêu đáp án.
+  const soY = r8.reduce((tong, b) => tong + subAnswerCount(b), 0);
+  check(soY === 80, `R08上 cần 80 ý đáp án (${soY})`);
 }
 
 /* ---- 13b. Tô sáng từ khoá trong kết quả tìm kiếm ---- */

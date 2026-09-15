@@ -1,0 +1,91 @@
+name: Build macOS app
+
+# Phải chạy trên máy macOS thật: đóng gói .dmg cần `hdiutil` và `codesign`, hai
+# công cụ chỉ có trên macOS. Cùng lý do với bản Windows phải chạy windows-latest.
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-latest
+    timeout-minutes: 40
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Cài đặt phụ thuộc
+        run: npm ci
+
+      - name: Lấy số hiệu phiên bản
+        id: ten
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Đóng gói .dmg
+        run: npm run pack:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Không có chứng chỉ Apple Developer. Thiếu dòng này thì
+          # electron-builder đi lục keychain của máy chạy tìm chứng chỉ, không
+          # thấy, rồi hỏng giữa chừng — hỏng vì thiếu thứ ta vốn không định có.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      - name: Xem có gì trong release/
+        run: ls -lh release/*.dmg
+
+      # Hai file .dmg, mỗi file hơn 100 MB — nặng gấp đôi bản Windows. Kho bản
+      # build của tài khoản miễn phí chỉ có 0,5 GB nên không giữ theo từng
+      # commit; commit thường vẫn build đủ để biết mã nguồn có hỏng không.
+      - name: Tải lên bản .dmg
+        if: github.event_name == 'workflow_dispatch'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: Denken-3-shuu-macOS
+          path: release/*.dmg
+          if-no-files-found: error
+          retention-days: 2
+
+      # Releases nằm ở kho riêng, không tính vào hạn mức 0,5 GB kia — nên đây là
+      # đường lấy file chắc ăn, kể cả lúc kho bản build đang đầy.
+      - name: Đính vào bản phát hành
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.ten.outputs.version }}
+          name: Denken 3-shuu v${{ steps.ten.outputs.version }}
+          files: release/*.dmg
+
+      - name: Nhắc cách mở lần đầu
+        if: always()
+        run: |
+          {
+            echo "## Bản macOS chưa ký — lần mở đầu tiên phải làm thêm một bước"
+            echo
+            echo "macOS chặn mọi app tải từ Internet mà không có chứng chỉ Apple"
+            echo "Developer, và báo **\"đã hỏng, nên chuyển vào Thùng rác\"** — đó là"
+            echo "câu báo gây hiểu nhầm, app không hỏng gì cả."
+            echo
+            echo 'Sau khi kéo app vào Applications, chạy một lần trong Terminal:'
+            echo
+            echo '```'
+            echo 'xattr -dr com.apple.quarantine "/Applications/Denken 3-shuu.app"'
+            echo '```'
+            echo
+            echo "Chi tiết và các cách khác: \`docs/MACOS.md\`."
+          } >> "$GITHUB_STEP_SUMMARY"

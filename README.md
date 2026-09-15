@@ -2,7 +2,7 @@
 
 App máy tính (Windows) để ôn thi 電験三種, dựng từ file Excel "Bài tập điện hạng 3 — Tổng hợp".
 
-Danh mục **1609 bài** trên denken-ou.com, chia bốn môn:
+Danh mục **1675 bài** trên denken-ou.com, chia bốn môn:
 
 | Môn | Số bài | Chủ đề |
 |---|---:|---:|
@@ -16,11 +16,11 @@ Danh mục **1609 bài** trên denken-ou.com, chia bốn môn:
 - **Hôm nay** — vòng tròn KPI ngày, chuỗi ngày liên tiếp 🔥, đếm ngược tới ngày thi, tiến độ bốn môn, biểu đồ 12 tuần, lịch ôn 14 ngày tới, lịch nhiệt 17 tuần, 15 huy hiệu.
 - **Ôn tập** — ba hàng đợi: đến hạn hôm nay / đang làm sai / chưa làm. Lọc theo môn, chủ đề và độ khó ★1–5. Chấm đúng/sai bằng phím `1`/`2`. **Chấm xong app không tự nhảy bài** — bạn ở lại ghi chú bao lâu tuỳ ý, chuyển bài bằng `←` `→`, quay lại bài cũ lúc nào cũng được, bấm nhầm thì chấm lại ngay tại chỗ.
 - **Đồng hồ làm bài** — bấm `Space` là mở bài trên denken-ou.com và bắt đầu đếm ngược: A問題 5 phút, B問題 10 phút. Hết giờ thì chuông reo tới khi bạn tắt, kèm rung và **một lời nhắc của hệ điều hành** — nên rời khỏi app sang trình duyệt đọc đề hay tắt màn hình cũng vẫn biết là hết giờ.
-- **Danh sách bài** — cả 1609 bài, lọc theo môn / chủ đề / trạng thái / độ khó. **Tìm được bằng cả tiếng Nhật lẫn tiếng Việt**, có dấu hay không đều được: gõ `tụ điện`, `tu dien` hay `コンデンサ` đều ra cùng một chỗ.
+- **Danh sách bài** — cả 1675 bài, lọc theo môn / chủ đề / trạng thái / độ khó. **Tìm được bằng cả tiếng Nhật lẫn tiếng Việt**, có dấu hay không đều được: gõ `tụ điện`, `tu dien` hay `コンデンサ` đều ra cùng một chỗ.
 - **Đã làm gần đây** — ba ngày gần nhất, xem lại câu nào bấm đúng câu nào bấm sai. Bài sai xếp lên trước; bấm vào là mở luôn cả chủ đề đó ở chế độ Ôn tập.
 - **Ghi chú** — mỗi bài nhiều ghi chú, mỗi ghi chú đính kèm được ảnh/PDF/Word. Ảnh hiện ngay trong app; chụp màn hình rồi `Ctrl+V` thẳng vào ô ghi chú.
 - **Link tham khảo** — mỗi bài nhiều link, mỗi link có nút mở ngay bên cạnh.
-- **Thi thử** — làm nguyên một kỳ thi thật, 24 kỳ từ H18 tới R07下. Chọn nhiều môn thì thi **lần lượt**: mỗi môn một đồng hồ riêng — 90 phút (理論/電力/機械), 65 phút (法規) — nộp xong môn này mới mở môn kia, thời gian **không cộng dồn**. 理論/機械 chỉ được chọn một trong 問17 hoặc 問18. Chấm điểm thang 100, mốc đạt 60, kèm **bảng phân tích**: đúng bao nhiêu phần trăm ở từng chủ đề ra trong đề đó, rồi tới từng câu — bạn chọn gì, đáp án đúng là gì. Mở lại lượt thi cũ trong lịch sử vẫn xem được đúng bảng đó.
+- **Thi thử** — làm nguyên một kỳ thi thật, 25 kỳ từ H18 tới R08上. Chọn nhiều môn thì thi **lần lượt**: mỗi môn một đồng hồ riêng — 90 phút (理論/電力/機械), 65 phút (法規) — nộp xong môn này mới mở môn kia, thời gian **không cộng dồn**. 理論/機械 chỉ được chọn một trong 問17 hoặc 問18. Chấm điểm thang 100, mốc đạt 60, kèm **bảng phân tích**: đúng bao nhiêu phần trăm ở từng chủ đề ra trong đề đó, rồi tới từng câu — bạn chọn gì, đáp án đúng là gì. Mở lại lượt thi cũ trong lịch sử vẫn xem được đúng bảng đó.
 - **Đang yếu ở đâu** — ngay trang Hôm nay: top 5 chủ đề có tỉ lệ sai cao nhất của mỗi môn, tính gộp cả lượt ôn tập hằng ngày lẫn từng ý trong đề thi thử. Bấm một chủ đề là mở màn Ôn tập với **toàn bộ** bài của chủ đề đó, bài đang sai và chưa làm xếp lên trước.
 - **Tiếng Việt** — chế độ Ôn tập hiện **bản dịch tên bài của chính bạn** — bản dịch viết sẵn trong file Excel gốc, 1608/1609 bài — ngay dưới tên bài tiếng Nhật; bài chưa dịch thì lùi về tên chủ đề. Ô tìm kiếm lục cả bản dịch này, nên gõ nguyên cụm như `suy ra lượng điện tích` cũng ra bài. Màn Thi thử cố ý **không** có: thi thì nên quen với chữ Nhật như đề thật.
 - **Đồng bộ tự động máy tính ↔ điện thoại** — qua một repo riêng tư của bạn trên GitHub. Tự chạy lúc mở app, lúc quay lại app và mỗi 5 phút. **Gộp chứ không ghi đè**: mỗi bài lấy bản sửa sau cùng, số bài ôn từng ngày cộng phần mới của cả hai bên, huy hiệu và lượt thi gộp lại hết. Hai máy ghi cùng lúc thì bên sau đọc lại rồi gộp lại, không bên nào mất.
@@ -214,7 +214,8 @@ npm run pack:win
 Chức năng thi thử cần biết đáp án đúng của từng câu. Đáp án là dữ liệu chung cho
 mọi người dùng nên nằm ở `src/data/answers.json`, đi kèm code.
 
-**Đã đủ cả 24 kỳ — 1920/1920 ý**, không câu nào thiếu đáp án. Phần lớn lấy từ
+**24 kỳ cũ đã đủ — 1920/1920 ý**, không câu nào thiếu đáp án. Riêng kỳ mới nhất
+R08上 còn thiếu 80 ý (xem mục dưới). Phần lớn lấy từ
 bảng đáp án chính thức (PDF) của 一般財団法人 電気技術者試験センター (H21 →
 R07下); riêng H18, H19, H20 do người dùng tra tay và nạp qua CSV.
 
@@ -281,7 +282,7 @@ python3 scripts/sua-danh-muc.py --thu   # xem trước
 python3 scripts/sua-danh-muc.py         # vá thật
 ```
 
-Hiện danh mục đã **đủ cả 24 kỳ × 4 môn = 96 đề**, không đề nào thiếu câu, và
+Hiện danh mục đã **đủ cả 25 kỳ × 4 môn = 100 đề**, không đề nào thiếu câu, và
 cả 96 đề đều chấm điểm được trọn vẹn.
 
 ## Bản dịch tên bài
@@ -391,7 +392,7 @@ src/
   state/useSync.ts hẹn nhịp đồng bộ nền
   platform/kho-android.ts  ghi/đọc/cứu hộ data.json trên Android — kiểm thử được
   views/           5 màn hình
-  data/catalog.json  danh mục 1609 bài
+  data/catalog.json  danh mục 1675 bài
 scripts/
   convert-excel.py Excel → catalog.json + seed.json
   build-answers.py CSV/Excel → answers.json (đáp án thi thử)
@@ -402,9 +403,12 @@ scripts/
   nap-tieng-viet.py Excel → bản dịch tên bài (nameVi) cho danh mục
   tao-icon-android.py mark.svg → icon hai lớp + ảnh khởi động cho Android
   tao-khoa-ky.mjs  tạo khoá ký cố định cho APK (chạy một lần)
+  them-ky-thi.py   thêm một kỳ thi mới vào danh mục (link suy từ số câu)
+  ky-thi-r8-1.json dữ liệu kỳ 令和8年度上期
 docs/
   DONG-BO-GITHUB.md      bật đồng bộ tự động, từng bước
   KHOA-KY-ANDROID.md     vì sao APK bắt gỡ app đi cài lại, và cách sửa hẳn
+  MACOS.md               bản MacBook: tải, mở lần đầu, chỗ chứa dữ liệu
   SAO-LUU-VA-DONG-BO.md  phương án sao lưu và đồng bộ Android
 ```
 
