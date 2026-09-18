@@ -123,8 +123,13 @@ def main() -> None:
         encoding="utf8",
     )
     print(f"\nĐã ghi {CATALOG.relative_to(ROOT)} — tổng {len(catalog['items'])} bài.")
-    print("Còn thiếu đáp án và số sao; chạy:")
-    print("  python3 scripts/bao-cao-thieu.py --csv")
+    print()
+    print("BƯỚC TIẾP THEO, đừng quên:")
+    print("  python3 scripts/sap-lai-thu-tu.py   # đưa kỳ mới lên đầu từng chủ đề")
+    print("  python3 scripts/bao-cao-thieu.py --csv   # xuất CSV điền đáp án và sao")
+    print()
+    print("Bài mới đang nằm ở CUỐI danh sách. Màn Danh sách bài hiện theo đúng thứ")
+    print("tự trong catalog.json, nên không sắp lại thì kỳ mới nhất rơi xuống đáy.")
 
 
 if __name__ == "__main__":

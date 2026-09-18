@@ -11,7 +11,7 @@ import type { AppData, ItemProgress } from "../src/lib/types";
 import { items as catalogItems } from "../src/lib/catalog";
 import { linkDeThi, tenDeThi, tenDeThiAnToan } from "../src/lib/de-thi";
 import linkDeThiFile from "../src/data/de-thi-link.json";
-import { subAnswerCount } from "../src/lib/exam";
+import { examOrder, subAnswerCount } from "../src/lib/exam";
 import { safeName } from "../src/platform/android";
 import type { TepAndroid } from "../src/platform/kho-android";
 import { taoKhoAndroid } from "../src/platform/kho-android";
@@ -1016,6 +1016,64 @@ async function kiemThuKhoAndroid(): Promise<void> {
   check(soY === 80, `R08上 cần 80 ý đáp án (${soY})`);
 }
 
+
+/* ------------------------------------------------------------------ *
+ * 13e-2. Thứ tự bài trong danh mục
+ *
+ * Màn Danh sách bài KHÔNG sắp gì cả — nó hiện đúng thứ tự phần tử trong
+ * catalog.json. Nên thứ tự trong file chính là thứ tự người dùng nhìn thấy, và
+ * nó phải theo đúng quy luật của dữ liệu gốc: trong mỗi môn, bài gom theo chủ
+ * đề, và trong mỗi chủ đề thì kỳ mới nhất đứng trước.
+ *
+ * Thêm kỳ mới bằng cách nối vào cuối mảng là kỳ mới nhất rơi xuống tận đáy danh
+ * sách — đúng chỗ người học ít nhìn nhất, trong khi nó là kỳ họ cần nhất. Đã
+ * xảy ra một lần với R08上, nên ràng lại thành phép kiểm.
+ * ------------------------------------------------------------------ */
+{
+  const MON = ["riron", "denryoku", "kikai", "houki"] as const;
+  const soCau = (q: string) => Number(/(\d+)/.exec(q ?? "")?.[1] ?? 0);
+
+  const nguoc: string[] = [];
+  for (const mon of MON) {
+    const cuaMon = catalogItems
+      .filter((b) => b.subject === mon)
+      .slice()
+      .sort((a, b) => a.no - b.no);
+
+    // Trong một chủ đề, đi từ trên xuống thì kỳ phải cũ dần.
+    for (let i = 1; i < cuaMon.length; i += 1) {
+      const truoc = cuaMon[i - 1]!;
+      const nay = cuaMon[i]!;
+      if (truoc.topic !== nay.topic) continue;
+      const a = examOrder(truoc.exam);
+      const b = examOrder(nay.exam);
+      if (b > a) {
+        nguoc.push(`${mon} ${nay.topic}: ${nay.exam} đứng sau ${truoc.exam}`);
+      } else if (a === b && soCau(nay.question) < soCau(truoc.question)) {
+        nguoc.push(`${mon} ${nay.exam}: ${nay.question} đứng sau ${truoc.question}`);
+      }
+    }
+  }
+  check(nguoc.length === 0,
+    `trong mỗi chủ đề, kỳ mới nhất đứng trước (${nguoc.length} chỗ ngược${nguoc[0] ? ": " + nguoc[0] : ""})`);
+
+  // Bài đầu danh sách phải thuộc kỳ mới nhất — thứ người học mở app ra là thấy.
+  const kyMoiNhat = Math.max(...catalogItems.map((b) => examOrder(b.exam)));
+  const dau = catalogItems.slice(0, 4);
+  check(
+    dau.every((b) => examOrder(b.exam) === kyMoiNhat),
+    `bốn bài đầu danh sách thuộc kỳ mới nhất (${dau.map((b) => `${b.subject} ${b.exam}`).join(", ")})`,
+  );
+
+  // `no` phải chạy 1..n liền mạch trong từng môn: chỗ hổng nghĩa là có bài bị
+  // bỏ quên lúc đánh số lại.
+  const hong: string[] = [];
+  for (const mon of MON) {
+    const so = catalogItems.filter((b) => b.subject === mon).map((b) => b.no).sort((a, b) => a - b);
+    if (so.some((v, i) => v !== i + 1)) hong.push(mon);
+  }
+  check(hong.length === 0, `số thứ tự chạy liền mạch trong từng môn (${hong.join(", ") || "đủ cả"})`);
+}
 
 /* ------------------------------------------------------------------ *
  * 13f. Tên file đề thi PDF
