@@ -38,6 +38,11 @@ jobs:
       - name: Kiểm tra kiểu dữ liệu
         run: npm run typecheck
 
+      - name: Lấy số hiệu phiên bản
+        id: ten
+        shell: bash
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
       - name: Đóng gói bản cài đặt
         run: npm run pack:win
         env:
@@ -64,10 +69,16 @@ jobs:
           if-no-files-found: error
           retention-days: 2
 
-      # Đẩy tay một tag dạng v1.0.1 là tự có bản phát hành tải về được.
+      # Hai lối vào, giống hệt hai luồng kia: đẩy tag `v*`, hoặc bấm Run workflow.
+      #
+      # Có lối thứ hai vì Releases nằm ở kho RIÊNG, không tính vào hạn mức 0,5 GB
+      # của kho bản build. Trước đây commit thường không giữ lại file nào để khỏi
+      # hết quota, nhưng như thế thì không còn đường nào lấy bản cài về — bấm Run
+      # workflow rồi tải từ Releases là đường vừa có file vừa không ăn quota.
       - name: Tạo bản phát hành
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.ten.outputs.version }}
+          name: Denken 3-shuu v${{ steps.ten.outputs.version }}
           files: release/*.exe
-          generate_release_notes: true

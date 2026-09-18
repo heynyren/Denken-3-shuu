@@ -36,7 +36,21 @@ jobs:
           distribution: temurin
           java-version: 21
 
-      - uses: android-actions/setup-android@v3
+      # `packages: ''` là chỗ quan trọng. Mặc định action này đi cài gói SDK tên
+      # `tools`, mà Google đã GỠ gói đó khỏi kho. Với cmdline-tools đời mới trên
+      # máy chạy, `sdkmanager tools` trả về:
+      #
+      #     Warning: Failed to find package 'tools'
+      #     Error: ... sdkmanager failed with exit code 1
+      #
+      # Hỏng ngay bước thứ 5, nên mọi bước sau bị bỏ qua — nhìn vào chỉ thấy
+      # "build hỏng" chứ không thấy APK chưa bao giờ được đóng gói.
+      #
+      # Máy chạy ubuntu-latest đã có sẵn Android SDK, nên không cần cài thêm gói
+      # nào; việc còn lại của action chỉ là chấp nhận license và đặt ANDROID_HOME.
+      - uses: android-actions/setup-android@v4
+        with:
+          packages: ''
 
       - run: npm ci
 
