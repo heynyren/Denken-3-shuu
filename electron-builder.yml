@@ -14,6 +14,11 @@ files:
 # Nén asar để khởi động nhanh hơn.
 asar: true
 
+# Trừ thư mục đề PDF. File trong asar không có đường dẫn thật trên đĩa, mà mở
+# đề bằng trình đọc của hệ điều hành thì phải trao cho nó một đường dẫn thật.
+asarUnpack:
+  - dist/renderer/de-thi/**
+
 win:
   target:
     - target: nsis

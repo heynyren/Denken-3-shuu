@@ -404,11 +404,14 @@ scripts/
   tao-icon-android.py mark.svg → icon hai lớp + ảnh khởi động cho Android
   tao-khoa-ky.mjs  tạo khoá ký cố định cho APK (chạy một lần)
   them-ky-thi.py   thêm một kỳ thi mới vào danh mục (link suy từ số câu)
+  nap-de-thi.mjs   nạp đề thi PDF vào app, soát tên trước khi nạp
   ky-thi-r8-1.json dữ liệu kỳ 令和8年度上期
 docs/
   DONG-BO-GITHUB.md      bật đồng bộ tự động, từng bước
   KHOA-KY-ANDROID.md     vì sao APK bắt gỡ app đi cài lại, và cách sửa hẳn
   MACOS.md               bản MacBook: tải, mở lần đầu, chỗ chứa dữ liệu
+de-thi/
+  README.md              cách đặt tên và nạp đề thi PDF
   SAO-LUU-VA-DONG-BO.md  phương án sao lưu và đồng bộ Android
 ```
 

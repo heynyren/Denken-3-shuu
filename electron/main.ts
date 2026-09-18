@@ -17,7 +17,7 @@ import { exportZip, mirrorTo } from "./mirror";
 import type { ImportReport } from "./import-xlsx";
 import { countBackups, load, normalise, paths, referencedFiles, save } from "./store";
 import type { Attachment, AppData, OpResult, StoreInfo } from "../src/lib/types";
-import { sideName } from "../src/platform/types";
+import { sideName, tenDeThiAnToan } from "../src/platform/types";
 
 const isDev = process.env.NODE_ENV === "development";
 const DEV_URL = "http://localhost:5173";
@@ -378,6 +378,72 @@ function registerHandlers(): void {
   ipcMain.handle("store:reveal", async (): Promise<OpResult> => {
     await shell.openPath(paths.dir);
     return { ok: true, path: paths.dir };
+  });
+
+  /* ------------------------ Đề thi PDF ------------------------ */
+
+  /**
+   * Hai chỗ chứa đề, cố ý khác nhau về vai:
+   *
+   *   Kèm bản cài  <resources>/de-thi/   — bộ đề đi theo app, cập nhật thì thay.
+   *   Của người dùng <userData>/de-thi/  — đề tự bỏ vào, không ai ghi đè.
+   *
+   * Trùng tên thì lấy bản của người dùng: họ bỏ tay vào là có ý thay.
+   */
+  const thuMucDeThi = (): string[] => [
+    paths.examDir,
+    // Đề đi kèm bản build nằm trong `dist/renderer/de-thi` — cùng chỗ mà bản
+    // Android lấy, nên một bộ nguồn duy nhất cho cả hai nền tảng.
+    //
+    // Lúc đóng gói, chỗ đó nằm trong `app.asar`. File trong asar KHÔNG có đường
+    // dẫn thật trên đĩa, mà `shell.openPath` thì cần đường dẫn thật để trao cho
+    // trình đọc PDF. Nên `electron-builder.yml` bung riêng thư mục này ra
+    // (`asarUnpack`), và `app.asar.unpacked` là chỗ nó nằm sau khi bung.
+    //
+    // Cách khác là `extraResources`, nhưng như thế mỗi PDF vào bản cài hai lần
+    // — một bản trong asar cho Vite, một bản ngoài cho Electron.
+    // Neo vào `__dirname` — chỗ của chính file main.js này — chứ không vào
+    // `app.getAppPath()`. getAppPath() trả về giá trị khác nhau tuỳ cách khởi
+    // động app, nên bộ kiểm thử (nạp main.js bằng đường dẫn tuyệt đối) không
+    // bao giờ chạm tới được thư mục thật, và lỗi ở đây sẽ lọt qua kiểm thử.
+    //
+    //   dist/electron/main.js  ->  dist/renderer/de-thi
+    path.join(__dirname, "..", "renderer", "de-thi").replace(
+      `app.asar${path.sep}`,
+      `app.asar.unpacked${path.sep}`,
+    ),
+  ];
+
+  ipcMain.handle("dethi:list", async (): Promise<string[]> => {
+    const co = new Set<string>();
+    for (const dir of thuMucDeThi()) {
+      try {
+        for (const ten of await fs.readdir(dir)) {
+          if (tenDeThiAnToan(ten)) co.add(ten);
+        }
+      } catch {
+        // Chưa có thư mục đó — bình thường, chưa ai bỏ đề nào vào.
+      }
+    }
+    return [...co].sort();
+  });
+
+  ipcMain.handle("dethi:open", async (_event, name: string): Promise<OpResult> => {
+    const safe = tenDeThiAnToan(name);
+    if (!safe) return { ok: false, error: "Tên file đề không hợp lệ." };
+
+    for (const dir of thuMucDeThi()) {
+      const target = path.join(dir, safe);
+      try {
+        await fs.access(target);
+      } catch {
+        continue;
+      }
+      // Trả về chuỗi rỗng là mở được; có chữ là thông báo lỗi của hệ điều hành.
+      const loi = await shell.openPath(target);
+      return loi ? { ok: false, error: loi } : { ok: true, path: target };
+    }
+    return { ok: false, error: "Máy này chưa có file đề đó." };
   });
 
   ipcMain.handle("shell:open-external", async (_event, url: string) => openExternal(url));

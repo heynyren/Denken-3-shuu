@@ -40,6 +40,8 @@ export interface Capabilities {
   mergeFile: boolean;
   /** Đồng bộ tự động qua GitHub. */
   cloudSync: boolean;
+  /** Mở được đề thi PDF bằng trình đọc của hệ điều hành. */
+  deThiPdf: boolean;
 }
 
 /** Mã lời nhắc hết giờ. Mỗi màn một mã để huỷ đúng cái của mình. */
@@ -84,6 +86,25 @@ export interface Platform {
    */
   sideRead(name: string): Promise<string | null>;
   sideWrite(name: string, text: string): Promise<OpResult>;
+
+  /* --- đề thi PDF --- */
+  /**
+   * Tên các file đề PDF máy này đang có.
+   *
+   * Gọi một lần lúc mở app rồi giữ lại, chứ không hỏi từng câu một: một đề 18
+   * câu thì 18 lần hỏi cùng một file, mà mỗi lần là một lượt đi qua cầu nối
+   * native — đủ để thấy nút nhấp nháy lúc vẽ đề.
+   */
+  deThiCo(): Promise<string[]>;
+  /**
+   * Mở một đề PDF bằng trình đọc của hệ điều hành.
+   *
+   * Cố ý **không** vẽ PDF trong app. Trình đọc của máy đã làm sẵn mọi thứ người
+   * ta cần khi làm đề: phóng to, nhảy trang, xem hai trang cạnh nhau, và quan
+   * trọng nhất là **để được ở cửa sổ riêng** cạnh app — ngồi thi thì cần vừa
+   * xem đề vừa bấm đáp án, chứ không phải cái nào che cái nào.
+   */
+  moDeThi(name: string): Promise<OpResult>;
 
   /* --- linh tinh --- */
   openExternal(url: string): Promise<OpResult>;
@@ -148,6 +169,20 @@ export interface Platform {
  */
 export function sideName(name: string): string | null {
   return /^[a-z0-9-]+\.json$/.test(name) ? name : null;
+}
+
+/**
+ * Chỉ nhận đúng dạng tên file đề PDF mà chính app sinh ra.
+ *
+ * Cùng lý do với `sideName()`: tên file đi thẳng vào đường dẫn trên đĩa, mà
+ * `../../` trong đó thì đọc được ra ngoài thư mục dữ liệu.
+ *
+ * Đặt ở đây chứ không ở `lib/de-thi.ts` vì tiến trình chính của Electron cũng
+ * cần hàm này, mà `lib/de-thi.ts` kéo theo cả `catalog.json` — 3 MB danh mục
+ * nhồi vào bản dựng của tiến trình chính để dùng đúng một dòng regex.
+ */
+export function tenDeThiAnToan(name: string): string | null {
+  return /^[a-z0-9-]+\.pdf$/.test(name) ? name : null;
 }
 
 /** Việc nền tảng không làm được — trả lời tử tế thay vì ném lỗi. */

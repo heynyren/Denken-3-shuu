@@ -9,6 +9,7 @@ import { highlight, matchesQuery, trichDoan } from "../src/lib/vi";
 import { mergeData } from "../src/lib/sync";
 import type { AppData, ItemProgress } from "../src/lib/types";
 import { items as catalogItems } from "../src/lib/catalog";
+import { tenDeThi, tenDeThiAnToan } from "../src/lib/de-thi";
 import { subAnswerCount } from "../src/lib/exam";
 import { safeName } from "../src/platform/android";
 import type { TepAndroid } from "../src/platform/kho-android";
@@ -998,6 +999,64 @@ async function kiemThuKhoAndroid(): Promise<void> {
   // Ý B問題 đếm 2, A問題 đếm 1 — dùng để biết phải đi tìm bao nhiêu đáp án.
   const soY = r8.reduce((tong, b) => tong + subAnswerCount(b), 0);
   check(soY === 80, `R08上 cần 80 ý đáp án (${soY})`);
+}
+
+
+/* ------------------------------------------------------------------ *
+ * 13f. Tên file đề thi PDF
+ *
+ * Một đề PDF ứng với một cặp (kỳ thi, môn). Tên file suy ra từ mã kỳ mà
+ * denken-ou dùng, và mã đó đọc ra từ chính link trong danh mục — nên nếu phép
+ * đọc sai thì app đi tìm file không tồn tại, hoặc tệ hơn là tìm ra file của kỳ
+ * khác rồi mở đề sai cho người đang thi.
+ * ------------------------------------------------------------------ */
+{
+  check(tenDeThi("R08上", "riron") === "rironr8-1.pdf", "R08上 理論 -> rironr8-1.pdf");
+  check(tenDeThi("R08上", "kikai") === "kikair8-1.pdf", "R08上 機械 -> kikair8-1.pdf");
+  check(tenDeThi("H22", "denryoku") === "denryokuh22.pdf", "H22 電力 -> denryokuh22.pdf");
+  check(tenDeThi("R4下", "houki") === "houkir4-2.pdf", "R4下 法規 -> houkir4-2.pdf");
+  check(tenDeThi("khong-co-ky-nay", "riron") === null, "kỳ không có thì trả null, không đoán bừa");
+
+  /* Chỗ dễ sai nhất: trong danh mục có đúng MỘT bài mang link sai môn —
+     法規 R4下 問11 trỏ sang trang 電力. Nếu phép đọc mã kỳ tin cả bài lẻ đó thì
+     cả kỳ R4下 法規 mang mã của 電力, và người thi 法規 mở ra đề 電力. */
+  check(
+    tenDeThi("R4下", "houki") !== "denryokur4-2.pdf",
+    "một link sai môn trong kỳ KHÔNG làm lệch mã của cả kỳ",
+  );
+
+  /* Mỗi cặp (kỳ, môn) phải ra một tên riêng — trùng tên là hai kỳ dùng chung
+     một file đề. */
+  const MON = ["riron", "denryoku", "kikai", "houki"] as const;
+  const cacKy = [...new Set(catalogItems.map((b) => b.exam))];
+  const ten = new Set<string>();
+  let thieu = 0;
+  for (const ky of cacKy) {
+    for (const mon of MON) {
+      const t = tenDeThi(ky, mon);
+      if (!t) { thieu += 1; continue; }
+      ten.add(t);
+    }
+  }
+  check(thieu === 0, `mọi kỳ đều suy ra được tên đề (${thieu} kỳ không ra)`);
+  check(
+    ten.size === cacKy.length * MON.length,
+    `${cacKy.length} kỳ × 4 môn ra ${ten.size} tên file khác nhau, không trùng`,
+  );
+
+  /* Chặn tên lạ: tên file đi thẳng vào đường dẫn trên đĩa. */
+  check(tenDeThiAnToan("rironr8-1.pdf") === "rironr8-1.pdf", "tên hợp lệ thì cho qua");
+  for (const xau of [
+    "../../etc/passwd",
+    "../rironr8-1.pdf",
+    "de/rironr8-1.pdf",
+    "rironr8-1.PDF",
+    "rironr8-1.pdf.exe",
+    "rironR8-1.pdf",
+    "",
+  ]) {
+    check(tenDeThiAnToan(xau) === null, `chặn tên lạ: ${JSON.stringify(xau)}`);
+  }
 }
 
 /* ---- 13b. Tô sáng từ khoá trong kết quả tìm kiếm ---- */

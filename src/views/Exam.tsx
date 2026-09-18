@@ -12,6 +12,7 @@ import {
   ChevronRight,
   CircleDashed,
   Coffee,
+  FileText,
   PartyPopper,
   Save,
   SquarePen,
@@ -23,6 +24,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AttemptAnalysis, QuestionTable, TopicTable } from "../components/ExamAnalysis";
 import { Ring, Stars, openLink } from "../components/ui";
+import { tenDeThi } from "../lib/de-thi";
+import { useDeThi } from "../state/useDeThi";
 import { subjectName, subjectViName, subjects } from "../lib/catalog";
 import { createAlarm } from "../lib/alarm";
 import answersFile from "../data/answers.json";
@@ -84,6 +87,9 @@ export default function Exam({
   const [endsAt, setEndsAt] = useState<number | null>(null);
   const [left, setLeft] = useState(0);
   const alarm = useRef(createAlarm());
+
+  /** Đề PDF máy này có — hỏi một lần lúc mở màn, không hỏi theo từng câu. */
+  const deThiCo = useDeThi();
 
   const set = useMemo(() => examSets.find((s) => s.exam === exam), [exam]);
   const papers = useMemo(
@@ -390,6 +396,7 @@ export default function Exam({
 
         <PaperSheet
           paper={current}
+          deThiCo={deThiCo}
           picks={picks}
           onPick={(id, index, value) =>
             setPicks((list) => {
@@ -517,12 +524,15 @@ export default function Exam({
 
 function PaperSheet({
   paper,
+  deThiCo,
   picks,
   onPick,
   choice,
   onChoice,
 }: {
   paper: ExamPaper;
+  /** Tên các đề PDF máy này có, để biết nên mở đề hay lùi về link. */
+  deThiCo: Set<string>;
   picks: Picks;
   onPick(id: string, index: number, value: number): void;
   choice: number | null;
@@ -530,6 +540,12 @@ function PaperSheet({
 }) {
   const active = questionsToAnswer(paper, choice);
   const activeIds = new Set(active.map((item) => item.id));
+
+  /* Có đề PDF thì mở đề. Không có mới lùi về link denken-ou — trang đó có sẵn
+     cả lời giải, mở ra giữa lúc đang thi là tự phá buổi thi của mình, nên chỉ
+     dùng khi không còn đường nào khác. */
+  const ten = tenDeThi(paper.exam, paper.subject);
+  const tenDe = ten && deThiCo.has(ten) ? ten : null;
 
   return (
     <div className="card">
@@ -540,6 +556,17 @@ function PaperSheet({
         </div>
         <span className="small muted">{t2("{n} phút", { n: EXAM_MINUTES[paper.subject] })}</span>
       </div>
+
+      {tenDe && (
+        <div className="callout" style={{ marginBottom: 14 }}>
+          <button className="dx-btn btn" onClick={() => void platform.moDeThi(tenDe)}>
+            <Ic i={FileText} /> {t("Mở đề PDF")}
+          </button>
+          <div className="small muted" style={{ marginTop: 8 }}>
+            {t("Đề mở bằng trình đọc PDF của máy, ở cửa sổ riêng — vừa xem đề vừa bấm đáp án ở đây.")}
+          </div>
+        </div>
+      )}
 
       {paper.hasChoice && (
         <div className="callout warn" style={{ marginBottom: 14 }}>
@@ -573,13 +600,15 @@ function PaperSheet({
                   {item.name}
                 </span>
                 <Stars count={item.stars} />
-                <button
-                  className="icon-btn"
-                  title={t("Mở đề bài trên denken-ou.com")}
-                  onClick={() => openLink(item.url)}
-                >
-                  ↗
-                </button>
+                {!tenDe && (
+                  <button
+                    className="icon-btn"
+                    title={t("Mở đề bài trên denken-ou.com")}
+                    onClick={() => openLink(item.url)}
+                  >
+                    ↗
+                  </button>
+                )}
               </div>
 
               {off ? (

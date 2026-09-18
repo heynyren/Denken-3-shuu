@@ -33,6 +33,7 @@ export const desktop: Platform = {
     attachments: true,
     mergeFile: true,
     cloudSync: true,
+    deThiPdf: true,
   },
 
   load: () => window.denken.load(),
@@ -53,6 +54,9 @@ export const desktop: Platform = {
 
   sideRead: (name) => window.denken.sideRead(name),
   sideWrite: (name, text) => window.denken.sideWrite(name, text),
+
+  deThiCo: () => window.denken.deThiCo(),
+  moDeThi: (name) => window.denken.moDeThi(name),
 
   openExternal: (url) => window.denken.openExternal(url),
 

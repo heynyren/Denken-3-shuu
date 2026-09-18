@@ -263,6 +263,11 @@ export interface DenkenBridge {
   sideRead(name: string): Promise<string | null>;
   sideWrite(name: string, text: string): Promise<OpResult>;
   revealDataFolder(): Promise<OpResult>;
+
+  /** Tên các file đề PDF máy này đang có. */
+  deThiCo(): Promise<string[]>;
+  /** Mở một đề PDF bằng trình đọc của hệ điều hành. */
+  moDeThi(name: string): Promise<OpResult>;
   /** Chọn thư mục nhân bản (thường là thư mục Google Drive trên máy). */
   pickMirrorDir(): Promise<OpResult & { dir?: string }>;
   /** Nhân bản ngay lập tức, không chờ lần ghi kế tiếp. */

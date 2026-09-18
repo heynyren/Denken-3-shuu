@@ -23,6 +23,9 @@ const bridge: DenkenBridge = {
     ipcRenderer.invoke("store:side-write", name, text),
   importXlsx: () => ipcRenderer.invoke("store:import-xlsx"),
   revealDataFolder: () => ipcRenderer.invoke("store:reveal"),
+
+  deThiCo: () => ipcRenderer.invoke("dethi:list"),
+  moDeThi: (name: string) => ipcRenderer.invoke("dethi:open", name),
   openExternal: (url: string) => ipcRenderer.invoke("shell:open-external", url),
 
   attachPick: () => ipcRenderer.invoke("attach:pick"),

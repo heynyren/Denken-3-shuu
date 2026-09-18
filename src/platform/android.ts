@@ -19,14 +19,18 @@ import { LocalNotifications } from "@capacitor/local-notifications";
 import { Share } from "@capacitor/share";
 import { StatusBar, Style } from "@capacitor/status-bar";
 
+import deThiKem from "../data/de-thi.json";
 import type { Attachment, AttachmentKind, OpResult } from "../lib/types";
 import type { TepAndroid } from "./kho-android";
 import { BACKUPS, FILE, taoKhoAndroid } from "./kho-android";
 import type { Platform } from "./types";
-import { sideName, unsupported } from "./types";
+import { sideName, tenDeThiAnToan, unsupported } from "./types";
 
 const DIR = Directory.Data;
 const ATTACHMENTS = "attachments";
+const DE_THI = "de-thi";
+/** Đề đóng gói sẵn trong APK — danh sách sinh lúc build bởi scripts/nap-de-thi.mjs. */
+const DE_THI_KEM: string[] = deThiKem.files;
 /** Chặn ảnh quá lớn, giống bản Windows. */
 const MAX_FILE_BYTES = 25 * 1024 * 1024;
 
@@ -217,6 +221,7 @@ export const android: Platform = {
     attachments: true,
     mergeFile: true,
     cloudSync: true,
+    deThiPdf: true,
   },
 
   async load() {
@@ -316,6 +321,81 @@ export const android: Platform = {
       return { ok: true, path: safe };
     } catch (cause) {
       return { ok: false, error: (cause as Error).message };
+    }
+  },
+
+  /**
+   * Đề PDF máy này có: bộ đóng gói sẵn trong APK, cộng đề người dùng tự bỏ vào.
+   *
+   * Bộ đóng gói sẵn không đọc được bằng `Filesystem.readdir` — nó nằm trong
+   * assets của APK, không phải trên thẻ nhớ. Nên danh sách của nó đi kèm dưới
+   * dạng một file JSON sinh ra lúc build (`src/data/de-thi.json`).
+   */
+  async deThiCo() {
+    const co = new Set<string>();
+    for (const ten of DE_THI_KEM) {
+      if (tenDeThiAnToan(ten)) co.add(ten);
+    }
+    for (const ten of await listDir(DE_THI)) {
+      if (tenDeThiAnToan(ten)) co.add(ten);
+    }
+    return [...co].sort();
+  },
+
+  /**
+   * Mở đề PDF bằng trình đọc của máy.
+   *
+   * Android không cho app này chỉ thẳng một file trong thư mục riêng của mình
+   * cho app khác đọc, nên đường đi là: bảo đảm file nằm trong thư mục Cache →
+   * lấy `content://` URI → đưa khay chọn ứng dụng để người dùng chọn trình đọc
+   * PDF của họ. Thêm một lần bấm so với bản máy tính, nhưng chạy được trên mọi
+   * máy mà không cần cài thêm plugin native nào.
+   *
+   * Đề đóng gói trong APK phải lôi ra Cache trước: nó nằm trong assets, không
+   * có đường dẫn trên đĩa để trao cho app khác.
+   */
+  async moDeThi(name) {
+    const safe = tenDeThiAnToan(name);
+    if (!safe) return { ok: false, error: "Tên file đề không hợp lệ." };
+
+    try {
+      // Đề người dùng tự bỏ vào thì ưu tiên — bỏ tay vào là có ý thay.
+      const cuaMinh = (await listDir(DE_THI)).includes(safe);
+      if (cuaMinh) {
+        const { uri } = await Filesystem.getUri({
+          path: `${DE_THI}/${safe}`,
+          directory: DIR,
+        });
+        await Share.share({ title: safe, url: uri });
+        return { ok: true, path: uri };
+      }
+
+      if (!DE_THI_KEM.includes(safe)) {
+        return { ok: false, error: "Máy này chưa có file đề đó." };
+      }
+
+      // Chép từ assets ra Cache. Ghi lại mỗi lần mở: rẻ hơn hẳn so với việc
+      // giữ trạng thái "đã chép chưa" rồi sai lệch sau một lần cập nhật app.
+      const res = await fetch(`./${DE_THI}/${safe}`);
+      if (!res.ok) return { ok: false, error: `Không đọc được đề (${res.status}).` };
+      const bytes = await res.arrayBuffer();
+
+      await Filesystem.writeFile({
+        path: `${DE_THI}/${safe}`,
+        directory: Directory.Cache,
+        data: bytesToBase64(bytes),
+        recursive: true,
+      });
+      const { uri } = await Filesystem.getUri({
+        path: `${DE_THI}/${safe}`,
+        directory: Directory.Cache,
+      });
+      await Share.share({ title: safe, url: uri });
+      return { ok: true, path: uri };
+    } catch (cause) {
+      const message = (cause as Error).message ?? String(cause);
+      if (/cancel/i.test(message)) return { ok: false, cancelled: true };
+      return { ok: false, error: message };
     }
   },
 

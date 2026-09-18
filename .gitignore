@@ -21,3 +21,8 @@ android/capacitor.settings.gradle
 android/local.properties
 *.keystore
 *.jks
+
+# Đề thi PDF được chép sang public/ bởi scripts/nap-de-thi.mjs — thứ do máy
+# sinh ra, bản gốc nằm ở de-thi/. Giữ cả hai bản trong repo là mỗi đề nặng
+# hai lần mà không thêm được gì.
+public/de-thi/

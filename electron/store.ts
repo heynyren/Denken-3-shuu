@@ -44,6 +44,15 @@ export const paths = {
   get corruptDir() {
     return path.join(app.getPath("userData"), "corrupt");
   },
+  /**
+   * Đề thi PDF người dùng tự bỏ vào, nằm cạnh data.json.
+   *
+   * Tách khỏi thư mục đề đóng gói sẵn trong bản cài: thư mục kia bị trình cài
+   * đặt ghi đè mỗi lần cập nhật, thư mục này thì không ai đụng tới.
+   */
+  get examDir() {
+    return path.join(app.getPath("userData"), "de-thi");
+  },
 };
 
 function today(): string {
