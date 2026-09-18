@@ -1076,6 +1076,39 @@ async function kiemThuKhoAndroid(): Promise<void> {
     // Kỳ chưa điền link thì phải trả null, chứ không trả chuỗi rỗng — chuỗi
     // rỗng là truthy đủ để giao diện vẽ ra một cái nút không mở được gì.
     check(linkDeThi("khong-co-ky-nay", "riron") === null, "kỳ chưa có link thì trả null");
+
+    /* Link của trung tâm sát hạch: 64/88 link là MÁY SUY RA, không phải người
+     * điền, và môi trường build không vào được shiken.or.jp để thử từng cái.
+     * Nên phải ràng bằng tính nhất quán nội tại: bốn môn của một kỳ dùng chung
+     * một ngày, và số hiệu môn phải đủ bộ 1–4 không trùng.
+     *
+     * Suy lệch một môn thì người thi 法規 mở ra đề 機械 — và vì cả hai link đều
+     * mở được nên không có gì báo lỗi, chỉ có người ngồi đọc sai đề.
+     */
+    const MAU = /^https:\/\/www\.shiken\.or\.jp\/chief\/upload\/(\d{8})_ch_third_q(\d+)\.pdf$/;
+    const theoKy = new Map<string, { ngay: Set<string>; so: number[] }>();
+    let ngoaiMau = 0;
+    for (const [khoa, url] of Object.entries(linkDeThiFile.links as Record<string, string>)) {
+      const m = MAU.exec(url);
+      if (!m) { ngoaiMau += 1; continue; }
+      const ky = khoa.split("|")[0]!;
+      const gom = theoKy.get(ky) ?? { ngay: new Set<string>(), so: [] };
+      gom.ngay.add(m[1]!);
+      gom.so.push(Number(m[2]));
+      theoKy.set(ky, gom);
+    }
+
+    const nhieuNgay = [...theoKy].filter(([, g]) => g.ngay.size !== 1).map(([k]) => k);
+    check(nhieuNgay.length === 0,
+      `link trung tâm: mỗi kỳ dùng chung một ngày (${nhieuNgay.join(", ") || "đúng cả"})`);
+
+    const soSai = [...theoKy]
+      .filter(([, g]) => g.so.length === 4 && g.so.slice().sort().join() !== "1,2,3,4")
+      .map(([k]) => k);
+    check(soSai.length === 0,
+      `link trung tâm: kỳ đủ bốn môn thì số hiệu là 1,2,3,4 (${soSai.join(", ") || "đúng cả"})`);
+
+    check(ngoaiMau === 0, `link trung tâm: mọi link theo đúng mẫu đã biết (${ngoaiMau} lạ)`);
   }
 
   /* Chặn tên lạ: tên file đi thẳng vào đường dẫn trên đĩa. */

@@ -112,12 +112,92 @@ def xuat() -> None:
     print(f"  python3 scripts/link-de-thi.py --nap {CSV_MAU.relative_to(ROOT)}")
 
 
+# Số hiệu file của từng môn trong đường dẫn của trung tâm: `…_ch_third_q03.pdf`.
+# Thứ tự này khớp với thứ tự môn trên đề thật, và được ba link điền tay của kỳ
+# R08上 xác nhận (q01 理論, q02 電力, q03 機械) nên q04 là 法規.
+SO_HIEU_MON = {"riron": 1, "denryoku": 2, "kikai": 3, "houki": 4}
+
+MAU_LINK = re.compile(r"^(?P<dau>.*_q)(?P<so>\d+)(?P<duoi>\.pdf)$")
+
+
+def noi_suy(dong: list[dict]) -> tuple[int, list[str], list[str]]:
+    """Điền link các môn còn trống, suy từ link đã có của cùng kỳ thi.
+
+    Trung tâm đặt tên theo `{ngày}_ch_third_q{số môn}.pdf`, cùng một ngày cho cả
+    bốn môn của một kỳ. Nên biết link của một môn là dựng được ba môn kia.
+
+    Chỉ điền vào chỗ TRỐNG. Link đã điền tay thì không đụng, mà còn dùng để
+    **đối chiếu**: nếu link tay khác link suy ra thì giả định về số hiệu môn đang
+    sai ở đâu đó, và cái đó phải báo ra chứ không được lặng lẽ ghi đè.
+    """
+    theo_ky: dict[str, list[dict]] = {}
+    for r in dong:
+        theo_ky.setdefault(r["ky_thi"], []).append(r)
+
+    them = 0
+    lech: list[str] = []
+    khong_suy_duoc: list[str] = []
+
+    for ky, rows in theo_ky.items():
+        mau = None
+        for r in rows:
+            link = (r.get("link_pdf") or "").strip()
+            m = MAU_LINK.match(link)
+            mon = JA_MON.get((r.get("mon") or "").strip())
+            if m and mon in SO_HIEU_MON:
+                rong = len(m.group("so"))
+                mau = (m.group("dau"), rong, m.group("duoi"))
+                break
+
+        if mau is None:
+            # Kỳ không có link nào: trung tâm chưa đăng đề kỳ đó (H20 đổ về
+            # trước). Không có gì để suy, và suy bừa thì ra 88 link chết.
+            if any((r.get("link_pdf") or "").strip() for r in rows):
+                khong_suy_duoc.append(ky)
+            continue
+
+        dau, rong, duoi = mau
+        for r in rows:
+            mon = JA_MON.get((r.get("mon") or "").strip())
+            if mon not in SO_HIEU_MON:
+                continue
+            can = f"{dau}{SO_HIEU_MON[mon]:0{rong}d}{duoi}"
+            co = (r.get("link_pdf") or "").strip()
+            if not co:
+                r["link_pdf"] = can
+                r["ghi_chu"] = (r.get("ghi_chu") or "").strip() or "nội suy"
+                them += 1
+            elif co != can:
+                lech.append(f"{ky} {r['mon']}: điền tay {co}  ≠  suy ra {can}")
+
+    return them, lech, khong_suy_duoc
+
+
 def nap(duong_dan: Path, thu: bool) -> None:
     thu_tu_ky, _ = doc_danh_muc()
     ky_co = set(thu_tu_ky)
 
     with duong_dan.open(encoding="utf-8-sig", newline="") as f:
         dong = list(csv.DictReader(f))
+
+    suy_ra: set[str] = set()
+    if "--noi-suy" in sys.argv:
+        them, lech, khong = noi_suy(dong)
+        print(f"Nội suy: điền thêm {them} link từ link đã có của cùng kỳ.")
+        for r in dong:
+            if (r.get("ghi_chu") or "").strip() == "nội suy":
+                suy_ra.add(f"{r['ky_thi']}|{JA_MON.get(r['mon'], r['mon'])}")
+        if khong:
+            print(f"  {len(khong)} kỳ không suy được (link không theo mẫu): {', '.join(khong)}")
+        if lech:
+            # Đây là tín hiệu giả định sai, không phải chuyện nhỏ: dừng lại.
+            print(f"\nDỪNG — {len(lech)} link điền tay KHÁC link suy ra:")
+            for m in lech:
+                print(f"  {m}")
+            print("\nGiả định về số hiệu môn (q01 理論 / q02 電力 / q03 機械 / q04 法規)")
+            print("đang sai ở đâu đó. Sửa lại rồi chạy lại, đừng nạp bừa.")
+            sys.exit(1)
+        print()
 
     links: dict[str, str] = {}
     if RA.exists():
@@ -165,8 +245,22 @@ def nap(duong_dan: Path, thu: bool) -> None:
         print("\n(--thu: chưa ghi gì cả)")
         return
 
+    # Giữ lại danh sách link nội suy. App không đọc trường này, nhưng sáu tháng
+    # sau mà có link chết thì cần biết ngay link nào là người điền, link nào là
+    # máy suy ra — hai loại đó tìm nguyên nhân theo hai hướng khác nhau.
+    cu_suy = set()
+    if RA.exists():
+        cu_suy = set(json.loads(RA.read_text(encoding="utf8")).get("noiSuy", []))
     RA.write_text(
-        json.dumps({"links": dict(sorted(links.items()))}, ensure_ascii=False, indent=2) + "\n",
+        json.dumps(
+            {
+                "links": dict(sorted(links.items())),
+                "noiSuy": sorted(cu_suy | suy_ra),
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n",
         encoding="utf8",
     )
     print(f"\nĐã ghi {RA.relative_to(ROOT)} — {len(links)} link.")

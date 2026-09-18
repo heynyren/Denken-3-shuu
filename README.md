@@ -337,6 +337,31 @@ cộng — thà thiếu còn hơn thổi phồng, vì con số thổi phồng l�
 liên tiếp lẫn mọi biểu đồ. Bấm nhầm hai lần liên tiếp cũng không sao, lần thứ
 hai ra y nguyên.
 
+### Đề thi gốc
+
+Trong phòng thi, ngoài nút `↗` sang denken-ou của từng câu, app còn mở **đề gốc**
+nếu có. Ba chỗ, thử lần lượt:
+
+| Thứ tự | Nguồn | Được | Mất |
+|---|---|---|---|
+| 1 | File PDF trong thư mục `de-thi/` | chạy offline, không ai xoá được | phải tự bỏ vào, làm nặng bản build |
+| 2 | Link đề của 電気技術者試験センター | app không nặng thêm byte nào | cần mạng, trung tâm có thể dọn đề cũ |
+| 3 | Nút `↗` denken-ou từng câu | luôn có | là trang giải, không phải đề gốc |
+
+Đường 3 **không bao giờ bị ẩn**, kể cả khi đã có 1 hoặc 2 — lúc đề của trung tâm
+biến mất thì đúng là lúc cần đường dự phòng nhất.
+
+Hiện có **88 link cho 22 kỳ** (H18–H20 thì trung tâm chưa đăng đề). Trong đó 24
+link do người dùng điền tay và 64 link **máy suy ra** từ mẫu
+`{ngày}_ch_third_q{số môn}.pdf` — 理論 q01, 電力 q02, 機械 q03, 法規 q04. Phép
+suy này được chính ba link điền tay của kỳ R08上 xác nhận, và có kiểm thử ràng
+tính nhất quán: bốn môn một kỳ phải cùng ngày, số hiệu phải đủ bộ 1–4.
+
+Thêm hoặc sửa link: `python3 scripts/link-de-thi.py --xuat`, điền cột `link_pdf`,
+rồi `--nap FILE.csv --noi-suy`. Chế độ `--noi-suy` điền các môn còn trống của
+cùng kỳ, và **dừng lại** nếu link điền tay khác link suy ra — đó là tín hiệu giả
+định về số hiệu môn đã sai, không phải chuyện để ghi đè cho xong.
+
 ### Không có mạng thì sao
 
 Ghi xuống đĩa và đồng bộ là **hai tầng tách rời**. Mọi thao tác đều ghi thẳng
