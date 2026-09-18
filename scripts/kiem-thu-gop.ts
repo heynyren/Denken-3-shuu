@@ -9,7 +9,8 @@ import { highlight, matchesQuery, trichDoan } from "../src/lib/vi";
 import { mergeData } from "../src/lib/sync";
 import type { AppData, ItemProgress } from "../src/lib/types";
 import { items as catalogItems } from "../src/lib/catalog";
-import { tenDeThi, tenDeThiAnToan } from "../src/lib/de-thi";
+import { linkDeThi, tenDeThi, tenDeThiAnToan } from "../src/lib/de-thi";
+import linkDeThiFile from "../src/data/de-thi-link.json";
 import { subAnswerCount } from "../src/lib/exam";
 import { safeName } from "../src/platform/android";
 import type { TepAndroid } from "../src/platform/kho-android";
@@ -985,15 +986,29 @@ async function kiemThuKhoAndroid(): Promise<void> {
   const la = r8.filter((b) => !chuDeCu.has(`${b.subject}|${b.topic}`));
   check(la.length === 0, `R08上 không đẻ ra chủ đề lạ (${la.length})`);
 
-  // Bài chưa biết độ khó mang 0 sao. Phải là 0 chứ không phải 1: 1 sao nghĩa là
-  // "đã biết, và là bài dễ nhất" — xếp nhầm cả 66 bài vào mức dễ.
+  /* Độ khó: 0 nghĩa là CHƯA BIẾT, 1–5 là đã biết.
+   *
+   * Phân biệt 0 với 1 là điều đáng giữ: 1 sao nghĩa là "đã biết, và là bài dễ
+   * nhất". Lẫn hai cái thì bài chưa xếp loại bị dồn hết vào mức dễ, và bộ lọc
+   * độ khó bên màn Ôn tập trả về sai.
+   */
   check(
-    r8.every((b) => b.stars === 0),
-    "R08上 để 0 sao — chưa biết độ khó thì đừng xếp vào mức nào",
+    catalogItems.every((b) => Number.isInteger(b.stars) && b.stars >= 0 && b.stars <= 5),
+    "mọi bài có số sao nằm trong 0–5",
   );
   check(
     catalogItems.filter((b) => b.exam !== "R08上").every((b) => b.stars >= 1),
     "các kỳ cũ vẫn đủ sao, không bị script làm rơi mất",
+  );
+  // Kỳ mới đang điền dần. Không ghim con số vì nó còn đổi; chỉ ràng rằng phần
+  // đã điền thì phải hợp lệ, và nhắc còn lại bao nhiêu.
+  const chuaCoSao = r8.filter((b) => b.stars === 0);
+  check(
+    chuaCoSao.length < r8.length,
+    `R08上 đã có sao cho ${r8.length - chuaCoSao.length}/${r8.length} bài` +
+      (chuaCoSao.length
+        ? ` (còn ${chuaCoSao.map((b) => `${b.subject} ${b.question}`).join(", ")})`
+        : ""),
   );
 
   // Ý B問題 đếm 2, A問題 đếm 1 — dùng để biết phải đi tìm bao nhiêu đáp án.
@@ -1043,6 +1058,25 @@ async function kiemThuKhoAndroid(): Promise<void> {
     ten.size === cacKy.length * MON.length,
     `${cacKy.length} kỳ × 4 môn ra ${ten.size} tên file khác nhau, không trùng`,
   );
+
+  /* Link đề chính thức: khoá phải ứng với kỳ và môn có thật, và phải là https.
+     Khoá sai thì link nằm đó mà không bao giờ hiện ra — lỗi im lặng. */
+  {
+    const khoaLa: string[] = [];
+    const khongHttps: string[] = [];
+    for (const [khoa, url] of Object.entries(linkDeThiFile.links as Record<string, string>)) {
+      const [ky, mon] = khoa.split("|");
+      if (!ky || !mon || !cacKy.includes(ky) || !(MON as readonly string[]).includes(mon)) {
+        khoaLa.push(khoa);
+      }
+      if (!/^https:\/\//.test(url)) khongHttps.push(khoa);
+    }
+    check(khoaLa.length === 0, `link đề: mọi khoá ứng với kỳ và môn có thật (${khoaLa.length} sai)`);
+    check(khongHttps.length === 0, `link đề: mọi link đều là https (${khongHttps.length} sai)`);
+    // Kỳ chưa điền link thì phải trả null, chứ không trả chuỗi rỗng — chuỗi
+    // rỗng là truthy đủ để giao diện vẽ ra một cái nút không mở được gì.
+    check(linkDeThi("khong-co-ky-nay", "riron") === null, "kỳ chưa có link thì trả null");
+  }
 
   /* Chặn tên lạ: tên file đi thẳng vào đường dẫn trên đĩa. */
   check(tenDeThiAnToan("rironr8-1.pdf") === "rironr8-1.pdf", "tên hợp lệ thì cho qua");

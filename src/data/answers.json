@@ -1312,6 +1312,60 @@
   "denryoku:denryokur7-2-9": [
    3
   ],
+  "denryoku:denryokur8-1-1": [
+   2
+  ],
+  "denryoku:denryokur8-1-10": [
+   5
+  ],
+  "denryoku:denryokur8-1-11": [
+   4
+  ],
+  "denryoku:denryokur8-1-12": [
+   3
+  ],
+  "denryoku:denryokur8-1-13": [
+   2
+  ],
+  "denryoku:denryokur8-1-14": [
+   2
+  ],
+  "denryoku:denryokur8-1-15": [
+   5,
+   3
+  ],
+  "denryoku:denryokur8-1-16": [
+   1,
+   4
+  ],
+  "denryoku:denryokur8-1-17": [
+   3,
+   5
+  ],
+  "denryoku:denryokur8-1-2": [
+   5
+  ],
+  "denryoku:denryokur8-1-3": [
+   1
+  ],
+  "denryoku:denryokur8-1-4": [
+   2
+  ],
+  "denryoku:denryokur8-1-5": [
+   4
+  ],
+  "denryoku:denryokur8-1-6": [
+   1
+  ],
+  "denryoku:denryokur8-1-7": [
+   2
+  ],
+  "denryoku:denryokur8-1-8": [
+   5
+  ],
+  "denryoku:denryokur8-1-9": [
+   1
+  ],
   "denryoku:no-link-354": [
    3
   ],
@@ -2368,6 +2422,48 @@
    1
   ],
   "houki:houkir7-2-9": [
+   2
+  ],
+  "houki:houkir8-1-1": [
+   3
+  ],
+  "houki:houkir8-1-10": [
+   2
+  ],
+  "houki:houkir8-1-11": [
+   4,
+   2
+  ],
+  "houki:houkir8-1-12": [
+   5,
+   1
+  ],
+  "houki:houkir8-1-13": [
+   1,
+   2
+  ],
+  "houki:houkir8-1-2": [
+   3
+  ],
+  "houki:houkir8-1-3": [
+   2
+  ],
+  "houki:houkir8-1-4": [
+   3
+  ],
+  "houki:houkir8-1-5": [
+   4
+  ],
+  "houki:houkir8-1-6": [
+   2
+  ],
+  "houki:houkir8-1-7": [
+   4
+  ],
+  "houki:houkir8-1-8": [
+   2
+  ],
+  "houki:houkir8-1-9": [
    2
   ],
   "kikai:kikaih18-1": [
@@ -3760,6 +3856,64 @@
    2
   ],
   "kikai:kikair7-2-9": [
+   3
+  ],
+  "kikai:kikair8-1-1": [
+   2
+  ],
+  "kikai:kikair8-1-10": [
+   5
+  ],
+  "kikai:kikair8-1-11": [
+   4
+  ],
+  "kikai:kikair8-1-12": [
+   3
+  ],
+  "kikai:kikair8-1-13": [
+   4
+  ],
+  "kikai:kikair8-1-14": [
+   5
+  ],
+  "kikai:kikair8-1-15": [
+   3,
+   3
+  ],
+  "kikai:kikair8-1-16": [
+   2,
+   2
+  ],
+  "kikai:kikair8-1-17": [
+   5,
+   2
+  ],
+  "kikai:kikair8-1-18": [
+   5,
+   4
+  ],
+  "kikai:kikair8-1-2": [
+   4
+  ],
+  "kikai:kikair8-1-3": [
+   1
+  ],
+  "kikai:kikair8-1-4": [
+   3
+  ],
+  "kikai:kikair8-1-5": [
+   2
+  ],
+  "kikai:kikair8-1-6": [
+   2
+  ],
+  "kikai:kikair8-1-7": [
+   2
+  ],
+  "kikai:kikair8-1-8": [
+   4
+  ],
+  "kikai:kikair8-1-9": [
    3
   ],
   "riron:kikaih24-13": [
@@ -5167,6 +5321,64 @@
    5
   ],
   "riron:rironr7-2-9": [
+   5
+  ],
+  "riron:rironr8-1-1": [
+   2
+  ],
+  "riron:rironr8-1-10": [
+   4
+  ],
+  "riron:rironr8-1-11": [
+   2
+  ],
+  "riron:rironr8-1-12": [
+   2
+  ],
+  "riron:rironr8-1-13": [
+   2
+  ],
+  "riron:rironr8-1-14": [
+   4
+  ],
+  "riron:rironr8-1-15": [
+   5,
+   3
+  ],
+  "riron:rironr8-1-16": [
+   2,
+   1
+  ],
+  "riron:rironr8-1-17": [
+   4,
+   4
+  ],
+  "riron:rironr8-1-18": [
+   2,
+   2
+  ],
+  "riron:rironr8-1-2": [
+   4
+  ],
+  "riron:rironr8-1-3": [
+   1
+  ],
+  "riron:rironr8-1-4": [
+   3
+  ],
+  "riron:rironr8-1-5": [
+   5
+  ],
+  "riron:rironr8-1-6": [
+   4
+  ],
+  "riron:rironr8-1-7": [
+   4
+  ],
+  "riron:rironr8-1-8": [
+   1
+  ],
+  "riron:rironr8-1-9": [
    5
   ]
  }

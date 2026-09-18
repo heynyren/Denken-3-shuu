@@ -214,8 +214,7 @@ npm run pack:win
 Chức năng thi thử cần biết đáp án đúng của từng câu. Đáp án là dữ liệu chung cho
 mọi người dùng nên nằm ở `src/data/answers.json`, đi kèm code.
 
-**24 kỳ cũ đã đủ — 1920/1920 ý**, không câu nào thiếu đáp án. Riêng kỳ mới nhất
-R08上 còn thiếu 80 ý (xem mục dưới). Phần lớn lấy từ
+**Đã đủ cả 25 kỳ — 2000/2000 ý**, không câu nào thiếu đáp án. Phần lớn lấy từ
 bảng đáp án chính thức (PDF) của 一般財団法人 電気技術者試験センター (H21 →
 R07下); riêng H18, H19, H20 do người dùng tra tay và nạp qua CSV.
 
@@ -405,6 +404,7 @@ scripts/
   tao-khoa-ky.mjs  tạo khoá ký cố định cho APK (chạy một lần)
   them-ky-thi.py   thêm một kỳ thi mới vào danh mục (link suy từ số câu)
   nap-de-thi.mjs   nạp đề thi PDF vào app, soát tên trước khi nạp
+  link-de-thi.py   link tới đề PDF chính thức của trung tâm sát hạch
   ky-thi-r8-1.json dữ liệu kỳ 令和8年度上期
 docs/
   DONG-BO-GITHUB.md      bật đồng bộ tự động, từng bước

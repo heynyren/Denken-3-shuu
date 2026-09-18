@@ -23,6 +23,7 @@
  * nào — đúng một nguồn sự thật, không có hai bảng để lệch nhau.
  */
 
+import linkFile from "../data/de-thi-link.json";
 import { items } from "./catalog";
 import type { CatalogItem, SubjectKey } from "./types";
 
@@ -71,3 +72,21 @@ export function tenDeThiCuaBai(bai: CatalogItem): string | null {
 
 /** Chặn tên file lạ. Định nghĩa ở `platform/types.ts`, xuất lại cho gọn chỗ gọi. */
 export { tenDeThiAnToan } from "../platform/types";
+
+/**
+ * Link tới đề PDF chính thức của 電気技術者試験センター.
+ *
+ * Giữ link chứ không đóng gói 100 file PDF vào app: đóng gói thì bản cài và APK
+ * nặng thêm đúng bằng tổng dung lượng đề, mà APK phình từ 6 MB lên hơn trăm MB
+ * thì mỗi lần vá lại tải lên chừng đó.
+ *
+ * Đổi lại, link sống hay chết là chuyện của trung tâm. Nên app **không** bỏ link
+ * denken-ou.com đi — trung tâm xoá đề thì vẫn còn đường xem.
+ *
+ * Điền bằng `scripts/link-de-thi.py`.
+ */
+const LINK: Record<string, string> = linkFile.links;
+
+export function linkDeThi(exam: string, subject: SubjectKey): string | null {
+  return LINK[`${exam}|${subject}`] ?? null;
+}

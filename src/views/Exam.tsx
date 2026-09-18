@@ -24,7 +24,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { AttemptAnalysis, QuestionTable, TopicTable } from "../components/ExamAnalysis";
 import { Ring, Stars, openLink } from "../components/ui";
-import { tenDeThi } from "../lib/de-thi";
+import { linkDeThi, tenDeThi } from "../lib/de-thi";
 import { useDeThi } from "../state/useDeThi";
 import { subjectName, subjectViName, subjects } from "../lib/catalog";
 import { createAlarm } from "../lib/alarm";
@@ -541,11 +541,21 @@ function PaperSheet({
   const active = questionsToAnswer(paper, choice);
   const activeIds = new Set(active.map((item) => item.id));
 
-  /* Có đề PDF thì mở đề. Không có mới lùi về link denken-ou — trang đó có sẵn
-     cả lời giải, mở ra giữa lúc đang thi là tự phá buổi thi của mình, nên chỉ
-     dùng khi không còn đường nào khác. */
+  /* Đề gốc lấy từ đâu — thử ba chỗ, theo đúng thứ tự đáng tin dần xuống.
+   *
+   *   1. File trên máy   — chạy offline, mở tức thì, không ai xoá được.
+   *   2. Link chính thức — đề của 電気技術者試験センター, cần mạng, và còn hay
+   *                        mất là chuyện của trung tâm.
+   *   3. denken-ou.com   — nút `↗` từng câu, giữ nguyên như cũ.
+   *
+   * Đường 3 **không bị ẩn đi** kể cả khi đã có 1 hoặc 2. Trung tâm có thói quen
+   * dọn đề cũ khỏi trang của họ, mà lúc đề biến mất thì đúng là lúc cần đường
+   * dự phòng nhất — bỏ nó đi để giao diện gọn hơn là đổi một chỗ gọn mắt lấy
+   * nguy cơ mất hẳn đường xem đề.
+   */
   const ten = tenDeThi(paper.exam, paper.subject);
-  const tenDe = ten && deThiCo.has(ten) ? ten : null;
+  const fileDe = ten && deThiCo.has(ten) ? ten : null;
+  const linkDe = linkDeThi(paper.exam, paper.subject);
 
   return (
     <div className="card">
@@ -557,13 +567,29 @@ function PaperSheet({
         <span className="small muted">{t2("{n} phút", { n: EXAM_MINUTES[paper.subject] })}</span>
       </div>
 
-      {tenDe && (
+      {(fileDe || linkDe) && (
         <div className="callout" style={{ marginBottom: 14 }}>
-          <button className="dx-btn btn" onClick={() => void platform.moDeThi(tenDe)}>
-            <Ic i={FileText} /> {t("Mở đề PDF")}
-          </button>
+          <div className="chip-row">
+            {fileDe && (
+              <button className="dx-btn btn" onClick={() => void platform.moDeThi(fileDe)}>
+                <Ic i={FileText} /> {t("Mở đề PDF")}
+              </button>
+            )}
+            {linkDe && (
+              <button
+                className={fileDe ? "chip" : "dx-btn btn"}
+                onClick={() => openLink(linkDe)}
+                title={linkDe}
+              >
+                <Ic i={FileText} />{" "}
+                {fileDe ? t("Đề trên trang trung tâm") : t("Mở đề PDF chính thức")}
+              </button>
+            )}
+          </div>
           <div className="small muted" style={{ marginTop: 8 }}>
-            {t("Đề mở bằng trình đọc PDF của máy, ở cửa sổ riêng — vừa xem đề vừa bấm đáp án ở đây.")}
+            {fileDe
+              ? t("Đề mở bằng trình đọc PDF của máy, ở cửa sổ riêng — vừa xem đề vừa bấm đáp án ở đây.")
+              : t("Đề gốc của trung tâm sát hạch, mở bằng trình duyệt.")}
           </div>
         </div>
       )}
@@ -600,15 +626,13 @@ function PaperSheet({
                   {item.name}
                 </span>
                 <Stars count={item.stars} />
-                {!tenDe && (
-                  <button
-                    className="icon-btn"
-                    title={t("Mở đề bài trên denken-ou.com")}
-                    onClick={() => openLink(item.url)}
-                  >
-                    ↗
-                  </button>
-                )}
+                <button
+                  className="icon-btn"
+                  title={t("Mở đề bài trên denken-ou.com")}
+                  onClick={() => openLink(item.url)}
+                >
+                  ↗
+                </button>
               </div>
 
               {off ? (
