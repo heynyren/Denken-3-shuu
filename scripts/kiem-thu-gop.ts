@@ -8,6 +8,8 @@ import { parseBackup } from "../src/lib/normalise";
 import { highlight, matchesQuery, trichDoan } from "../src/lib/vi";
 import { mergeData } from "../src/lib/sync";
 import type { AppData, ItemProgress } from "../src/lib/types";
+import { chamBai } from "../src/components/ChonDapAn";
+import answersKT from "../src/data/answers.json";
 import { items as catalogItems } from "../src/lib/catalog";
 import { linkDeThi, tenDeThi, tenDeThiAnToan } from "../src/lib/de-thi";
 import linkDeThiFile from "../src/data/de-thi-link.json";
@@ -50,6 +52,8 @@ function prog(status: ItemProgress["status"], updatedAt: string, level = 1): Ite
 }
 
 const clone = <T,>(x: T): T => JSON.parse(JSON.stringify(x));
+
+const ANSWERS_KT = (answersKT as { answers: Record<string, number[]> }).answers;
 
 /* ---- 1. Bài sửa ở một bên: bên kia phải nhận được ---- */
 {
@@ -1073,6 +1077,51 @@ async function kiemThuKhoAndroid(): Promise<void> {
     if (so.some((v, i) => v !== i + 1)) hong.push(mon);
   }
   check(hong.length === 0, `số thứ tự chạy liền mạch trong từng môn (${hong.join(", ") || "đủ cả"})`);
+}
+
+
+/* ------------------------------------------------------------------ *
+ * 13g. Chấm bài khi ôn tập
+ *
+ * Ca quan trọng nhất là B問題 hai ý mà ĐÚNG MỘT, SAI MỘT. Viết cẩu thả — `some`
+ * thay cho `every`, hay chỉ xét ý đầu — thì ca đó báo "đúng", và người học được
+ * cộng một lượt đúng cho bài mình chỉ làm được nửa. Chuỗi ngày, biểu đồ, và
+ * chu kỳ SRS của bài đó lệch theo.
+ *
+ * Ca ấy khó gặp khi bấm tay thử nên phải ràng ở đây, không dựa vào may mắn.
+ * ------------------------------------------------------------------ */
+{
+  /* --- A問題, một ý --- */
+  check(chamBai([3], [3], 1) === "correct", "một ý, chọn đúng -> đúng");
+  check(chamBai([2], [3], 1) === "wrong", "một ý, chọn sai -> sai");
+  check(chamBai([undefined], [3], 1) === "wrong", "một ý, chưa chọn -> sai");
+
+  /* --- B問題, hai ý: CẢ HAI phải đúng --- */
+  check(chamBai([4, 2], [4, 2], 2) === "correct", "hai ý, đúng cả hai -> đúng");
+  check(chamBai([4, 5], [4, 2], 2) === "wrong", "hai ý, đúng ý (a) sai ý (b) -> SAI");
+  check(chamBai([1, 2], [4, 2], 2) === "wrong", "hai ý, sai ý (a) đúng ý (b) -> SAI");
+  check(chamBai([1, 5], [4, 2], 2) === "wrong", "hai ý, sai cả hai -> sai");
+  check(chamBai([4, undefined], [4, 2], 2) === "wrong", "hai ý, mới chọn một ý -> sai");
+
+  /* --- Bài chưa có đáp án thì không được báo đúng --- */
+  check(chamBai([3], [], 1) === "wrong", "chưa có đáp án thì không tính là đúng");
+  check(chamBai([4, 2], [4], 2) === "wrong", "thiếu đáp án ý (b) thì không tính là đúng");
+
+  /* --- Chỉ xét đúng số ý của bài, phần dư bỏ qua --- */
+  check(chamBai([3, 9], [3, 1], 1) === "correct", "bài một ý: không xét ý thứ hai còn sót");
+
+  /* Đếm thật: mọi bài trong danh mục đều chấm được, vì cả 2000 ý đã có đáp án.
+     Nếu có bài chấm không ra thì nút chọn đáp án của bài đó không hiện, và người
+     dùng lùi về tự khai mà không hiểu vì sao. */
+  const khongChamDuoc = catalogItems.filter((bai) => {
+    const truth = (ANSWERS_KT as Record<string, number[]>)[bai.id];
+    const soY = subAnswerCount(bai);
+    if (!truth) return true;
+    for (let i = 0; i < soY; i += 1) if (truth[i] === undefined) return true;
+    return false;
+  });
+  check(khongChamDuoc.length === 0,
+    `mọi bài đều chấm được bằng đáp án (${khongChamDuoc.length} bài thiếu)`);
 }
 
 /* ------------------------------------------------------------------ *

@@ -1891,6 +1891,58 @@ mark.hit {
   color: #fff;
 }
 
+/* Sau khi lộ đáp án ở màn Ôn tập và Danh sách bài.
+   Xanh là đáp án đúng, đỏ là ô đã chọn mà sai. Ô đúng tô xanh KỂ CẢ khi không
+   chọn nó — mục đích là thấy đáp án đúng nằm ở đâu, không chỉ biết mình sai. */
+.exam-choice.dung,
+.exam-choice.sai {
+  color: #fff;
+  cursor: default;
+}
+.exam-choice.dung {
+  background: var(--green);
+  border-color: var(--green);
+}
+.exam-choice.sai {
+  background: var(--red);
+  border-color: var(--red);
+}
+/* Ô bị khoá nhưng không phải đúng cũng không phải sai: mờ đi để hai ô kia nổi. */
+.exam-choice:disabled:not(.dung):not(.sai) {
+  opacity: 0.45;
+  cursor: default;
+}
+.exam-choice:disabled {
+  /* Ghi đè hiệu ứng hover — khoá rồi thì đưa chuột vào không đổi gì nữa. */
+  pointer-events: none;
+}
+
+/* Khối chọn đáp án khi ôn tập */
+.cham-bai {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 14px;
+}
+.cham-y {
+  align-self: center;
+  margin-left: 4px;
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+.cham-y.dung {
+  color: var(--green);
+}
+.cham-y.sai {
+  color: var(--red);
+}
+.graded-note.dung {
+  color: var(--green);
+}
+.graded-note.sai {
+  color: var(--red);
+}
+
 /* Kết luận đạt / chưa đạt */
 .exam-verdict {
   display: flex;

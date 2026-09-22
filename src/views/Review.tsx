@@ -15,6 +15,7 @@ import {
 import { Ic } from "../components/ui/icon";
 import { useEffect, useMemo, useState } from "react";
 
+import { ChonDapAn, coDapAn } from "../components/ChonDapAn";
 import { usePaneActive } from "../components/KeepAlive";
 import ItemDetail from "../components/ItemDetail";
 import Timer, { useCountdown } from "../components/Timer";
@@ -185,11 +186,21 @@ export default function Review({
   const go = (delta: number) =>
     setCursor((index) => Math.min(queue.length - 1, Math.max(0, index + delta)));
 
-  // Phím tắt: 1 = đúng, 2 = sai, Space = mở bài, ← → = chuyển bài.
-  //
-  // Chỉ nghe khi màn này đang hiện. Màn bị ẩn vẫn nằm trong DOM và vẫn chạy —
-  // không chặn thì bấm `1` lúc đang xem Danh sách bài sẽ chấm nhầm một bài ở
-  // đây, lặng lẽ, và bạn chỉ phát hiện khi thấy tiến độ tự nhảy.
+  /**
+   * Phím tắt: Space = mở bài, ← → = chuyển bài.
+   *
+   * Phím số thì **tuỳ bài**:
+   *   - Bài có đáp án  -> 1–5 là chọn đáp án, do `ChonDapAn` tự nghe.
+   *   - Bài chưa có    -> 1 = làm đúng, 2 = làm sai, như cũ.
+   *
+   * Nên ở đây chỉ bắt 1 và 2 khi bài KHÔNG có đáp án. Bắt luôn cả hai trường
+   * hợp thì bấm `1` để chọn đáp án số 1 sẽ vừa chọn vừa tự khai "làm đúng" —
+   * hai lượt ôn cho một lần bấm, và bài sai vẫn được ghi là đúng.
+   *
+   * Chỉ nghe khi màn này đang hiện. Màn bị ẩn vẫn nằm trong DOM và vẫn chạy —
+   * không chặn thì bấm `1` lúc đang xem Danh sách bài sẽ chấm nhầm một bài ở
+   * đây, lặng lẽ, và bạn chỉ phát hiện khi thấy tiến độ tự nhảy.
+   */
   const dangHien = usePaneActive();
   useEffect(() => {
     if (!dangHien) return;
@@ -198,8 +209,9 @@ export default function Review({
       if (target && /^(INPUT|TEXTAREA)$/.test(target.tagName)) return;
       if (!item) return;
 
-      if (event.key === "1") grade("correct");
-      else if (event.key === "2") grade("wrong");
+      const tuKhai = !coDapAn(item);
+      if (tuKhai && event.key === "1") grade("correct");
+      else if (tuKhai && event.key === "2") grade("wrong");
       else if (event.key === "ArrowRight") go(1);
       else if (event.key === "ArrowLeft") go(-1);
       else if (event.code === "Space") {
@@ -450,25 +462,38 @@ export default function Review({
 
             <div className="small dim">{levelLabel(progress?.srsLevel ?? 0)}</div>
 
-            <div className="review-actions">
-              <button
-                className={`btn success${justGraded === "correct" ? " chosen" : ""}`}
-                onClick={() => grade("correct")}
-              >
-                <Ic i={CheckCircle2} /> {t("Làm đúng")} <span className="small dim">1</span>
-              </button>
-              <button
-                className={`btn danger${justGraded === "wrong" ? " chosen" : ""}`}
-                onClick={() => grade("wrong")}
-              >
-                <Ic i={XCircle} /> {t("Làm sai")} <span className="small dim">2</span>
-              </button>
-            </div>
+            {coDapAn(item) ? (
+              /* `key` để đổi bài là ô chọn trắng lại. Thiếu nó thì đáp án vừa
+                 chọn ở bài trước dính sang bài sau. */
+              <ChonDapAn key={item.id} item={item} onCham={grade} banPhim />
+            ) : (
+              <div className="review-actions">
+                <button
+                  className={`btn success${justGraded === "correct" ? " chosen" : ""}`}
+                  onClick={() => grade("correct")}
+                >
+                  <Ic i={CheckCircle2} /> {t("Làm đúng")} <span className="small dim">1</span>
+                </button>
+                <button
+                  className={`btn danger${justGraded === "wrong" ? " chosen" : ""}`}
+                  onClick={() => grade("wrong")}
+                >
+                  <Ic i={XCircle} /> {t("Làm sai")} <span className="small dim">2</span>
+                </button>
+              </div>
+            )}
 
             {justGraded && (
-              <div className="graded-note">
-                {t("Đã ghi nhận")} <strong>{justGraded === "correct" ? t("đúng") : t("sai")}</strong>{" "}
-                {t("và xếp lịch ôn lại. Vẫn đang ở bài này — cứ ghi chú thoải mái, chuyển bài lúc nào là quyền của bạn. Bấm nhầm thì chấm lại bằng nút kia.")}
+              <div className={`graded-note ${justGraded === "correct" ? "dung" : "sai"}`}>
+                {t("Đã ghi nhận")}{" "}
+                <strong>{justGraded === "correct" ? t("làm đúng") : t("làm sai")}</strong>{" "}
+                {justGraded === "correct"
+                  ? t("và đẩy bài lên cấp tiếp theo.")
+                  : t("và đưa bài về cấp 1.")}{" "}
+                {t("Vẫn đang ở bài này — cứ ghi chú thoải mái, chuyển bài lúc nào là quyền của bạn.")}
+                {/* Chỉ bài tự khai mới chấm lại được. Bài chọn đáp án thì khoá
+                    sau khi chấm, nên đừng hứa một cái nút không còn ở đó. */}
+                {!coDapAn(item) && <> {t("Bấm nhầm thì chấm lại bằng nút kia.")}</>}
               </div>
             )}
 

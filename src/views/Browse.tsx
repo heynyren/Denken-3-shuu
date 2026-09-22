@@ -16,6 +16,7 @@ import {
 import { Ic, type IconType } from "../components/ui/icon";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { ChonDapAn, coDapAn } from "../components/ChonDapAn";
 import ItemDetail from "../components/ItemDetail";
 import { Empty, Stars, StatusPill, openLink } from "../components/ui";
 import { items, subjectName, subjects, topicsBySubject } from "../lib/catalog";
@@ -323,19 +324,37 @@ export default function Browse({
             store={store}
           />
 
+          {/* Bài có đáp án thì chọn đáp án như trong phòng thi; chưa có thì
+              lùi về hai nút tự khai. Không bật phím tắt số ở màn này: đang cuộn
+              danh sách 1675 bài mà gõ một con số lại chấm luôn bài đang mở là
+              chuyện bất ngờ. */}
+          {coDapAn(selectedItem) && (
+            <div style={{ marginTop: 16 }}>
+              <ChonDapAn
+                key={selectedItem.id}
+                item={selectedItem}
+                onCham={(result) => store.review(selectedItem.id, result)}
+              />
+            </div>
+          )}
+
           <div className="btn-row" style={{ marginTop: 16 }}>
-            <button
-              className="btn success sm"
-              onClick={() => store.review(selectedItem.id, "correct")}
-            >
-              <Ic i={Check} /> {t("Ghi nhận làm đúng")}
-            </button>
-            <button
-              className="btn danger sm"
-              onClick={() => store.review(selectedItem.id, "wrong")}
-            >
-              <Ic i={XCircle} /> {t("Ghi nhận làm sai")}
-            </button>
+            {!coDapAn(selectedItem) && (
+              <>
+                <button
+                  className="btn success sm"
+                  onClick={() => store.review(selectedItem.id, "correct")}
+                >
+                  <Ic i={Check} /> {t("Ghi nhận làm đúng")}
+                </button>
+                <button
+                  className="btn danger sm"
+                  onClick={() => store.review(selectedItem.id, "wrong")}
+                >
+                  <Ic i={XCircle} /> {t("Ghi nhận làm sai")}
+                </button>
+              </>
+            )}
             <span className="spacer" />
             <button
               className="btn ghost sm"
