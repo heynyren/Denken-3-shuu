@@ -71,6 +71,9 @@ export default function Browse({
   const [topic, setTopic] = useState("all");
   const [status, setStatus] = useState<StatusFilter>("all");
   const [stars, setStars] = useState<Set<number>>(new Set());
+  /** Bài nào vừa chấm trong phiên này, để hiện dòng báo kết quả. */
+  const [daCham, setDaCham] = useState<Record<string, "correct" | "wrong">>({});
+  const oChiTiet = useRef<HTMLDivElement | null>(null);
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -146,6 +149,24 @@ export default function Browse({
       else next.add(value);
       return next;
     });
+
+  /**
+   * Chọn một bài thì cuộn tới bảng chi tiết.
+   *
+   * Bảng đó nằm DƯỚI danh sách 1675 dòng, nên bấm một bài xong thì ô chọn đáp
+   * án ở ngoài tầm mắt — phải tự cuộn đi tìm mới thấy chỗ trả lời. Màn Ôn tập
+   * không có vấn đề này vì mỗi lúc chỉ có một bài trên màn.
+   *
+   * `block: "nearest"` để nếu bảng đã nằm trong tầm mắt thì không giật màn hình
+   * vô cớ; chỉ cuộn khi thật sự cần.
+   */
+  useEffect(() => {
+    if (!selected) return;
+    const hen = window.setTimeout(() => {
+      oChiTiet.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 60);
+    return () => window.clearTimeout(hen);
+  }, [selected]);
 
   const selectedItem = selected
     ? items.find((item) => item.id === selected) ?? null
@@ -294,7 +315,7 @@ export default function Browse({
 
       {/* Chi tiết bài đang chọn */}
       {selectedItem && (
-        <div className="card">
+        <div className="card" ref={oChiTiet}>
           <div className="card-head">
             <div className="card-title">
               <span className="ja">{selectedItem.name}</span>
@@ -318,25 +339,39 @@ export default function Browse({
             </span>
           </div>
 
+          {/* Ô chọn đáp án đặt NGAY DƯỚI đầu bài, trước khối ghi chú — giống
+              hệt màn Ôn tập. Đặt sau `ItemDetail` như bản trước là nó bị đẩy
+              xuống dưới cả ghi chú, link và đính kèm: mở bài ra không thấy chỗ
+              trả lời, phải cuộn đi tìm. */}
+          {coDapAn(selectedItem) && (
+            <ChonDapAn
+              key={selectedItem.id}
+              item={selectedItem}
+              onCham={(result) => {
+                store.review(selectedItem.id, result);
+                setDaCham((truoc) => ({ ...truoc, [selectedItem.id]: result }));
+              }}
+              banPhim
+            />
+          )}
+
+          {daCham[selectedItem.id] && (
+            <div className={`graded-note ${daCham[selectedItem.id] === "correct" ? "dung" : "sai"}`}>
+              {t("Đã ghi nhận")}{" "}
+              <strong>
+                {daCham[selectedItem.id] === "correct" ? t("làm đúng") : t("làm sai")}
+              </strong>{" "}
+              {daCham[selectedItem.id] === "correct"
+                ? t("và đẩy bài lên cấp tiếp theo.")
+                : t("và đưa bài về cấp 1.")}
+            </div>
+          )}
+
           <ItemDetail
             item={selectedItem}
             progress={data.progress[selectedItem.id]}
             store={store}
           />
-
-          {/* Bài có đáp án thì chọn đáp án như trong phòng thi; chưa có thì
-              lùi về hai nút tự khai. Không bật phím tắt số ở màn này: đang cuộn
-              danh sách 1675 bài mà gõ một con số lại chấm luôn bài đang mở là
-              chuyện bất ngờ. */}
-          {coDapAn(selectedItem) && (
-            <div style={{ marginTop: 16 }}>
-              <ChonDapAn
-                key={selectedItem.id}
-                item={selectedItem}
-                onCham={(result) => store.review(selectedItem.id, result)}
-              />
-            </div>
-          )}
 
           <div className="btn-row" style={{ marginTop: 16 }}>
             {!coDapAn(selectedItem) && (

@@ -189,17 +189,19 @@ export default function Review({
   /**
    * Phím tắt: Space = mở bài, ← → = chuyển bài.
    *
-   * Phím số thì **tuỳ bài**:
-   *   - Bài có đáp án  -> 1–5 là chọn đáp án, do `ChonDapAn` tự nghe.
-   *   - Bài chưa có    -> 1 = làm đúng, 2 = làm sai, như cũ.
+   * Phím **1–5 là chọn đáp án**, do `ChonDapAn` tự nghe — không phải việc của
+   * chỗ này.
    *
-   * Nên ở đây chỉ bắt 1 và 2 khi bài KHÔNG có đáp án. Bắt luôn cả hai trường
-   * hợp thì bấm `1` để chọn đáp án số 1 sẽ vừa chọn vừa tự khai "làm đúng" —
-   * hai lượt ôn cho một lần bấm, và bài sai vẫn được ghi là đúng.
+   * Trước đây 1 = làm đúng, 2 = làm sai. Bỏ hẳn hai phím đó: khi đã chọn được
+   * đáp án thì tự khai không còn là cách chấm chính, mà để 1 và 2 mang hai
+   * nghĩa tuỳ bài — chọn đáp án ở bài này, tự khai ở bài kia — là kiểu phím tắt
+   * dễ bấm nhầm nhất, vì cùng một ngón tay ra hai kết quả khác nhau mà không
+   * có gì trên màn hình báo trước.
+   *
+   * Bài chưa có đáp án thì vẫn còn hai nút bấm; chỉ là không có phím tắt.
    *
    * Chỉ nghe khi màn này đang hiện. Màn bị ẩn vẫn nằm trong DOM và vẫn chạy —
-   * không chặn thì bấm `1` lúc đang xem Danh sách bài sẽ chấm nhầm một bài ở
-   * đây, lặng lẽ, và bạn chỉ phát hiện khi thấy tiến độ tự nhảy.
+   * không chặn thì bấm phím lúc đang xem màn khác sẽ chuyển bài ở đây, lặng lẽ.
    */
   const dangHien = usePaneActive();
   useEffect(() => {
@@ -209,10 +211,7 @@ export default function Review({
       if (target && /^(INPUT|TEXTAREA)$/.test(target.tagName)) return;
       if (!item) return;
 
-      const tuKhai = !coDapAn(item);
-      if (tuKhai && event.key === "1") grade("correct");
-      else if (tuKhai && event.key === "2") grade("wrong");
-      else if (event.key === "ArrowRight") go(1);
+      if (event.key === "ArrowRight") go(1);
       else if (event.key === "ArrowLeft") go(-1);
       else if (event.code === "Space") {
         event.preventDefault();
@@ -472,13 +471,13 @@ export default function Review({
                   className={`btn success${justGraded === "correct" ? " chosen" : ""}`}
                   onClick={() => grade("correct")}
                 >
-                  <Ic i={CheckCircle2} /> {t("Làm đúng")} <span className="small dim">1</span>
+                  <Ic i={CheckCircle2} /> {t("Làm đúng")}
                 </button>
                 <button
                   className={`btn danger${justGraded === "wrong" ? " chosen" : ""}`}
                   onClick={() => grade("wrong")}
                 >
-                  <Ic i={XCircle} /> {t("Làm sai")} <span className="small dim">2</span>
+                  <Ic i={XCircle} /> {t("Làm sai")}
                 </button>
               </div>
             )}
