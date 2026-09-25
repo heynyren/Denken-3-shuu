@@ -429,6 +429,10 @@ select {
   flex-direction: column;
   gap: 16px;
 }
+/* Màn Danh sách bài cần rộng hơn khung 1080px chung để đủ chỗ cho hai cột. */
+.container.wide {
+  max-width: 1320px;
+}
 
 .card {
   background: var(--surface-2);
@@ -969,6 +973,11 @@ mark.hit {
   background: var(--red-soft);
   color: #ff6b81;
 }
+/* Bài tự loại khỏi chu kỳ SRS — màu trầm, không phải cảnh báo. */
+.pill.excluded {
+  background: var(--surface-3);
+  color: var(--text-3);
+}
 
 .stars {
   color: var(--amber);
@@ -1015,6 +1024,39 @@ mark.hit {
   position: absolute;
   left: 0;
   right: 0;
+}
+
+/* ==========================================================================
+   Bố cục hai cột cho màn Danh sách bài (máy tính / tablet ngang)
+   --------------------------------------------------------------------------
+   Danh sách bên trái, chi tiết bên phải, để bấm một bài là thấy luôn ô chọn
+   đáp án mà không phải cuộn xuống tìm. Dưới 860px không đủ chỗ ngang, xem
+   override trong khối "Điện thoại". Mốc 861px trong Browse.tsx phải khớp
+   đúng con số 860px này.
+   ========================================================================== */
+.browse-split {
+  display: grid;
+  grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+/* Cuộn ảo được dùng nốt chiều cao còn trống của màn hình, không dừng ở 60vh
+   như bố cục xếp dọc — 260px là ước lượng phần đầu trang + khối bộ lọc. */
+.browse-split .virtual {
+  max-height: calc(100vh - var(--header-h) - 260px);
+}
+/* Dính lại khi cuộn danh sách dài, giống thanh đồng hồ ở màn thi thử. */
+.browse-detail {
+  position: sticky;
+  top: 0;
+  max-height: calc(100vh - var(--header-h) - 40px);
+  overflow-y: auto;
+}
+.browse-detail-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
 }
 
 /* ==========================================================================
@@ -2314,6 +2356,22 @@ mark.hit {
   /* Riêng bốn ô số liệu vẫn để hai cột — chúng chỉ có một con số và một dòng. */
   .grid.cols-4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Màn Danh sách bài: về lại xếp dọc như trước, ô chi tiết không dính nữa. */
+  .browse-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .browse-split .virtual {
+    max-height: 60vh;
+  }
+  .browse-detail {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+  .browse-detail-empty {
+    display: none;
   }
 
   /* --- Mục tiêu chạm --- */

@@ -55,6 +55,8 @@ export interface Store {
   snooze(id: string, days: number): void;
   /** Bật/tắt dấu sao "bài này đáng chú ý". */
   toggleStar(id: string): void;
+  /** Bật/tắt "loại bài này khỏi chu kỳ ôn SRS" (bài quá dễ, khỏi nhắc lại). */
+  toggleSrsExcluded(id: string): void;
 
   updateSettings(patch: Partial<Settings>): void;
   saveExamResult(result: ExamResult): void;
@@ -386,6 +388,14 @@ export function useStore(): Store {
     [update],
   );
 
+  const toggleSrsExcluded = useCallback(
+    (id: string) =>
+      update((current) =>
+        withProgress(current, id, (p) => ({ ...p, srsExcluded: !p.srsExcluded })),
+      ),
+    [update],
+  );
+
   const snooze = useCallback(
     (id: string, days: number) =>
       update((current) => {
@@ -456,6 +466,7 @@ export function useStore(): Store {
     resetItem,
     snooze,
     toggleStar,
+    toggleSrsExcluded,
     updateSettings,
     saveExamResult,
     removeExamResult,

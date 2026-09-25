@@ -205,6 +205,8 @@ export function normalise(input: unknown, fallback: AppData): AppData {
       // đều "khác" bản trên máy chủ ở lần đồng bộ kế tiếp, rồi hai bên ghi qua
       // ghi lại một vòng chẳng để làm gì.
       ...(typeof entry.reviewedAt === "string" ? { reviewedAt: entry.reviewedAt } : {}),
+      // Cùng lý do với `reviewedAt`: chỉ giữ khi thật sự bật.
+      ...(entry.srsExcluded === true ? { srsExcluded: true } : {}),
       nextReview: entry.nextReview ?? null,
       history: Array.isArray(entry.history) ? entry.history : [],
     };

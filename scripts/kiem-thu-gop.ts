@@ -81,6 +81,33 @@ const ANSWERS_KT = (answersKT as { answers: Record<string, number[]> }).answers;
   check(report.conflicts.includes("a"), "có báo xung đột chứ không lặng lẽ bỏ một bên");
 }
 
+/* ---- 2b. Cờ "loại khỏi SRS" đi theo cả bản ghi thắng, giống `starred` ---- */
+{
+  const base = blank();
+  base.progress["a"] = prog("correct", "2026-08-10T00:00:00Z");
+  const pc = clone(base);
+  const phone = clone(base);
+  pc.progress["a"] = { ...prog("correct", "2026-08-12T09:00:00Z"), srsExcluded: true };
+
+  const { data } = mergeData(base, pc, phone);
+  check(data.progress["a"].srsExcluded === true,
+    "loại khỏi SRS ở máy có bản ghi mới hơn: cờ còn nguyên sau khi gộp");
+}
+{
+  // Hệ quả đã chấp nhận (ghi ở docblock `khoiOnTap`): bản ghi mới hơn không có
+  // cờ thì cờ trôi theo — đúng như `starred`. Kiểm thử này ghim lại hành vi đó
+  // để ai đổi luật gộp thì thấy ngay mình vừa đổi cái gì.
+  const base = blank();
+  base.progress["a"] = { ...prog("correct", "2026-08-10T00:00:00Z"), srsExcluded: true };
+  const pc = clone(base);
+  const phone = clone(base);
+  phone.progress["a"] = prog("wrong", "2026-08-12T09:00:00Z");
+
+  const { data } = mergeData(base, pc, phone);
+  check(!data.progress["a"].srsExcluded,
+    "bản ghi mới hơn không có cờ: cờ loại khỏi SRS bị cuốn theo (như `starred`)");
+}
+
 /* ---- 3. dailyLog: cộng phần mới, KHÔNG nhân đôi qua nhiều lần đồng bộ ---- */
 {
   // Lần đồng bộ trước cả hai đang là 5 bài.

@@ -55,9 +55,14 @@ export function emptyProgress(): ItemProgress {
   };
 }
 
-/** Bài đã đến hạn ôn (kể cả quá hạn). Bài chưa từng làm không tính là đến hạn. */
+/**
+ * Bài đã đến hạn ôn (kể cả quá hạn). Bài chưa từng làm không tính là đến hạn.
+ * Bài bị loại khỏi SRS cũng không: đây là điểm chặn DUY NHẤT — hàng ôn tập,
+ * đếm đến hạn ở Bảng điều khiển và bộ lọc "Đến hạn" đều đi qua hàm này.
+ */
 export function isDue(progress: ItemProgress | undefined, today: string): boolean {
   if (!progress?.nextReview) return false;
+  if (progress.srsExcluded) return false;
   return daysBetween(today, progress.nextReview) <= 0;
 }
 

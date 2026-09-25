@@ -71,6 +71,11 @@ function newer(a: string | undefined, b: string | undefined): boolean {
  * Trạng thái, cấp độ ôn, ngày ôn lại và lịch sử phải khớp với nhau — lấy trạng
  * thái của máy này ghép với ngày ôn lại của máy kia là ra một bản ghi không bao
  * giờ tồn tại trên máy nào cả.
+ *
+ * `srsExcluded` (loại bài khỏi SRS) CỐ Ý không nằm trong khối này: nó là ý kiến
+ * người dùng bấm ra, như `starred`, nên đi theo cả bản ghi thắng `updatedAt`.
+ * Hệ quả (chấp nhận, giống hệt `starred`): bật cờ trên máy A rồi sửa gì đó bài
+ * ấy trên máy B muộn hơn thì bản của B thắng trọn và cờ trôi mất.
  */
 function khoiOnTap(p: ItemProgress) {
   return {

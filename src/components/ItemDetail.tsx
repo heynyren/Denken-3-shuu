@@ -7,6 +7,8 @@
 
 import {
   AlertTriangle,
+  Bell,
+  BellOff,
   FileText,
   Image as ImageIcon,
   Link2,
@@ -371,10 +373,16 @@ export default function ItemDetail({
           <StatusPill status={progress?.status ?? "todo"} />
           <Stars count={item.stars} />
           <span className="small dim">{levelLabel(progress?.srsLevel ?? 0)}</span>
-          {progress?.nextReview && (
-            <span className={`pill ${late > 0 ? "overdue" : "due"}`}>
-              {late > 0 ? t2("Quá hạn {n} ngày", { n: late }) : t2("Ôn lại {ngay}", { ngay: progress.nextReview })}
+          {progress?.srsExcluded ? (
+            <span className="pill excluded">
+              <Ic i={BellOff} className="h-3 w-3" /> {t("Đã loại khỏi SRS")}
             </span>
+          ) : (
+            progress?.nextReview && (
+              <span className={`pill ${late > 0 ? "overdue" : "due"}`}>
+                {late > 0 ? t2("Quá hạn {n} ngày", { n: late }) : t2("Ôn lại {ngay}", { ngay: progress.nextReview })}
+              </span>
+            )
           )}
           {progress?.doneDate && (
             <span className="small dim">{t2("Làm gần nhất {ngay}", { ngay: progress.doneDate })}</span>
@@ -388,6 +396,18 @@ export default function ItemDetail({
           onClick={() => (onOpenExercise ? onOpenExercise() : openLink(item.url))}
         >
           {t("↗ Mở bài trên denken-ou.com")}
+        </button>
+        <button
+          className="btn ghost sm"
+          onClick={() => store.toggleSrsExcluded(item.id)}
+          title={
+            progress?.srsExcluded
+              ? t("Đưa bài này lại vào chu kỳ ôn tập")
+              : t("Bài này quá dễ — không cần ôn lại theo lịch SRS nữa")
+          }
+        >
+          <Ic i={progress?.srsExcluded ? Bell : BellOff} />
+          {progress?.srsExcluded ? t("Đưa lại vào SRS") : t("Loại khỏi SRS")}
         </button>
       </div>
 

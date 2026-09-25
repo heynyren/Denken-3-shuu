@@ -1,4 +1,5 @@
 import {
+  BellOff,
   Bookmark,
   Check,
   CircleDashed,
@@ -151,29 +152,46 @@ export default function Browse({
     });
 
   /**
-   * Chọn một bài thì cuộn tới bảng chi tiết.
+   * Màn rộng (>860px) xếp danh sách và chi tiết thành hai cột cạnh nhau; màn
+   * hẹp vẫn xếp dọc như cũ. Mốc 861px khớp đúng breakpoint 860px trong
+   * styles.css — hai bên phải cùng một con số, lệch nhau là bố cục CSS một
+   * đằng, hành vi cuộn một nẻo.
+   */
+  const [wide, setWide] = useState(
+    () => window.matchMedia("(min-width: 861px)").matches,
+  );
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 861px)");
+    const onChange = () => setWide(mq.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
+  /**
+   * Chọn một bài thì cuộn tới bảng chi tiết — CHỈ ở bố cục xếp dọc.
    *
-   * Bảng đó nằm DƯỚI danh sách 1675 dòng, nên bấm một bài xong thì ô chọn đáp
-   * án ở ngoài tầm mắt — phải tự cuộn đi tìm mới thấy chỗ trả lời. Màn Ôn tập
-   * không có vấn đề này vì mỗi lúc chỉ có một bài trên màn.
+   * Ở màn hẹp bảng chi tiết nằm DƯỚI danh sách 1675 dòng, nên bấm một bài xong
+   * thì ô chọn đáp án ở ngoài tầm mắt — phải tự cuộn đi tìm mới thấy chỗ trả
+   * lời. Ở bố cục hai cột thì chi tiết luôn nằm ngay bên phải, tự cuộn chỉ làm
+   * giật màn hình.
    *
    * `block: "nearest"` để nếu bảng đã nằm trong tầm mắt thì không giật màn hình
    * vô cớ; chỉ cuộn khi thật sự cần.
    */
   useEffect(() => {
-    if (!selected) return;
+    if (!selected || wide) return;
     const hen = window.setTimeout(() => {
       oChiTiet.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }, 60);
     return () => window.clearTimeout(hen);
-  }, [selected]);
+  }, [selected, wide]);
 
   const selectedItem = selected
     ? items.find((item) => item.id === selected) ?? null
     : null;
 
   return (
-    <div className="container">
+    <div className="container wide">
       {/* Bộ lọc */}
       <div className="card">
         <div className="row wrap" style={{ gap: 10, marginBottom: 12 }}>
@@ -274,8 +292,9 @@ export default function Browse({
         </div>
       </div>
 
-      {/* Danh sách */}
-      <div className="card flush">
+      {/* Danh sách bên trái, chi tiết bên phải (màn rộng); màn hẹp xếp dọc. */}
+      <div className="browse-split">
+      <div className="card flush browse-list">
         {filtered.length === 0 ? (
           <Empty icon={Search} title={t("Không có bài nào khớp")}>
             <p className="muted">{t("Thử bỏ bớt bộ lọc hoặc đổi từ khoá tìm kiếm.")}</p>
@@ -314,8 +333,8 @@ export default function Browse({
       </div>
 
       {/* Chi tiết bài đang chọn */}
-      {selectedItem && (
-        <div className="card" ref={oChiTiet}>
+      {selectedItem ? (
+        <div className="card browse-detail" ref={oChiTiet}>
           <div className="card-head">
             <div className="card-title">
               <span className="ja">{selectedItem.name}</span>
@@ -400,7 +419,16 @@ export default function Browse({
             </button>
           </div>
         </div>
+      ) : (
+        /* Ô giữ chỗ cho cột phải khi chưa chọn bài — chỉ hiện ở bố cục hai
+           cột; màn hẹp ẩn bằng CSS để giữ nguyên cảm giác cũ. */
+        <div className="card browse-detail browse-detail-empty">
+          <Empty icon={Search} title={t("Chọn một bài để xem chi tiết")}>
+            <p className="muted">{t("Bấm vào một dòng trong danh sách bên trái.")}</p>
+          </Empty>
+        </div>
       )}
+      </div>
     </div>
   );
 }
@@ -515,6 +543,11 @@ function Row({
       {due && (
         <span className={`pill ${late > 0 ? "overdue" : "due"}`}>
           {late > 0 ? t2("quá hạn {n}n", { n: late }) : t("đến hạn")}
+        </span>
+      )}
+      {progress?.srsExcluded && (
+        <span className="pill excluded" title={t("Đã loại khỏi SRS")}>
+          <Ic i={BellOff} className="h-3 w-3" />
         </span>
       )}
       <StatusPill status={progress?.status ?? "todo"} />

@@ -122,6 +122,16 @@ export interface ItemProgress {
   /** 0 = chưa vào chu kỳ ôn; 1..6 ứng với 1/3/7/14/30/90 ngày. */
   srsLevel: number;
   /**
+   * Bạn tự loại bài này khỏi chu kỳ ôn giãn cách — dùng khi bài quá dễ, không
+   * cần SRS nhắc lại nữa. Khác `starred`: đây là tắt lịch ôn, không phải đánh
+   * dấu đáng chú ý. Cấp và lịch hẹn cũ giữ nguyên, bật lại là ôn tiếp như cũ.
+   *
+   * Tuỳ chọn, chỉ có mặt khi THẬT SỰ bật — giữ đúng cách làm của `reviewedAt`:
+   * thêm cứng vào mọi bản ghi cũ sẽ làm chúng "khác" bản trên máy kia ở lần
+   * đồng bộ kế tiếp mà chẳng để làm gì.
+   */
+  srsExcluded?: boolean;
+  /**
    * Mốc của lần CHẤM BÀI gần nhất, đủ chính xác tới giây.
    *
    * Khác `updatedAt` ở chỗ: `updatedAt` nhảy theo MỌI lần sửa, kể cả lúc bạn

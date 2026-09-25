@@ -1,4 +1,5 @@
 import {
+  BellOff,
   CalendarCheck,
   CheckCircle2,
   Star,
@@ -429,7 +430,14 @@ export default function Review({
               </span>
               <Stars count={item.stars} />
               <StatusPill status={progress?.status ?? "todo"} />
-              {late > 0 && <span className="pill overdue">{t2("Quá hạn {n} ngày", { n: late })}</span>}
+              {!progress?.srsExcluded && late > 0 && (
+                <span className="pill overdue">{t2("Quá hạn {n} ngày", { n: late })}</span>
+              )}
+              {progress?.srsExcluded && (
+                <span className="pill excluded">
+                  <Ic i={BellOff} className="h-3 w-3" /> {t("Đã loại khỏi SRS")}
+                </span>
+              )}
               <span className="spacer" />
               <button
                 className={`star-toggle${progress?.starred ? " on" : ""}`}
