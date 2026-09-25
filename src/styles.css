@@ -1036,7 +1036,7 @@ mark.hit {
    ========================================================================== */
 .browse-split {
   display: grid;
-  grid-template-columns: minmax(340px, 420px) minmax(0, 1fr);
+  grid-template-columns: minmax(360px, 460px) minmax(0, 1fr);
   gap: 16px;
   align-items: start;
 }
@@ -1044,6 +1044,28 @@ mark.hit {
    như bố cục xếp dọc — 260px là ước lượng phần đầu trang + khối bộ lọc. */
 .browse-split .virtual {
   max-height: calc(100vh - var(--header-h) - 260px);
+}
+/* Cột trái chỉ rộng 360–460px nên dòng bài phải gói gọn như trên màn hẹp:
+   mọi thứ một dòng, cắt bằng dấu ba chấm — để nội dung tự xuống dòng là vượt
+   chiều cao cố định ROW_HEIGHT của danh sách ảo và đè lên dòng dưới. */
+.browse-split .item-row {
+  gap: 8px;
+  padding: 8px 10px;
+}
+.browse-split .item-meta {
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  gap: 6px;
+}
+.browse-split .item-meta > span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+.browse-split .item-meta > span:first-child {
+  flex-shrink: 1;
 }
 /* Dính lại khi cuộn danh sách dài, giống thanh đồng hồ ở màn thi thử. */
 .browse-detail {
